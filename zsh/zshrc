@@ -5,6 +5,8 @@
 # Init cool-dotfiles versioned zsh runtime
 [ -s "$HOME/.config/zsh/init.zsh" ] && source "$HOME/.config/zsh/init.zsh"
 
+export TERM=screen-256color
+
 #+++++++++++++++++++++++++++++++++++++++
 # USER-DEFINED Afterwards
 #+++++++++++++++++++++++++++++++++++++++
