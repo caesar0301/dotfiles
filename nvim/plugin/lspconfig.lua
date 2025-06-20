@@ -180,8 +180,6 @@ local function getJavaBinary()
 	end
 	if jdkhome then
 		return jdkhome .. "/bin/java"
-	else
-		print("Please set JAVA_HOME correctly, as required by JDT language server")
 	end
 	return "/usr/local/bin/java"
 end
