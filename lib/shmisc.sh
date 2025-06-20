@@ -54,6 +54,29 @@ print_message() {
     "$COLOR_RESET"
 }
 
+# Common usage function for install scripts
+# Arguments:
+#   $1 - script name (optional, defaults to install.sh)
+#   $2 - additional options (optional)
+# Example:
+#   usage_me "install.sh" "[-d] [-v]"
+usage_me() {
+  local script_name=${1:-"install.sh"}
+  local additional_opts=${2:-""}
+  local opts="[-f] [-s] [-c]"
+  if [ -n "$additional_opts" ]; then
+    opts="$opts $additional_opts"
+  fi
+
+  echo "Usage: $script_name $opts"
+  echo "  -f copy and install"
+  echo "  -s soft link install"
+  echo "  -c cleanse install"
+  if [ -n "$additional_opts" ]; then
+    echo "  $additional_opts"
+  fi
+}
+
 # Log an info message
 # Arguments:
 #   $@ - message
@@ -598,10 +621,11 @@ pip_install_lib() {
 
 # Install one or more npm libraries globally
 npm_install_lib() {
+  mkdir -p $HOME/.local && npm config set prefix '~/.local/'
+
   local libs=("$@") # Capture all arguments as an array
   local options="--prefer-offline --no-audit --progress=true"
   local npm_cmd="npm"
-  local PASSSECRET=${SUDO_PASS:-""}
 
   # Check if npm is available
   if ! command -v "$npm_cmd" >/dev/null 2>&1; then
@@ -616,13 +640,7 @@ npm_install_lib() {
   fi
 
   info "Installing npm libraries: ${libs[*]}"
-
-  # Install libraries with or without sudo
-  if [ -z "$PASSSECRET" ]; then
-    sudo "$npm_cmd" install $options -g "${libs[@]}"
-  else
-    echo "$PASSSECRET" | sudo -S "$npm_cmd" install $options -g "${libs[@]}"
-  fi
+  "$npm_cmd" install $options -g "${libs[@]}"
 }
 
 # Install a R library
