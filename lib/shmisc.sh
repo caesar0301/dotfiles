@@ -624,7 +624,7 @@ npm_install_lib() {
   mkdir -p $HOME/.local && npm config set prefix '~/.local/'
 
   local libs=("$@") # Capture all arguments as an array
-  local options="--prefer-offline --no-audit --progress=true"
+  local options="--prefer-offline --no-audit --progress=true --registry=https://registry.npmmirror.com"
   local npm_cmd="npm"
 
   # Check if npm is available
