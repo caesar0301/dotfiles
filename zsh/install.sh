@@ -112,7 +112,7 @@ done
 install_zsh
 install_zinit
 install_pyenv
-install_jenv
+#install_jenv
 [ "x${CAESAR_DOT_ZSH_INSTALL_GVM}" == "x1" ] && install_gvm
 
 # Configure
