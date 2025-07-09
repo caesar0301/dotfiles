@@ -32,7 +32,10 @@ zinit ice wait lucid; zinit snippet OMZL::completion.zsh
 zinit ice wait lucid; zinit snippet OMZL::functions.zsh
 zinit ice wait lucid; zinit snippet OMZL::git.zsh
 zinit ice wait lucid; zinit snippet OMZL::spectrum.zsh
-zinit ice wait lucid; zinit snippet OMZL::theme-and-appearance.zsh
+
+# Theme
+zinit ice pick"async.zsh" src"pure.zsh"
+zinit light sindresorhus/pure
 
 # Efficiency
 zinit ice pick"z.sh" wait lucid; zinit load rupa/z
@@ -48,9 +51,6 @@ zinit light zsh-users/zsh-autosuggestions
 # Command output highlighting
 zinit ice pick "zsh-syntax-highlighting.zsh" wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
-
-# Theme
-zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 # Development
 zinit ice wait lucid; zinit snippet OMZP::git
