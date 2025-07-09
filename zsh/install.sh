@@ -22,10 +22,6 @@ ZSH_VERSION="5.8"
 # Load common utils
 source "$THISDIR/../lib/shmisc.sh"
 
-# Install envs
-CAESAR_DOT_ZSH_INSTALL_P10K=${CAESAR_DOT_ZSH_INSTALL_P10K:-1}
-CAESAR_DOT_ZSH_INSTALL_GVM=${CAESAR_DOT_ZSH_INSTALL_GVM:-1}
-
 INSTALL_FILES=(
   init.zsh
   _helper.zsh
@@ -46,10 +42,6 @@ handle_shell_proxy() {
   else
     warn "$HOME/.config/proxy existed, skip without rewriting"
   fi
-}
-
-handle_p10k() {
-  install_file_pair "$THISDIR/config/p10k.zsh" "$HOME/.p10k.zsh"
 }
 
 # Function to handle Zsh configuration
@@ -79,7 +71,6 @@ handle_zsh() {
 cleanse_zsh() {
   rm -rf "$XDG_DATA_HOME/zinit"
   rm -rf "$HOME/.config/proxy"
-  rm -rf "$HOME/.p10k.zsh"
 
   for i in "${INSTALL_FILES[@]}"; do
     rm -rf "$XDG_CONFIG_HOME/zsh/$i"
@@ -113,10 +104,9 @@ install_zsh
 install_zinit
 install_pyenv
 #install_jenv
-[ "x${CAESAR_DOT_ZSH_INSTALL_GVM}" == "x1" ] && install_gvm
+#install_gvm
 
 # Configure
-[ "x${CAESAR_DOT_ZSH_INSTALL_P10K}" == "x1" ] && handle_p10k
 handle_shell_proxy
 handle_zsh
 

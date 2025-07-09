@@ -85,8 +85,5 @@ export SAVEHIST=9999
 export PATH=$HOME/.local/bin:$PATH
 export RLWRAP_HOME=${HOME}/.config/rlwrap
 
-# respect p10k theme
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
 # respect fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
