@@ -9,7 +9,7 @@
 Clone the whole repo
 
 ```bash
-git clone --depth=1 https://github.com/caesar0301/cool-dotfiles.git ~/.dotfiles
+git clone --depth 1 https://github.com/caesar0301/cool-dotfiles.git ~/.dotfiles
 ```
 
 Install zsh configurations to `~/.config/zsh` by running:

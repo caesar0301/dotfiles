@@ -35,7 +35,7 @@ function install_tpm {
   info "Installing TPM..."
   create_dir "$XDG_CONFIG_HOME/tmux/plugins"
   if [ ! -e "$XDG_CONFIG_HOME/tmux/plugins/tpm" ]; then
-    git clone https://github.com/tmux-plugins/tpm "$XDG_CONFIG_HOME/tmux/plugins/tpm"
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$XDG_CONFIG_HOME/tmux/plugins/tpm"
   fi
 }
 

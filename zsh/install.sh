@@ -32,7 +32,7 @@ install_zinit() {
   local ZINIT_HOME="$XDG_DATA_HOME/zinit/zinit.git"
   create_dir "$(dirname "$ZINIT_HOME")"
   if [ ! -d "$ZINIT_HOME/.git" ]; then
-    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" || error "Failed to clone Zinit"
+    git clone --depth 1 https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" || error "Failed to clone Zinit"
   fi
 }
 

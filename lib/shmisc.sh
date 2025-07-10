@@ -446,7 +446,7 @@ install_jenv() {
   elif is_linux; then
     if [ ! -e "$HOME/.jenv" ]; then
       info "Installing jenv to $HOME/.jenv..."
-      git clone https://github.com/jenv/jenv.git "$HOME/.jenv"
+      git clone --depth 1 https://github.com/jenv/jenv.git "$HOME/.jenv"
     fi
     PATH="$HOME/.jenv/bin:$PATH"
   fi
