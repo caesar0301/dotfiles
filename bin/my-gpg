@@ -1,0 +1,172 @@
+#!/bin/bash
+
+# GPG Helper Script
+# Provides convenient GPG operations using key aliases
+#
+# Usage:
+#   gpg_helper.sh dec <alias> <encrypted_file>     - Decrypt and display
+#   gpg_helper.sh enc <alias> <file_to_encrypt>    - Encrypt file
+#   gpg_helper.sh edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
+
+# Key aliases mapping (using regular arrays for compatibility)
+ALIASES=("drjaminchen" "ninjacaesar")
+EMAILS=("chenxm35@gmail.com" "caesar0301@163.com")
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_error() {
+  echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Function to validate key alias and return email
+validate_alias() {
+  local alias=$1
+  local i=0
+
+  for a in "${ALIASES[@]}"; do
+    if [[ "$a" == "$alias" ]]; then
+      echo "${EMAILS[$i]}"
+      return 0
+    fi
+    ((i++))
+  done
+
+  print_error "Invalid key alias: $alias"
+  echo "Available aliases:"
+  local j=0
+  for a in "${ALIASES[@]}"; do
+    echo "  $a -> ${EMAILS[$j]}"
+    ((j++))
+  done
+  return 1
+}
+
+# Function to check if file exists
+check_file() {
+  local file=$1
+  if [[ ! -f "$file" ]]; then
+    print_error "File not found: $file"
+    exit 1
+  fi
+}
+
+# Function to decrypt and display
+decrypt_and_display() {
+  local key_email=$1
+  local encrypted_file=$2
+
+  if ! gpg --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
+    print_error "Failed to decrypt file. Make sure you have the correct key and the file is encrypted for $key_email"
+    exit 1
+  fi
+}
+
+# Function to encrypt file
+encrypt_file() {
+  local key_email=$1
+  local file_to_encrypt=$2
+  local encrypted_file="${file_to_encrypt}.enc"
+
+  if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$file_to_encrypt"; then
+    print_error "Failed to encrypt file"
+    exit 1
+  fi
+}
+
+# Function to decrypt, edit, and re-encrypt
+edit_encrypted_file() {
+  local key_email=$1
+  local encrypted_file=$2
+  local temp_file="/tmp/gpg_edit_$$"
+
+  # Decrypt to temporary file
+  if ! gpg --output "$temp_file" --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
+    print_error "Failed to decrypt file for editing"
+    exit 1
+  fi
+
+  # Get default editor
+  local editor=${EDITOR:-nano}
+
+  # Edit the file
+  if $editor "$temp_file"; then
+    # Re-encrypt the edited file
+    if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$temp_file"; then
+      print_error "Failed to re-encrypt file"
+      # Don't exit here, we still want to clean up
+    fi
+  else
+    print_error "Editor exited with error"
+  fi
+
+  # Clean up temporary file
+  if [[ -f "$temp_file" ]]; then
+    rm -f "$temp_file"
+  fi
+}
+
+# Main script logic
+main() {
+  local operation=$1
+  local alias=$2
+  local file=$3
+
+  # Check if we have the required arguments
+  if [[ $# -lt 3 ]]; then
+    print_error "Usage: $0 <operation> <alias> <file>"
+    echo ""
+    echo "Operations:"
+    echo "  dec <alias> <encrypted_file>     - Decrypt and display"
+    echo "  enc <alias> <file_to_encrypt>    - Encrypt file"
+    echo "  edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt"
+    echo ""
+    echo "Aliases:"
+    local i=0
+    for a in "${ALIASES[@]}"; do
+      echo "  $a -> ${EMAILS[$i]}"
+      ((i++))
+    done
+    exit 1
+  fi
+
+  # Validate key alias
+  local key_email
+  if ! key_email=$(validate_alias "$alias"); then
+    exit 1
+  fi
+
+  # Check if file exists
+  check_file "$file"
+
+  # Perform the requested operation
+  case "$operation" in
+  "dec")
+    decrypt_and_display "$key_email" "$file"
+    ;;
+  "enc")
+    encrypt_file "$key_email" "$file"
+    ;;
+  "edit")
+    edit_encrypted_file "$key_email" "$file"
+    ;;
+  *)
+    print_error "Unknown operation: $operation"
+    echo "Valid operations: dec, enc, edit"
+    exit 1
+    ;;
+  esac
+}
+
+# Check if GPG is available
+if ! command -v gpg &>/dev/null; then
+  print_error "GPG is not installed or not in PATH"
+  exit 1
+fi
+
+# Run main function with all arguments
+main "$@"
