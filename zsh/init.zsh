@@ -82,7 +82,7 @@ export HISTSIZE=9999
 export SAVEHIST=9999
 
 # extra paths
-export PATH=$HOME/.local/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/.dotfiles/bin:$PATH
 export RLWRAP_HOME=${HOME}/.config/rlwrap
 
 # respect fzf
