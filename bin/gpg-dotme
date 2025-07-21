@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 # GPG Helper Script
 # Provides convenient GPG operations using key aliases
@@ -8,7 +9,7 @@
 #   gpg-dotme enc <alias> <file_to_encrypt>    - Encrypt file
 #   gpg-dotme edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
 
-# Key aliases mapping (using regular arrays for compatibility)
+# Replace associative array with parallel arrays for compatibility
 ALIASES=("drjaminchen" "ninjacaesar")
 EMAILS=("chenxm35@gmail.com" "caesar0301@163.com")
 
@@ -20,14 +21,13 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 print_error() {
-  echo -e "${RED}[ERROR]${NC} $1"
+  echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
-# Function to validate key alias and return email
+# Update validate_alias to use parallel arrays
 validate_alias() {
   local alias=$1
   local i=0
-
   for a in "${ALIASES[@]}"; do
     if [[ "$a" == "$alias" ]]; then
       echo "${EMAILS[$i]}"
@@ -35,7 +35,6 @@ validate_alias() {
     fi
     ((i++))
   done
-
   print_error "Invalid key alias: $alias"
   echo "Available aliases:"
   local j=0
@@ -59,7 +58,6 @@ check_file() {
 decrypt_and_display() {
   local key_email=$1
   local encrypted_file=$2
-
   if ! gpg --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
     print_error "Failed to decrypt file. Make sure you have the correct key and the file is encrypted for $key_email"
     exit 1
@@ -71,7 +69,6 @@ encrypt_file() {
   local key_email=$1
   local file_to_encrypt=$2
   local encrypted_file="${file_to_encrypt}.enc"
-
   if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$file_to_encrypt"; then
     print_error "Failed to encrypt file"
     exit 1
@@ -82,11 +79,13 @@ encrypt_file() {
 edit_encrypted_file() {
   local key_email=$1
   local encrypted_file=$2
-  local temp_file="/tmp/gpg_edit_$$"
+  local temp_file
+  temp_file=$(mktemp /tmp/gpg_edit_XXXXXX)
 
   # Decrypt to temporary file
   if ! gpg --output "$temp_file" --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
     print_error "Failed to decrypt file for editing"
+    rm -f "$temp_file"
     exit 1
   fi
 
@@ -94,7 +93,7 @@ edit_encrypted_file() {
   local editor=${EDITOR:-nano}
 
   # Edit the file
-  if $editor "$temp_file"; then
+  if "$editor" "$temp_file"; then
     # Re-encrypt the edited file
     if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$temp_file"; then
       print_error "Failed to re-encrypt file"
@@ -105,34 +104,31 @@ edit_encrypted_file() {
   fi
 
   # Clean up temporary file
-  if [[ -f "$temp_file" ]]; then
-    rm -f "$temp_file"
-  fi
+  rm -f "$temp_file"
 }
 
 # Main script logic
 main() {
-  local operation=$1
-  local alias=$2
-  local file=$3
-
-  # Check if we have the required arguments
   if [[ $# -lt 3 ]]; then
     print_error "Usage: $0 <operation> <alias> <file>"
-    echo ""
-    echo "Operations:"
-    echo "  dec <alias> <encrypted_file>     - Decrypt and display"
-    echo "  enc <alias> <file_to_encrypt>    - Encrypt file"
-    echo "  edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt"
-    echo ""
-    echo "Aliases:"
-    local i=0
-    for a in "${ALIASES[@]}"; do
-      echo "  $a -> ${EMAILS[$i]}"
-      ((i++))
+    cat <<EOF
+
+Operations:
+  dec <alias> <encrypted_file>     - Decrypt and display
+  enc <alias> <file_to_encrypt>    - Encrypt file
+  edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
+
+Aliases:
+EOF
+    for i in "${!ALIASES[@]}"; do
+      echo "  ${ALIASES[$i]} -> ${EMAILS[$i]}"
     done
     exit 1
   fi
+
+  local operation=$1
+  local alias=$2
+  local file=$3
 
   # Validate key alias
   local key_email
@@ -148,12 +144,11 @@ main() {
   "dec")
     # Check for private key
     if ! gpg --list-secret-keys "$alias" | grep -q 'sec'; then
-        echo "Error: No GPG private key found for alias '$alias'. Cannot decrypt." >&2
-        exit 1
+      print_error "No GPG private key found for alias '$alias'. Cannot decrypt."
+      exit 1
     fi
     # Proceed with decryption
-    gpg --decrypt --recipient "$alias" "$encrypted_file"
-    exit $?
+    gpg --decrypt --recipient "$alias" "$file"
     ;;
   "enc")
     encrypt_file "$key_email" "$file"
@@ -169,11 +164,13 @@ main() {
   esac
 }
 
-# Check if GPG is available
-if ! command -v gpg &>/dev/null; then
-  print_error "GPG is not installed or not in PATH"
-  exit 1
-fi
+# Check for required commands
+dependencies=(gpg mktemp)
+for dep in "${dependencies[@]}"; do
+  if ! command -v "$dep" &>/dev/null; then
+    print_error "$dep is not installed or not in PATH"
+    exit 1
+  fi
+done
 
-# Run main function with all arguments
 main "$@"
