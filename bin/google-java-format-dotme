@@ -1,0 +1,256 @@
+#!/bin/bash
+# Google Java Format wrapper script
+# Enhanced version with better error handling and Java detection
+
+set -euo pipefail
+
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[0;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+# Function to print colored output
+print_message() {
+    local color=$1
+    local message=$2
+    printf "%b%s%b\n" "$color" "$message" "$NC"
+}
+
+# Function to print error and exit
+error_exit() {
+    print_message "$RED" "Error: $1"
+    exit 1
+}
+
+# Function to print warning
+print_warning() {
+    print_message "$YELLOW" "Warning: $1"
+}
+
+# Function to print info
+print_info() {
+    print_message "$BLUE" "Info: $1"
+}
+
+# Function to find Java installation
+find_java() {
+    local java_home=""
+    local java_bin=""
+    
+    # Check for specific Java home for Google Java Format
+    if [ -n "${JAVA_HOME_4GJF:-}" ]; then
+        java_home="$JAVA_HOME_4GJF"
+        print_info "Using JAVA_HOME_4GJF: $java_home"
+    elif [ -n "${JAVA_HOME:-}" ]; then
+        java_home="$JAVA_HOME"
+        print_info "Using JAVA_HOME: $java_home"
+    else
+        # Try to find Java in common locations
+        local java_paths=(
+            "/usr/lib/jvm/default-java"
+            "/usr/lib/jvm/java-11-openjdk"
+            "/usr/lib/jvm/java-8-openjdk"
+            "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home"
+            "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home"
+            "/System/Library/Java/JavaVirtualMachines/1.8.jdk/Contents/Home"
+        )
+        
+        for path in "${java_paths[@]}"; do
+            if [ -d "$path" ] && [ -x "$path/bin/java" ]; then
+                java_home="$path"
+                print_info "Found Java at: $java_home"
+                break
+            fi
+        done
+    fi
+    
+    # Set Java binary path
+    if [ -n "$java_home" ]; then
+        java_bin="$java_home/bin/java"
+        if [ ! -x "$java_bin" ]; then
+            error_exit "Java binary not found at $java_bin"
+        fi
+    else
+        # Fallback to system Java
+        if ! command -v java >/dev/null 2>&1; then
+            error_exit "Java not found. Please install Java or set JAVA_HOME"
+        fi
+        java_bin="java"
+        print_warning "Using system Java. Consider setting JAVA_HOME for better control"
+    fi
+    
+    echo "$java_bin"
+}
+
+# Function to find Google Java Format JAR
+find_gjf_jar() {
+    local gjf_jar=""
+    
+    # Check for custom JAR file location
+    if [ -n "${GJF_JAR_FILE:-}" ]; then
+        gjf_jar="$GJF_JAR_FILE"
+        print_info "Using custom GJF_JAR_FILE: $gjf_jar"
+    else
+        # Default locations
+        local default_locations=(
+            "$HOME/.local/share/google-java-format/google-java-format-all-deps.jar"
+            "$HOME/.cache/google-java-format/google-java-format-all-deps.jar"
+            "/usr/local/share/google-java-format/google-java-format-all-deps.jar"
+            "/opt/google-java-format/google-java-format-all-deps.jar"
+        )
+        
+        for location in "${default_locations[@]}"; do
+            if [ -f "$location" ]; then
+                gjf_jar="$location"
+                print_info "Found Google Java Format JAR at: $gjf_jar"
+                break
+            fi
+        done
+    fi
+    
+    if [ -z "$gjf_jar" ]; then
+        error_exit "Google Java Format JAR not found. Please install it or set GJF_JAR_FILE"
+    fi
+    
+    if [ ! -f "$gjf_jar" ]; then
+        error_exit "Google Java Format JAR file does not exist: $gjf_jar"
+    fi
+    
+    echo "$gjf_jar"
+}
+
+# Function to check Java version compatibility
+check_java_version() {
+    local java_bin=$1
+    local version_output
+    local java_version
+    
+    if ! version_output=$("$java_bin" -version 2>&1); then
+        error_exit "Failed to get Java version"
+    fi
+    
+    # Extract version number
+    if [[ $version_output =~ version\ \"([0-9]+)\.([0-9]+) ]]; then
+        java_version="${BASH_REMATCH[1]}"
+        if [ "$java_version" -lt 8 ]; then
+            error_exit "Java 8 or higher is required. Found Java $java_version"
+        fi
+        print_info "Using Java version: $java_version"
+    else
+        print_warning "Could not determine Java version, continuing anyway"
+    fi
+}
+
+# Function to show help
+show_help() {
+    cat << EOF
+Google Java Format Wrapper Script
+
+Usage: $(basename "$0") [OPTIONS] [FILES...]
+
+Options:
+    -h, --help          Show this help message
+    -v, --version       Show version information
+    --check-version     Check Java and GJF versions
+    --dry-run           Show what would be formatted without making changes
+
+Environment Variables:
+    JAVA_HOME_4GJF      Java home directory for Google Java Format
+    JAVA_HOME           Java home directory (fallback)
+    GJF_JAR_FILE        Path to Google Java Format JAR file
+
+Examples:
+    $(basename "$0") MyFile.java                    # Format a single file
+    $(basename "$0") --dry-run *.java              # Check what would be formatted
+    $(basename "$0") -i src/main/java/             # Format directory in-place
+
+For more options, see: https://github.com/google/google-java-format
+EOF
+}
+
+# Function to show version info
+show_version() {
+    local java_bin
+    local gjf_jar
+    
+    java_bin=$(find_java)
+    gjf_jar=$(find_gjf_jar)
+    
+    echo "Google Java Format Wrapper Script"
+    echo "Java binary: $java_bin"
+    echo "GJF JAR: $gjf_jar"
+    
+    # Show Java version
+    if "$java_bin" -version 2>&1 | head -n 1; then
+        echo
+    fi
+}
+
+# Main execution
+main() {
+    local java_bin
+    local gjf_jar
+    local args=()
+    local dry_run=false
+    
+    # Parse command line arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                show_version
+                exit 0
+                ;;
+            --check-version)
+                java_bin=$(find_java)
+                gjf_jar=$(find_gjf_jar)
+                check_java_version "$java_bin"
+                print_message "$GREEN" "All checks passed!"
+                exit 0
+                ;;
+            --dry-run)
+                dry_run=true
+                args+=("$1")
+                shift
+                ;;
+            *)
+                args+=("$1")
+                shift
+                ;;
+        esac
+    done
+    
+    # Find Java and GJF JAR
+    java_bin=$(find_java)
+    gjf_jar=$(find_gjf_jar)
+    
+    # Check Java version
+    check_java_version "$java_bin"
+    
+    # Show what we're doing
+    if [ ${#args[@]} -eq 0 ]; then
+        print_warning "No files specified. Use --help for usage information."
+        show_help
+        exit 1
+    fi
+    
+    if [ "$dry_run" = true ]; then
+        print_info "Dry run mode - no files will be modified"
+    fi
+    
+    # Execute Google Java Format
+    print_info "Running Google Java Format..."
+    if ! "$java_bin" -jar "$gjf_jar" "${args[@]}"; then
+        error_exit "Google Java Format failed"
+    fi
+    
+    print_message "$GREEN" "Google Java Format completed successfully"
+}
+
+# Run main function
+main "$@" 
