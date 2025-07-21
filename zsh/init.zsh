@@ -85,5 +85,8 @@ export SAVEHIST=9999
 export PATH=$HOME/.local/bin:$HOME/.dotfiles/bin:$PATH
 export RLWRAP_HOME=${HOME}/.config/rlwrap
 
+# respect local zshenv
+[ -f ~/.zshenv.local ] && source ~/.zshenv.local
+
 # respect fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
