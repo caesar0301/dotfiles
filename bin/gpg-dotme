@@ -4,9 +4,9 @@
 # Provides convenient GPG operations using key aliases
 #
 # Usage:
-#   gpg_helper.sh dec <alias> <encrypted_file>     - Decrypt and display
-#   gpg_helper.sh enc <alias> <file_to_encrypt>    - Encrypt file
-#   gpg_helper.sh edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
+#   gpg-dotme dec <alias> <encrypted_file>     - Decrypt and display
+#   gpg-dotme enc <alias> <file_to_encrypt>    - Encrypt file
+#   gpg-dotme edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
 
 # Key aliases mapping (using regular arrays for compatibility)
 ALIASES=("drjaminchen" "ninjacaesar")
@@ -146,7 +146,14 @@ main() {
   # Perform the requested operation
   case "$operation" in
   "dec")
-    decrypt_and_display "$key_email" "$file"
+    # Check for private key
+    if ! gpg --list-secret-keys "$alias" | grep -q 'sec'; then
+        echo "Error: No GPG private key found for alias '$alias'. Cannot decrypt." >&2
+        exit 1
+    fi
+    # Proceed with decryption
+    gpg --decrypt --recipient "$alias" "$encrypted_file"
+    exit $?
     ;;
   "enc")
     encrypt_file "$key_email" "$file"
