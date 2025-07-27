@@ -7,8 +7,11 @@ Supports remote config fetching, proxy group management, and rule processing.
 """
 
 import argparse
+import base64
 import copy
+import os
 import urllib.request
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 from urllib.error import URLError
 
@@ -20,6 +23,29 @@ from yaml import Loader, safe_load
 DEFAULT_MATCH_DIRECT = False
 ADD_COUNTRY_GROUPS = False
 ADD_GFWLIST = False
+
+
+def get_script_dir() -> Path:
+    """
+    Get the directory where this script is located.
+    
+    Returns:
+        Path object pointing to the script directory
+    """
+    return Path(__file__).parent.absolute()
+
+
+def get_resource_path(relative_path: str) -> Path:
+    """
+    Get absolute path for a resource file relative to the script directory.
+    
+    Args:
+        relative_path: Path relative to the script directory
+        
+    Returns:
+        Absolute path to the resource file
+    """
+    return get_script_dir() / relative_path
 
 
 def read_remote_config(link: str) -> Optional[Dict[str, Any]]:
@@ -111,33 +137,9 @@ def get_gfw_rules() -> List[str]:
         List of GFW rules
     """
     rules = []
-    
-    # Try remote URL first
-    remote_url = "https://raw.githubusercontent.com/gfwlist/gfwlist/refs/heads/master/gfwlist.txt"
     try:
-        req = urllib.request.Request(remote_url)
-        req.add_header(
-            "User-Agent",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69",
-        )
-        
-        with urllib.request.urlopen(req) as response:
-            content = response.read().decode('utf-8')
-            for line in content.split('\n'):
-                line = line.strip("\r\n ")
-                if line and not line.startswith("#") and not line.startswith("!"):
-                    rules.append(line)
-            print(f"Successfully loaded {len(rules)} GFW rules from remote URL")
-            return rules
-            
-    except (URLError, UnicodeDecodeError) as e:
-        print(f"Failed to fetch remote GFW list: {e}")
-        print("Falling back to local gfwrules.txt...")
-    
-    # Fallback to local file
-    try:
-        with open("rules/gfwrules.txt", encoding="utf-8") as rule_file:
+        local_file = get_resource_path("rules/gfwrules.txt")
+        with open(local_file, encoding="utf-8") as rule_file:
             for line in rule_file:
                 line = line.strip("\r\n ")
                 if line and not line.startswith("#"):
@@ -147,7 +149,6 @@ def get_gfw_rules() -> List[str]:
         print("Warning: rules/gfwrules.txt not found")
     except Exception as e:
         print(f"Error reading GFW rules: {e}")
-
     return rules
 
 
@@ -165,7 +166,8 @@ def read_ruleset_as_providers(result: Dict[str, Any]) -> Dict[str, Any]:
     ruleset = {}
 
     try:
-        with open(filename, encoding="utf-8") as rule_file:
+        filepath = get_resource_path(filename)
+        with open(filepath, encoding="utf-8") as rule_file:
             ruleset = safe_load(rule_file)
     except FileNotFoundError:
         print(f"Warning: {filename} not found")
@@ -197,7 +199,7 @@ def read_ruleset_as_rules(result: Dict[str, Any]) -> Dict[str, Any]:
     target_files = ["ChatGPT.yaml", "cdn.yaml", "news.yaml", "oracle.yaml"]
 
     for filename in target_files:
-        filepath = f"ruleset/{filename}"
+        filepath = get_resource_path(f"ruleset/{filename}")
         try:
             with open(filepath, encoding="utf-8") as rule_file:
                 extra_rules = safe_load(rule_file)
