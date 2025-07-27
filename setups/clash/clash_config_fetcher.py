@@ -8,7 +8,6 @@ Supports remote config fetching, proxy group management, and rule processing.
 
 import argparse
 import copy
-import time
 import urllib.request
 from typing import Dict, List, Optional, Tuple, Any
 from urllib.error import URLError
@@ -332,6 +331,9 @@ def main() -> None:
     parser.add_argument(
         "-w", "--gfwlist", action="store_true", help="Add gfwlist rules (default false)"
     )
+    parser.add_argument(
+        "-o", "--output", type=str, default="config.latest", help="Output filename (default: config.latest)"
+    )
 
     args = parser.parse_args()
 
@@ -361,7 +363,7 @@ def main() -> None:
     finalize_groups(trojan)
 
     # Write output file
-    output_filename = f"config.latest"
+    output_filename = args.output
     try:
         with open(output_filename, "w", encoding="utf-8") as output_file:
             yaml.dump(trojan, output_file, default_flow_style=False, allow_unicode=True)
