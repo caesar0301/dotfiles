@@ -105,18 +105,44 @@ def rule_key(rule: str) -> Tuple[str, str]:
 
 def get_gfw_rules() -> List[str]:
     """
-    Read GFW rules from the rules file.
+    Read GFW rules from remote GitHub URL first, fallback to local file.
 
     Returns:
         List of GFW rules
     """
     rules = []
+    
+    # Try remote URL first
+    remote_url = "https://raw.githubusercontent.com/gfwlist/gfwlist/refs/heads/master/gfwlist.txt"
+    try:
+        req = urllib.request.Request(remote_url)
+        req.add_header(
+            "User-Agent",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69",
+        )
+        
+        with urllib.request.urlopen(req) as response:
+            content = response.read().decode('utf-8')
+            for line in content.split('\n'):
+                line = line.strip("\r\n ")
+                if line and not line.startswith("#") and not line.startswith("!"):
+                    rules.append(line)
+            print(f"Successfully loaded {len(rules)} GFW rules from remote URL")
+            return rules
+            
+    except (URLError, UnicodeDecodeError) as e:
+        print(f"Failed to fetch remote GFW list: {e}")
+        print("Falling back to local gfwrules.txt...")
+    
+    # Fallback to local file
     try:
         with open("rules/gfwrules.txt", encoding="utf-8") as rule_file:
             for line in rule_file:
                 line = line.strip("\r\n ")
                 if line and not line.startswith("#"):
                     rules.append(line)
+        print(f"Successfully loaded {len(rules)} GFW rules from local file")
     except FileNotFoundError:
         print("Warning: rules/gfwrules.txt not found")
     except Exception as e:
