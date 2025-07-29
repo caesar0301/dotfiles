@@ -58,7 +58,7 @@ check_file() {
 decrypt_and_display() {
   local key_email=$1
   local encrypted_file=$2
-  if ! gpg --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
+  if ! gpg --batch --yes --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
     print_error "Failed to decrypt file. Make sure you have the correct key and the file is encrypted for $key_email"
     exit 1
   fi
@@ -69,7 +69,7 @@ encrypt_file() {
   local key_email=$1
   local file_to_encrypt=$2
   local encrypted_file="${file_to_encrypt}.enc"
-  if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$file_to_encrypt"; then
+  if ! gpg --batch --yes --output "$encrypted_file" --encrypt --recipient "$key_email" "$file_to_encrypt"; then
     print_error "Failed to encrypt file"
     exit 1
   fi
@@ -83,7 +83,7 @@ edit_encrypted_file() {
   temp_file=$(mktemp /tmp/gpg_edit_XXXXXX)
 
   # Decrypt to temporary file
-  if ! gpg --output "$temp_file" --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
+  if ! gpg --batch --yes --output "$temp_file" --decrypt --recipient "$key_email" "$encrypted_file" 2>/dev/null; then
     print_error "Failed to decrypt file for editing"
     rm -f "$temp_file"
     exit 1
@@ -95,7 +95,7 @@ edit_encrypted_file() {
   # Edit the file
   if "$editor" "$temp_file"; then
     # Re-encrypt the edited file
-    if ! gpg --output "$encrypted_file" --encrypt --recipient "$key_email" "$temp_file"; then
+    if ! gpg --batch --yes --output "$encrypted_file" --encrypt --recipient "$key_email" "$temp_file"; then
       print_error "Failed to re-encrypt file"
       # Don't exit here, we still want to clean up
     fi
@@ -148,7 +148,7 @@ EOF
       exit 1
     fi
     # Proceed with decryption
-    gpg --decrypt --recipient "$alias" "$file"
+    gpg --batch --yes --decrypt --recipient "$alias" "$file"
     ;;
   "enc")
     encrypt_file "$key_email" "$file"
