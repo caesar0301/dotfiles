@@ -30,7 +30,6 @@ autoload -Uz _zi && (( ${+_comps} )) && _comps[zi]=_zi
 zinit ice wait lucid; zinit snippet OMZL::clipboard.zsh
 zinit ice wait lucid; zinit snippet OMZL::completion.zsh
 zinit ice wait lucid; zinit snippet OMZL::functions.zsh
-zinit ice wait lucid; zinit snippet OMZL::git.zsh
 zinit ice wait lucid; zinit snippet OMZL::spectrum.zsh
 
 # Theme
