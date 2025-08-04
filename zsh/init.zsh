@@ -52,9 +52,6 @@ zinit light zsh-users/zsh-autosuggestions
 zinit ice pick "zsh-syntax-highlighting.zsh" wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Development
-zinit ice wait lucid; zinit snippet OMZP::git
-
 # Custom extensions
 zinit light caesar0301/zsh-caesardev
 zinit light caesar0301/zsh-shell-proxy
