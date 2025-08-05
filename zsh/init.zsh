@@ -80,6 +80,7 @@ export SAVEHIST=9999
 # extra paths
 export PATH=$HOME/.local/bin:$HOME/.dotfiles/bin:$PATH
 export RLWRAP_HOME=${HOME}/.config/rlwrap
+export PATH=$HOME/.npm-global/bin:$PATH
 
 # respect local zshenv
 [ -f ~/.zshenv.local ] && source ~/.zshenv.local
