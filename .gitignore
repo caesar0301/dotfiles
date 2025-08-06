@@ -6,3 +6,8 @@ emacs/lisp/lisp
 emacs/plugins/plugins
 setups/clash/config.gfwlist
 setups/clash/config.latest
+
+package-lock.json
+package.json
+vifm/colors/colors
+vifm/scripts/scripts
