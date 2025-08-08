@@ -2,7 +2,18 @@
 
 Download from https://github.com/MetaCubeX/mihomo/releases
 
-sudo systemctl status mihomo
+```
+cp mihomo /usr/local/bin
+cp config.yaml /etc/mihomo
+
+cat /etc/systemd/system/mihomo.service
+
+systemctl daemon-reload
+systemctl enable mihomo
+systemctl status mihomo
+
+journalctl -u mihomo -o cat -e
+```
 
 ## Update config
 
