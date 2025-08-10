@@ -45,3 +45,6 @@ alias gqu="git-quick-update"
 
 # Warp aliases
 alias warp="cd ~/storage/documents/warpnotes"
+
+# Enter warpnotes by default
+warp
