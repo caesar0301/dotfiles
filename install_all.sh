@@ -7,7 +7,7 @@
 THISDIR=$(dirname $(realpath $0))
 source $THISDIR/lib/shmisc.sh
 
-components=(tmux zsh nvim vifm emacs npm misc)
+components=(alacritty tmux zsh nvim vifm emacs npm misc)
 components+=(lisp rlwrap)
 
 for key in "${components[@]}"; do
