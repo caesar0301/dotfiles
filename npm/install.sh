@@ -10,6 +10,7 @@ source "$THISDIR/../lib/shmisc.sh"
 
 # Function to handle npm configuration
 handle_npm() {
+  create_dir $HOME/.npm-global/lib
   install_file_pair "$THISDIR/.npmrc" "$HOME/.npmrc"
 }
 
