@@ -621,6 +621,7 @@ pip_install_lib() {
 
 # Install one or more npm libraries globally
 npm_install_lib() {
+  # be consistent with npm/.npmrc
   mkdir -p $HOME/.local && npm config set prefix '~/.local/'
 
   local libs=("$@") # Capture all arguments as an array
@@ -755,4 +756,9 @@ install_neovim() {
   local link="https://github.com/neovim/neovim/releases/download/v${nvimver}/${NVIM_RELEASE}.tar.gz"
   info "Downloading Neovim from $link"
   curl -k -L --progress-bar "$link" | tar -xz --strip-components=1 -C "$HOME/.local"
+}
+
+install_ai_code_agents() {
+  local agents="@qwen-code/qwen-code @iflow-ai/iflow-cli @google/gemini-cli @anthropic-ai/claude-code"
+  npm_install_lib ${agents}
 }

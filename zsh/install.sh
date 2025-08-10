@@ -105,6 +105,7 @@ install_zinit
 install_pyenv
 #install_jenv
 #install_gvm
+install_ai_code_agents
 
 # Configure
 handle_shell_proxy
