@@ -761,4 +761,6 @@ install_neovim() {
 install_ai_code_agents() {
   local agents="@qwen-code/qwen-code @iflow-ai/iflow-cli @google/gemini-cli @anthropic-ai/claude-code"
   npm_install_lib ${agents}
+  # cursor agent cli
+  curl https://cursor.com/install -fsS | bash
 }
