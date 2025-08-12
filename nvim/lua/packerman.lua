@@ -295,17 +295,4 @@ return packer.startup(function(use)
 			{ "kovisoft/paredit" },
 		},
 	})
-
-	---------------
-	-- AI Assistant
-	---------------
-
-	-- Free, ultrafast Copilot alternative
-	use({
-		"Exafunction/windsurf.nvim",
-		requires = {
-			"nvim-lua/plenary.nvim",
-			"hrsh7th/nvim-cmp",
-		},
-	})
 end)
