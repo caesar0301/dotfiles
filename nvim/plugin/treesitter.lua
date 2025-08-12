@@ -8,7 +8,6 @@ require("nvim-treesitter.configs").setup({
 		"vimdoc",
 		"luadoc",
 		"markdown",
-		"latex",
 	},
 	autotag = {
 		enable = true,
