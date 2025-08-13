@@ -33,15 +33,6 @@ vim.keymap.set("i", "<C-a>", "<ESC>I", opt_s("Goto line head"))
 vim.keymap.set("n", "<C-e>", "<ESC>$", opt_s("Goto line tail"))
 vim.keymap.set("i", "<C-e>", "<ESC>A", opt_s("Goto line tail"))
 
--- Plugin: AnyJump
-vim.keymap.set("n", "<leader>aj", ":AnyJump<CR>", opt_s("[AnyJump] jump to symbol"))
-vim.keymap.set("x", "<leader>aj", ":AnyJumpVisual<CR>", opt_s("[AnyJump] jump to symbol visual"))
-vim.keymap.set("n", "<leader>ab", ":AnyJumpBack<CR>", opt_s("[AnyJump] jump back"))
-vim.keymap.set("n", "<leader>al", ":AnyJumpLastResults<CR>", opt_s("[AnyJump] jump to last results"))
-
--- Plugin: formatter.nvim
-vim.keymap.set("n", "<leader>af", ":w<CR><bar>:Format<CR>", opt_s("Format current buffer"))
-
 -- Move line in visual mode
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected downwards" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected upwards" })
