@@ -323,12 +323,18 @@ return packer.startup(function(use)
 			{ "hrsh7th/nvim-cmp" },
 			{ "nvim-tree/nvim-web-devicons" },
 			{ "HakonHarnes/img-clip.nvim" },
-			{ "zbirenbaum/copilot.lua" },
+			-- { "zbirenbaum/copilot.lua" },
 			{ "stevearc/dressing.nvim" },
 			{ "folke/snacks.nvim" },
 		},
 		config = function()
-			require("avante").setup({})
+			require("avante").setup({
+				windows = {
+					input = { border = "rounded", width = 60, height = 10 },
+					output = { border = "rounded", width = 60, height = 20 },
+					ask = { floating = true, border = "rounded", start_insert = true },
+				},
+			})
 		end,
 	})
 end)
