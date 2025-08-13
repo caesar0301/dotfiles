@@ -77,7 +77,7 @@ return packer.startup(function(use)
 	-- easily manage multiple terminal windows
 	use({
 		"akinsho/toggleterm.nvim",
-		tag = "*",
+		tag = "v2.13.1",
 		config = function()
 			require("toggleterm").setup()
 		end,
@@ -145,7 +145,7 @@ return packer.startup(function(use)
 	-- Highly extendable fuzzy finder over file and symbols
 	use({
 		"nvim-telescope/telescope.nvim",
-		tag = "0.1.6",
+		tag = "0.1.8",
 		requires = {
 			{ "nvim-lua/plenary.nvim" },
 			{ "BurntSushi/ripgrep" },
@@ -212,7 +212,7 @@ return packer.startup(function(use)
 	-- Add/change/delete surrounding delimiter pairs with ease
 	use({
 		"kylechui/nvim-surround",
-		tag = "*", -- Use for stability; omit to use `main` branch for the latest features
+		tag = "v3.1.3",
 		config = function()
 			require("nvim-surround").setup({})
 		end,
@@ -318,9 +318,7 @@ return packer.startup(function(use)
 			{ "hrsh7th/nvim-cmp" },
 			{ "nvim-tree/nvim-web-devicons" },
 			{ "HakonHarnes/img-clip.nvim" },
-			{ "zbirenbaum/copilot.lua" },
 			{ "stevearc/dressing.nvim" },
-			{ "folke/snacks.nvim" },
 		},
 		config = function()
 			require("avante").setup({
