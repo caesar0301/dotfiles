@@ -39,6 +39,7 @@ zinit light sindresorhus/pure
 # Efficiency
 zinit ice pick"z.sh" wait lucid; zinit load rupa/z
 zinit ice wait lucid; zinit snippet OMZP::vi-mode
+zinit ice wait lucid; zinit snippet OMZP::alias-finder
 
 # Auto command completion
 zinit light zsh-users/zsh-completions
