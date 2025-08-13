@@ -162,13 +162,6 @@ function handle_neovim {
   install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/"
 }
 
-function post_install {
-  warn "**********Post installation*************"
-  warn "Run following commands in Neovim to install plugins:"
-  warn ":PackerInstall"
-  warn "****************************************"
-}
-
 # Function to cleanse all Neovim-related files
 function cleanse_all {
   rm -rf "$HOME/.ctags"
@@ -197,5 +190,7 @@ install_lang_formatters
 install_fzf
 setup_ctags
 
-post_install
-info "Success! Run :PackerInstall to install Neovim plugins"
+warn "================================================"
+warn "Run :PackerInstall in Neovim to install plugins:"
+warn "Run :checkhealth to validate overall health"
+warn "================================================"

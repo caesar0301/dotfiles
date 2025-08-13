@@ -93,6 +93,9 @@ return packer.startup(function(use)
 	-- Previewing native LSP's goto definition etc. in floating window
 	use({
 		"rmagatti/goto-preview",
+		requires = {
+			{ "rmagatti/logger.nvim" },
+		},
 		config = function()
 			require("goto-preview").setup()
 		end,

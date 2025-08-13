@@ -15,6 +15,13 @@ function handle_alacritty {
   info "Installing Alacritty configuration..."
   create_dir "$XDG_CONFIG_HOME/alacritty"
   install_file_pair "$THISDIR/alacritty.toml" "$XDG_CONFIG_HOME/alacritty/alacritty.toml"
+
+  # install alacritty themes
+  if [ ! -e $XDG_CONFIG_HOME/alacritty/theme ]; then
+    git clone https://github.com/alacritty/alacritty-theme $XDG_CONFIG_HOME/alacritty/themes
+  else
+    warn "$XDG_CONFIG_HOME/alacritty/theme already exists, skip"
+  fi
 }
 
 # Function to cleanse Alacritty configuration
