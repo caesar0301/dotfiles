@@ -235,6 +235,7 @@ return packer.startup(function(use)
 
 	-- Markdown support
 	use("plasticboy/vim-markdown")
+	use("MeanderingProgrammer/render-markdown.nvim")
 
 	-- Markdown preview in modern browser
 	use({
@@ -304,12 +305,6 @@ return packer.startup(function(use)
 	-- AI Assistant
 	-------------------
 
-	-- Optional dependencies
-	use("HakonHarnes/img-clip.nvim")
-	use("zbirenbaum/copilot.lua")
-	use("stevearc/dressing.nvim") -- for enhanced input UI
-	use("folke/snacks.nvim") -- for modern input UI
-
 	-- Avante.nvim with build process
 	use({
 		"yetone/avante.nvim",
@@ -323,7 +318,7 @@ return packer.startup(function(use)
 			{ "hrsh7th/nvim-cmp" },
 			{ "nvim-tree/nvim-web-devicons" },
 			{ "HakonHarnes/img-clip.nvim" },
-			-- { "zbirenbaum/copilot.lua" },
+			{ "zbirenbaum/copilot.lua" },
 			{ "stevearc/dressing.nvim" },
 			{ "folke/snacks.nvim" },
 		},
