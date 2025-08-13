@@ -1,5 +1,5 @@
 [general]
-import = ["~/.config/alacritty/themes/themes/gruvbox_dark.toml"]
+import = ["~/.config/alacritty/themes/themes/horizon_dark.toml"]
 
 [font]
 normal = { family = "Hack Nerd Font", style = "Regular" }
