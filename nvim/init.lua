@@ -10,7 +10,7 @@
 -------------------------------------------------------------
 
 -- Setup globals that I expect to be always available.
-local modules = { "packerman", "core", "preference" }
+local modules = { "core", "preference" }
 for _, module in ipairs(modules) do
 	require(module)
 end

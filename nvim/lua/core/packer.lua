@@ -284,6 +284,7 @@ return packer.startup(function(use)
 	-- use {
 	--     "Olical/conjure",
 	--     requires = {
+
 	--         {"PaterJason/cmp-conjure"},
 	--         {"kovisoft/paredit"}
 	--     }
@@ -297,5 +298,37 @@ return packer.startup(function(use)
 			{ "HiPhish/nvim-cmp-vlime" },
 			{ "kovisoft/paredit" },
 		},
+	})
+
+	-------------------
+	-- AI Assistant
+	-------------------
+
+	-- Optional dependencies
+	use("HakonHarnes/img-clip.nvim")
+	use("zbirenbaum/copilot.lua")
+	use("stevearc/dressing.nvim") -- for enhanced input UI
+	use("folke/snacks.nvim") -- for modern input UI
+
+	-- Avante.nvim with build process
+	use({
+		"yetone/avante.nvim",
+		branch = "main",
+		run = "make",
+		requires = {
+			{ "nvim-lua/plenary.nvim" },
+			{ "MunifTanjim/nui.nvim" },
+			{ "MeanderingProgrammer/render-markdown.nvim" },
+			-- optional
+			{ "hrsh7th/nvim-cmp" },
+			{ "nvim-tree/nvim-web-devicons" },
+			{ "HakonHarnes/img-clip.nvim" },
+			{ "zbirenbaum/copilot.lua" },
+			{ "stevearc/dressing.nvim" },
+			{ "folke/snacks.nvim" },
+		},
+		config = function()
+			require("avante").setup({})
+		end,
 	})
 end)
