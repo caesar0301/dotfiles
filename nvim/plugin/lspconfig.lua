@@ -80,7 +80,6 @@ end
 -- General language servers
 local servers = {
 	"rust_analyzer",
-	"pyright",
 	"clojure_lsp",
 	"metals",
 	"cmake",
@@ -92,6 +91,34 @@ for _, lsp in ipairs(servers) do
 		capabilities = common_caps,
 	})
 end
+
+-- Python
+local function get_python_path()
+	-- 1. Check local .venv
+	local venv_path = vim.fn.getcwd() .. "/.venv/bin/python"
+	if vim.fn.executable(venv_path) == 1 then
+		return venv_path
+	end
+	-- 2. Check pyenv version
+	local pyenv_path = vim.fn.trim(vim.fn.system("pyenv which python 2>/dev/null"))
+	if vim.fn.executable(pyenv_path) == 1 then
+		return pyenv_path
+	end
+	-- 3. Fallback to system python
+	if vim.fn.executable("/usr/bin/python3") == 1 then
+		return "/usr/bin/python3"
+	elseif vim.fn.executable("python3") == 1 then
+		return "python3"
+	else
+		return "python"
+	end
+end
+
+lspconfig.pyright.setup({
+	settings = { python = { pythonPath = get_python_path() } },
+	on_attach = common_on_attach,
+	capabilities = common_caps,
+})
 
 -- Clangd
 lspconfig.clangd.setup({
