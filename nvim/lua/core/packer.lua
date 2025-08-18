@@ -265,8 +265,18 @@ return packer.startup(function(use)
 	-- LaTeX synatx highlighting
 	use("lervag/vimtex")
 
-	-- Rust support
-	use("rust-lang/rust.vim")
+	-- Rust support (conditionally loaded based on kernel version)
+	if SUPPORTS_RUST_PLUGINS then
+		use("rust-lang/rust.vim")
+	else
+		-- Fallback message for unsupported systems
+		vim.defer_fn(function()
+			vim.notify(
+				"Rust plugin disabled: Kernel version " .. KERNEL_VERSION .. " < 5.0",
+				vim.log.levels.WARN
+			)
+		end, 100)
+	end
 
 	-- Haskell synatx highlighting
 	use("neovimhaskell/haskell-vim")
@@ -305,20 +315,47 @@ return packer.startup(function(use)
 	-- AI Assistant
 	-------------------
 
-	-- Avante.nvim with build process
-	use({
-		"yetone/avante.nvim",
-		branch = "main",
-		run = "make",
-		requires = {
-			{ "nvim-lua/plenary.nvim" },
-			{ "MunifTanjim/nui.nvim" },
-			{ "MeanderingProgrammer/render-markdown.nvim" },
-			-- optional
-			{ "hrsh7th/nvim-cmp" },
-			{ "nvim-tree/nvim-web-devicons" },
-			{ "HakonHarnes/img-clip.nvim" },
-			{ "stevearc/dressing.nvim" },
-		},
-	})
+	-- Avante.nvim AI assistant (conditionally loaded based on kernel version)
+	if SUPPORTS_MODERN_PLUGINS then
+		use({
+			"yetone/avante.nvim",
+			branch = "main",
+			run = "make",
+			cond = function()
+				-- Additional runtime check
+				return kernel_meets_requirement("5.0")
+			end,
+			requires = {
+				{ "nvim-lua/plenary.nvim" },
+				{ "MunifTanjim/nui.nvim" },
+				{ "MeanderingProgrammer/render-markdown.nvim" },
+				-- optional dependencies
+				{ "hrsh7th/nvim-cmp" },
+				{ "nvim-tree/nvim-web-devicons" },
+				{ "HakonHarnes/img-clip.nvim" },
+				{ "stevearc/dressing.nvim" },
+			},
+			config = function()
+				-- Only configure if kernel requirements are met
+				if kernel_meets_requirement("5.0") then
+					require("avante").setup({
+						-- Add any avante-specific configuration here
+					})
+				else
+					vim.notify(
+						"Avante.nvim disabled: Kernel version requirements not met",
+						vim.log.levels.WARN
+					)
+				end
+			end,
+		})
+	else
+		-- Show informative message for unsupported systems
+		vim.defer_fn(function()
+			vim.notify(
+				"Avante.nvim disabled: Kernel version " .. KERNEL_VERSION .. " < 5.0 (required for modern AI features)",
+				vim.log.levels.INFO
+			)
+		end, 100)
+	end
 end)
