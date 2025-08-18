@@ -320,14 +320,5 @@ return packer.startup(function(use)
 			{ "HakonHarnes/img-clip.nvim" },
 			{ "stevearc/dressing.nvim" },
 		},
-		config = function()
-			require("avante").setup({
-				windows = {
-					input = { border = "rounded", width = 60, height = 10 },
-					output = { border = "rounded", width = 60, height = 20 },
-					ask = { floating = true, border = "rounded", start_insert = true },
-				},
-			})
-		end,
 	})
 end)
