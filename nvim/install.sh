@@ -188,6 +188,7 @@ install_jdt_language_server
 install_hack_nerd_font # Required by nvim-web-devicons
 install_lang_formatters
 install_fzf
+install_cargo
 setup_ctags
 
 warn "================================================"
