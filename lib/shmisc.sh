@@ -24,9 +24,15 @@ set -euo pipefail
 
 # XDG base directory specification
 # These variables define standard directories for user data, config, and cache
-readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
-readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
-readonly XDG_CACHE_HOME=${XDG_CACHE_HOME:-"$HOME/.cache"}
+# Set default values if not already set (only if not readonly)
+[[ -z "${XDG_DATA_HOME:-}" ]] && XDG_DATA_HOME="$HOME/.local/share"
+[[ -z "${XDG_CONFIG_HOME:-}" ]] && XDG_CONFIG_HOME="$HOME/.config"
+[[ -z "${XDG_CACHE_HOME:-}" ]] && XDG_CACHE_HOME="$HOME/.cache"
+
+# Make readonly only if not already readonly (suppress error if already readonly)
+readonly XDG_DATA_HOME 2>/dev/null || true
+readonly XDG_CONFIG_HOME 2>/dev/null || true
+readonly XDG_CACHE_HOME 2>/dev/null || true
 
 # ANSI color codes for modern terminal output
 readonly COLOR_RED='\033[0;31m'
@@ -64,11 +70,11 @@ print_message() {
   # Modern log format with icons and enhanced readability
   local icon
   case "$level" in
-    "INFO") icon="ℹ" ;;
-    "WARN") icon="⚠" ;;
-    "ERROR") icon="✗" ;;
-    "SUCCESS") icon="✓" ;;
-    *) icon="•" ;;
+  "INFO") icon="ℹ" ;;
+  "WARN") icon="⚠" ;;
+  "ERROR") icon="✗" ;;
+  "SUCCESS") icon="✓" ;;
+  *) icon="•" ;;
   esac
 
   printf "%b%s [%s] %s %s%b\n" \
@@ -115,7 +121,10 @@ warn() {
 # Enhanced error function with optional exit code
 error() {
   local exit_code=1
-  [[ $1 =~ ^[0-9]+$ ]] && { exit_code=$1; shift; }
+  [[ $1 =~ ^[0-9]+$ ]] && {
+    exit_code=$1
+    shift
+  }
   print_message "$COLOR_RED" "$LOG_ERROR" "$@" >&2
   exit "$exit_code"
 }
@@ -142,10 +151,10 @@ absfilepath() {
 # Create directory with enhanced validation and feedback
 create_dir() {
   [[ $# -ne 1 ]] && error "create_dir: requires exactly one directory path"
-  
+
   local dir=$1
   [[ -d "$dir" ]] && return 0
-  
+
   mkdir -p "$dir" || error "Failed to create directory: $dir"
   info "Created directory: $dir"
 }
@@ -154,10 +163,10 @@ create_dir() {
 get_temp_dir() {
   local temp_dir
   temp_dir=$(mktemp -d 2>/dev/null) || error "Failed to create temporary directory"
-  
+
   # Enhanced cleanup trap
   trap 'rm -rf "$temp_dir" 2>/dev/null || true' EXIT INT TERM
-  
+
   info "Created temporary directory: $temp_dir"
   printf "%s" "$temp_dir"
 }
@@ -175,9 +184,9 @@ checkcmd() {
 # Install Python packages with enhanced error handling and feedback
 pip_install_lib() {
   [[ $# -eq 0 ]] && error "pip_install_lib: requires at least one package name"
-  
+
   checkcmd pip || error "pip is not installed or not in PATH"
-  
+
   info "Installing pip packages: $*"
   if pip install --user "$@" --quiet; then
     success "Successfully installed pip packages: $*"
@@ -189,29 +198,119 @@ pip_install_lib() {
 # Install Go packages with enhanced validation and feedback
 go_install_lib() {
   [[ $# -eq 0 ]] && error "go_install_lib: requires at least one package path"
-  
+
   checkcmd go || error "Go is not installed or not in PATH"
-  
+
   info "Installing Go packages: $*"
-  if go install "$@"; then
-    success "Successfully installed Go packages: $*"
+
+  # Use proxy in China
+  local proxies=(
+    "https://goproxy.cn,direct"
+    "https://goproxy.io,direct"
+    "direct"
+  )
+
+  local success_flag=0
+  local failed_packages=()
+
+  # Install each package separately to avoid module conflicts
+  for package in "$@"; do
+    local package_success=0
+    for proxy in "${proxies[@]}"; do
+      info "Trying to install $package with GOPROXY=$proxy"
+      if GOPROXY="$proxy" go install "$package"; then
+        success "Successfully installed Go package: $package (via $proxy)"
+        package_success=1
+        break
+      else
+        warn "Failed to install $package with GOPROXY=$proxy, retrying..."
+      fi
+    done
+
+    if [[ $package_success -eq 0 ]]; then
+      failed_packages+=("$package")
+    fi
+  done
+
+  if [[ ${#failed_packages[@]} -gt 0 ]]; then
+    error "Failed to install Go packages: ${failed_packages[*]}"
   else
-    error "Failed to install Go packages: $*"
+    success "Successfully installed all Go packages: $*"
   fi
 }
 
 # Install R packages with improved error handling
 rlang_install_lib() {
   [[ $# -eq 0 ]] && error "rlang_install_lib: requires at least one package name"
-  
+
   checkcmd Rscript || error "R is not installed or not in PATH"
-  
-  info "Installing R packages: $*"
-  if Rscript -e "install.packages(c('$*'), repos='https://cloud.r-project.org/')"; then
-    success "Successfully installed R packages: $*"
-  else
-    error "Failed to install R packages: $*"
-  fi
+
+  local packages=("$@")
+  local pkg_str=$(printf "'%s'," "${packages[@]}")
+  pkg_str="${pkg_str%,}"
+
+  info "Installing R packages: ${packages[*]}"
+
+  # China CRAN mirrors
+  local mirrors=(
+    "https://mirrors.tuna.tsinghua.edu.cn/CRAN"
+    "https://mirrors.ustc.edu.cn/CRAN"
+    "https://mirrors.aliyun.com/CRAN"
+    "https://cloud.r-project.org"
+  )
+
+  local success_flag=0
+  for repo in "${mirrors[@]}"; do
+    info "Trying CRAN mirror: $repo"
+    if Rscript -e "install.packages(c(${pkg_str}), repos='$repo')" >/dev/null 2>&1; then
+      success "Successfully installed R packages: ${packages[*]} (via $repo)"
+      success_flag=1
+      break
+    else
+      warn "Failed with CRAN mirror: $repo, retrying..."
+    fi
+  done
+
+  [[ $success_flag -eq 1 ]] || error "Failed to install R packages after trying all mirrors: ${packages[*]}"
+}
+
+# Install npm packages globally with enhanced configuration
+npm_install_lib() {
+  [[ $# -eq 0 ]] && error "npm_install_lib: requires at least one package name"
+
+  checkcmd npm || error "npm is not installed or not in PATH"
+
+  # Configure npm prefix for local installs
+  create_dir "$HOME/.local"
+  npm config set prefix "$HOME/.local" >/dev/null 2>&1
+
+  local packages=("$@")
+  local cache_dir="$HOME/.npm_cache"
+  create_dir "$cache_dir"
+
+  local registries=(
+    "https://registry.npmmirror.com"
+    "https://registry.npmjs.org"
+    "https://registry.yarnpkg.com"
+  )
+
+  local options="--prefer-offline --no-audit --progress=true --cache=$cache_dir"
+  local success_flag=0
+
+  info "Installing npm packages: ${packages[*]}"
+
+  for reg in "${registries[@]}"; do
+    info "Trying npm registry: $reg"
+    if npm install $options --registry="$reg" -g "${packages[@]}"; then
+      success "Successfully installed npm packages: ${packages[*]} (via $reg)"
+      success_flag=1
+      break
+    else
+      warn "Failed with registry: $reg, retrying..."
+    fi
+  done
+
+  [[ $success_flag -eq 1 ]] || error "Failed to install npm packages after trying all registries: ${packages[*]}"
 }
 
 # Enhanced sudo access management with improved error handling
@@ -221,9 +320,9 @@ check_sudo_access() {
 
   info "Requesting sudo access..."
   sudo -v -p "$prompt" || error "Failed to obtain sudo access"
-  
+
   success "Sudo access granted"
-  
+
   # Background process to maintain sudo credentials
   {
     while kill -0 "$$" 2>/dev/null; do
@@ -243,9 +342,9 @@ get_os_name() {
   os_name=$(uname -s 2>/dev/null) || error "Failed to detect operating system"
 
   case "${os_name,,}" in
-    linux*) printf "linux" ;;
-    darwin*) printf "darwin" ;;
-    *) error "Unsupported operating system: $os_name" ;;
+  linux*) printf "linux" ;;
+  darwin*) printf "darwin" ;;
+  *) error "Unsupported operating system: $os_name" ;;
   esac
 }
 
@@ -255,30 +354,39 @@ get_arch_name() {
   arch_name=$(uname -m 2>/dev/null) || error "Failed to detect CPU architecture"
 
   case "${arch_name,,}" in
-    x86_64*|amd64*) printf "amd64" ;;
-    aarch64*|arm64*) printf "arm64" ;;
-    armv7*) printf "armv7" ;;
-    i?86*) printf "i386" ;;
-    *) error "Unsupported CPU architecture: $arch_name" ;;
+  x86_64* | amd64*) printf "amd64" ;;
+  aarch64* | arm64*) printf "arm64" ;;
+  armv7*) printf "armv7" ;;
+  i?86*) printf "i386" ;;
+  *) error "Unsupported CPU architecture: $arch_name" ;;
   esac
 }
 
 # Generate UUID with multiple fallback methods
 gen_uuid() {
   local uuid
-  
+
   # Try uuidgen first (most systems)
   if checkcmd uuidgen; then
-    uuid=$(uuidgen 2>/dev/null) && { printf "%s" "$uuid"; return; }
+    uuid=$(uuidgen 2>/dev/null) && {
+      printf "%s" "$uuid"
+      return
+    }
   fi
-  
+
   # Fallback to Python
   if checkcmd python3; then
-    uuid=$(python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null) && { printf "%s" "$uuid"; return; }
+    uuid=$(python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null) && {
+      printf "%s" "$uuid"
+      return
+    }
   elif checkcmd python; then
-    uuid=$(python -c 'import uuid; print(uuid.uuid4())' 2>/dev/null) && { printf "%s" "$uuid"; return; }
+    uuid=$(python -c 'import uuid; print(uuid.uuid4())' 2>/dev/null) && {
+      printf "%s" "$uuid"
+      return
+    }
   fi
-  
+
   # Last resort: pseudo-random UUID
   printf "%08x-%04x-%04x-%04x-%012x" \
     $((RANDOM * RANDOM)) $((RANDOM)) $((RANDOM)) $((RANDOM)) $((RANDOM * RANDOM * RANDOM))
@@ -293,7 +401,7 @@ download_file() {
   create_dir "$output_dir"
 
   info "Downloading: $url"
-  
+
   # Try curl first (preferred)
   if checkcmd curl; then
     if curl -fsSL --progress-bar "$url" -o "$output"; then
@@ -301,7 +409,7 @@ download_file() {
       return
     fi
   fi
-  
+
   # Fallback to wget
   if checkcmd wget; then
     if wget -q --show-progress "$url" -O "$output"; then
@@ -309,7 +417,7 @@ download_file() {
       return
     fi
   fi
-  
+
   error "Failed to download $url (tried curl and wget)"
 }
 
@@ -322,57 +430,57 @@ extract_tar() {
 
   create_dir "$output"
   info "Extracting: $(basename "$archive")"
-  
+
   # Auto-detect compression and extract
   case "${archive,,}" in
-    *.tar.gz|*.tgz) tar -xzf "$archive" -C "$output" ;;
-    *.tar.bz2|*.tbz2) tar -xjf "$archive" -C "$output" ;;
-    *.tar.xz|*.txz) tar -xJf "$archive" -C "$output" ;;
-    *.tar) tar -xf "$archive" -C "$output" ;;
-    *) error "Unsupported archive format: $archive" ;;
+  *.tar.gz | *.tgz) tar -xzf "$archive" -C "$output" ;;
+  *.tar.bz2 | *.tbz2) tar -xjf "$archive" -C "$output" ;;
+  *.tar.xz | *.txz) tar -xJf "$archive" -C "$output" ;;
+  *.tar) tar -xf "$archive" -C "$output" ;;
+  *) error "Unsupported archive format: $archive" ;;
   esac || error "Failed to extract: $archive"
-  
+
   success "Extracted: $(basename "$archive")"
 }
 
 # Generate random lowercase alphanumeric string with validation
 random_uuid_lower() {
   local length=${1:-32} uuid
-  
+
   # Use multiple methods for better compatibility
   if [[ -c /dev/urandom ]]; then
-    uuid=$(tr -dc 'a-z0-9' < /dev/urandom | fold -w "$length" | head -n 1)
+    uuid=$(tr -dc 'a-z0-9' </dev/urandom | fold -w "$length" | head -n 1)
   else
     # Fallback method using RANDOM
-    uuid=$(printf "%s" {1.."$length"} | while read -r _; do printf "%c" "$(printf "\\$(printf "%03o" $((97 + RANDOM % 26)))")" ; done)
+    uuid=$(printf "%s" {1.."$length"} | while read -r _; do printf "%c" "$(printf "\\$(printf "%03o" $((97 + RANDOM % 26)))")"; done)
   fi
-  
+
   printf "%s" "${uuid:0:$length}"
 }
 
 # Generate random number with enhanced validation
 random_num() {
   local width=${1:-4} number
-  
+
   # Validate width parameter
   [[ $width =~ ^[1-9][0-9]*$ ]] || error "random_num: width must be positive integer"
-  
+
   if [[ -c /dev/urandom ]]; then
-    number=$(tr -dc '0-9' < /dev/urandom | head -c "$width")
+    number=$(tr -dc '0-9' </dev/urandom | head -c "$width")
     # Ensure we don't return empty or all-zeros
-    [[ -n $number && $number != $(printf "%0${width}d" 0) ]] || number=$(( (RANDOM % 9 + 1) * 10**(width-1) + RANDOM % (10**(width-1)) ))
+    [[ -n $number && $number != $(printf "%0${width}d" 0) ]] || number=$(((RANDOM % 9 + 1) * 10 ** (width - 1) + RANDOM % (10 ** (width - 1))))
   else
     # Fallback using RANDOM
-    number=$(( (RANDOM % 9 + 1) * 10**(width-1) + RANDOM % (10**(width-1)) ))
+    number=$(((RANDOM % 9 + 1) * 10 ** (width - 1) + RANDOM % (10 ** (width - 1))))
   fi
-  
+
   printf "%0${width}d" "$number"
 }
 
 # Get current shell name with improved detection
 current_shell_name() {
   local shell_path shell_name
-  
+
   # Try multiple methods to detect shell
   if [[ -n $SHELL ]]; then
     shell_path=$SHELL
@@ -382,13 +490,13 @@ current_shell_name() {
     local username ostype
     username=$(whoami 2>/dev/null) || error "Cannot determine current user"
     ostype=$(uname -s 2>/dev/null) || error "Cannot determine OS type"
-    
+
     case "$ostype" in
-      Darwin) shell_path=$(dscl . -read "/Users/$username" UserShell 2>/dev/null | awk '{print $2}') ;;
-      *) shell_path=$(getent passwd "$username" 2>/dev/null | cut -d: -f7) ;;
+    Darwin) shell_path=$(dscl . -read "/Users/$username" UserShell 2>/dev/null | awk '{print $2}') ;;
+    *) shell_path=$(getent passwd "$username" 2>/dev/null | cut -d: -f7) ;;
     esac
   fi
-  
+
   [[ -n $shell_path ]] || error "Cannot determine current shell"
   shell_name=$(basename "$shell_path")
   printf "%s" "$shell_name"
@@ -398,59 +506,61 @@ current_shell_name() {
 current_shell_config() {
   local shell_name shell_config
   shell_name=$(current_shell_name)
-  
+
   case "$shell_name" in
-    zsh) shell_config="$HOME/.zshrc" ;;
-    bash) 
-      # Prefer .bashrc, fallback to .bash_profile
-      if [[ -f "$HOME/.bashrc" ]]; then
-        shell_config="$HOME/.bashrc"
-      else
-        shell_config="$HOME/.bash_profile"
-      fi
-      ;;
-    fish) shell_config="$HOME/.config/fish/config.fish" ;;
-    tcsh|csh) shell_config="$HOME/.cshrc" ;;
-    ksh) shell_config="$HOME/.kshrc" ;;
-    *) 
-      warn "Unknown shell: $shell_name, using .profile"
-      shell_config="$HOME/.profile"
-      ;;
+  zsh) shell_config="$HOME/.zshrc" ;;
+  bash)
+    # Prefer .bashrc, fallback to .bash_profile
+    if [[ -f "$HOME/.bashrc" ]]; then
+      shell_config="$HOME/.bashrc"
+    else
+      shell_config="$HOME/.bash_profile"
+    fi
+    ;;
+  fish) shell_config="$HOME/.config/fish/config.fish" ;;
+  tcsh | csh) shell_config="$HOME/.cshrc" ;;
+  ksh) shell_config="$HOME/.kshrc" ;;
+  *)
+    warn "Unknown shell: $shell_name, using .profile"
+    shell_config="$HOME/.profile"
+    ;;
   esac
-  
+
   printf "%s" "$shell_config"
 }
 
 # Get latest GitHub release with enhanced error handling and filtering
 latest_github_release() {
   [[ $# -ne 2 ]] && error "latest_github_release: requires owner and repository name"
-  
+
   local owner=$1 repo=$2 pattern=${3:-""} api_url release_info download_urls
   api_url="https://api.github.com/repos/$owner/$repo/releases/latest"
-  
+
   info "Fetching latest release for $owner/$repo"
-  
+
   # Fetch release information with proper error handling
   if ! release_info=$(curl -s --fail "$api_url" 2>/dev/null); then
     error "Failed to fetch release information from GitHub API"
   fi
-  
+
   # Extract download URLs
   download_urls=$(printf "%s" "$release_info" | grep -o '"browser_download_url":"[^"]*"' | cut -d'"' -f4)
-  
+
   [[ -n $download_urls ]] || error "No download URLs found in release"
-  
+
   # Filter by pattern if provided
   if [[ -n $pattern ]]; then
     download_urls=$(printf "%s" "$download_urls" | grep -E "$pattern" | head -1)
     [[ -n $download_urls ]] || error "No downloads matching pattern: $pattern"
   fi
-  
+
   printf "%s" "$download_urls"
 }
 
 # Enhanced system detection functions with caching
-declare -g _os_cache _arch_cache
+# Use regular variable declaration for bash compatibility
+_os_cache=""
+_arch_cache=""
 
 is_linux() {
   [[ ${_os_cache:-$(uname -s)} == "Linux" ]]
@@ -493,20 +603,27 @@ get_kernel_version() {
 # Enhanced file installation with backup and verification
 install_file_pair() {
   [[ $# -ne 2 ]] && error "install_file_pair: requires source and destination paths"
-  
+
   local src="$1" dest="$2" dest_dir backup_suffix
   [[ -e "$src" ]] || error "Source does not exist: $src"
-  
+
   dest_dir=$(dirname "$dest")
   create_dir "$dest_dir"
-  
+
   # Create backup if destination exists
   if [[ -e "$dest" ]]; then
     backup_suffix=".backup.$(date +%Y%m%d_%H%M%S)"
     info "Creating backup: ${dest}${backup_suffix}"
-    cp "$dest" "${dest}${backup_suffix}"
+    if [[ -L "$dest" ]]; then
+      # Handle symlinks by copying the link itself
+      cp -P "$dest" "${dest}${backup_suffix}"
+    elif [[ -d "$dest" ]]; then
+      cp -r "$dest" "${dest}${backup_suffix}"
+    else
+      cp "$dest" "${dest}${backup_suffix}"
+    fi
   fi
-  
+
   # Install file (copy or symlink)
   if [[ ${LINK_INSTEAD_OF_COPY:-0} == 1 ]]; then
     ln -sf "$(realpath "$src")" "$dest" || error "Failed to create symlink: $src -> $dest"
@@ -515,7 +632,7 @@ install_file_pair() {
     cp -r "$src" "$dest" || error "Failed to copy: $src -> $dest"
     info "Copied: $(basename "$src") -> $(basename "$dest")"
   fi
-  
+
   # Verify installation
   [[ -e "$dest" ]] || error "Installation verification failed: $dest"
 }
@@ -526,8 +643,11 @@ install_file_pair() {
 
 # Install uv Python package manager with verification
 install_uv() {
-  checkcmd uv && { info "uv already installed: $(uv --version)"; return; }
-  
+  checkcmd uv && {
+    info "uv already installed: $(uv --version)"
+    return
+  }
+
   info "Installing uv Python package manager..."
   if curl -LsSf https://astral.sh/uv/install.sh | sh; then
     success "uv installed successfully"
@@ -545,11 +665,11 @@ install_pyenv() {
     info "pyenv already installed at $HOME/.pyenv"
     return
   fi
-  
+
   info "Installing pyenv Python version manager..."
   if curl -fsSL https://pyenv.run | bash; then
     success "pyenv installed successfully"
-    
+
     # Add to shell configuration
     local shell_config
     shell_config=$(current_shell_config)
@@ -560,7 +680,7 @@ install_pyenv() {
         echo 'export PYENV_ROOT="$HOME/.pyenv"'
         echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
         echo 'eval "$(pyenv init -)"'
-      } >> "$shell_config"
+      } >>"$shell_config"
     fi
   else
     error "Failed to install pyenv"
@@ -573,9 +693,9 @@ install_jenv() {
     info "jenv already installed: $(jenv version-name 2>/dev/null || echo 'installed')"
     return
   fi
-  
+
   info "Installing jenv Java version manager..."
-  
+
   if is_macos; then
     if checkcmd brew; then
       brew install jenv || error "Failed to install jenv via Homebrew"
@@ -586,7 +706,7 @@ install_jenv() {
     if [[ ! -d "$HOME/.jenv" ]]; then
       git clone --depth 1 https://github.com/jenv/jenv.git "$HOME/.jenv" || error "Failed to clone jenv repository"
       export PATH="$HOME/.jenv/bin:$PATH"
-      
+
       # Add to shell configuration
       local shell_config
       shell_config=$(current_shell_config)
@@ -596,13 +716,13 @@ install_jenv() {
           echo '# jenv configuration'
           echo 'export PATH="$HOME/.jenv/bin:$PATH"'
           echo 'eval "$(jenv init -)"'
-        } >> "$shell_config"
+        } >>"$shell_config"
       fi
     fi
   else
     error "Unsupported platform for jenv installation"
   fi
-  
+
   # Initialize jenv in current session
   eval "$(jenv init -)" 2>/dev/null || warn "Failed to initialize jenv in current session"
   success "jenv installed successfully"
@@ -621,7 +741,7 @@ install_gvm() {
   fi
 
   info "Installing Go Version Manager (GVM)..."
-  
+
   # Install GVM
   if bash -c "$(curl -fsSL https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)"; then
     success "GVM installed successfully"
@@ -633,10 +753,10 @@ install_gvm() {
   local shell_config gvm_line
   shell_config=$(current_shell_config)
   gvm_line='[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"'
-  
+
   if ! grep -Fq "$gvm_line" "$shell_config" 2>/dev/null; then
     info "Adding GVM to shell configuration: $(basename "$shell_config")"
-    echo "$gvm_line" >> "$shell_config"
+    echo "$gvm_line" >>"$shell_config"
   fi
 
   # Source GVM in current session
@@ -646,7 +766,7 @@ install_gvm() {
   # Verify installation
   if command -v gvm >/dev/null 2>&1; then
     info "GVM verification successful: $(gvm version 2>/dev/null)"
-    
+
     # Install default Go version
     local go_version="go1.24.2"
     info "Installing $go_version as default Go version..."
@@ -666,24 +786,24 @@ install_nvm() {
     info "nvm already installed at $HOME/.nvm"
     return
   fi
-  
+
   info "Installing Node Version Manager (nvm)..."
-  
+
   # Get latest nvm version
   local nvm_version
   nvm_version=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep '"tag_name"' | cut -d'"' -f4 2>/dev/null)
-  nvm_version=${nvm_version:-"v0.39.0"}  # fallback version
-  
+  nvm_version=${nvm_version:-"v0.39.0"} # fallback version
+
   # Install nvm
   local install_url="https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh"
   if curl -o- "$install_url" | bash; then
     success "nvm installed successfully"
-    
+
     # Verify installation
     export NVM_DIR="$HOME/.nvm"
     # shellcheck disable=SC1090
     [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
-    
+
     if command -v nvm >/dev/null 2>&1; then
       info "nvm verification successful: $(nvm --version)"
     else
@@ -755,33 +875,6 @@ install_golang() {
   info "Downloading Go from $link"
   curl -k -L --progress-bar "$link" | tar -xz -C "$(dirname "$custom_goroot")"
 }
-
-
-
-
-
-# Install npm packages globally with enhanced configuration
-npm_install_lib() {
-  [[ $# -eq 0 ]] && error "npm_install_lib: requires at least one package name"
-  
-  checkcmd npm || error "npm is not installed or not in PATH"
-  
-  # Configure npm prefix
-  create_dir "$HOME/.local"
-  npm config set prefix "$HOME/.local" 2>/dev/null
-  
-  local packages=("$@")
-  local options="--prefer-offline --no-audit --progress=true --registry=https://registry.npmmirror.com"
-  
-  info "Installing npm packages: ${packages[*]}"
-  if npm install $options -g "${packages[@]}"; then
-    success "Successfully installed npm packages: ${packages[*]}"
-  else
-    error "Failed to install npm packages: ${packages[*]}"
-  fi
-}
-
-
 
 # Install Hack Nerd Font
 install_hack_nerd_font() {
@@ -957,7 +1050,7 @@ install_cargo() {
   fi
 
   info "Installing Rust and Cargo..."
-  
+
   # Choose download method
   local download_cmd
   if checkcmd curl; then
@@ -971,20 +1064,20 @@ install_cargo() {
   # Install rustup with non-interactive mode
   if $download_cmd https://sh.rustup.rs | sh -s -- -y --no-modify-path; then
     success "Rust and Cargo installed successfully"
-    
+
     # Source environment in current session
     # shellcheck disable=SC1090
     [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
-    
+
     # Add to shell configuration if not present
     local shell_config
     shell_config=$(current_shell_config)
     if ! grep -q 'cargo/env' "$shell_config" 2>/dev/null; then
       info "Adding Cargo to shell configuration"
-      echo '# Cargo configuration' >> "$shell_config"
-      echo '[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"' >> "$shell_config"
+      echo '# Cargo configuration' >>"$shell_config"
+      echo '[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"' >>"$shell_config"
     fi
-    
+
     # Verify installation
     if checkcmd cargo; then
       info "Cargo verification successful: $(cargo --version)"

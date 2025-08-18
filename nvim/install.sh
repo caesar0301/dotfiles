@@ -47,7 +47,7 @@ function check_dependencies {
   if is_linux; then
     kernel_version=$(get_kernel_version)
     info "Detected kernel version: $kernel_version"
-    
+
     # Check if kernel version meets modern plugin requirements
     if [[ $(echo "$kernel_version < 5.0" | bc -l 2>/dev/null || echo "1") == "1" ]]; then
       warn "Kernel version $kernel_version < 5.0 detected"
@@ -73,7 +73,7 @@ function check_dependencies {
   if ! checkcmd rg; then
     warn "ripgrep not found, telescope.nvim functionality will be limited"
   fi
-  
+
   # Check bc for version comparison (install if missing on Linux)
   if is_linux && ! checkcmd bc; then
     warn "bc (basic calculator) not found, attempting to install for version comparisons"
@@ -188,7 +188,7 @@ function handle_neovim {
     info "Installing plugin manager Packer..."
     git clone --depth 1 https://github.com/wbthomason/packer.nvim "$packer_home"
   fi
-  install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/"
+  install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
 }
 
 # Function to cleanse all Neovim-related files
