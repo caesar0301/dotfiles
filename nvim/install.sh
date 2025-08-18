@@ -41,6 +41,19 @@ readonly LSP_GO="golang.org/x/tools/gopls@latest github.com/jstemmer/gotags@late
 
 function check_dependencies {
   local missing_deps=()
+  local kernel_version
+
+  # Get kernel version for compatibility checks
+  if is_linux; then
+    kernel_version=$(get_kernel_version)
+    info "Detected kernel version: $kernel_version"
+    
+    # Check if kernel version meets modern plugin requirements
+    if [[ $(echo "$kernel_version < 5.0" | bc -l 2>/dev/null || echo "1") == "1" ]]; then
+      warn "Kernel version $kernel_version < 5.0 detected"
+      warn "Some modern plugins (avante.nvim, rust features) will be disabled for compatibility"
+    fi
+  fi
 
   # Check essential package managers
   local required_cmds=(
@@ -59,6 +72,22 @@ function check_dependencies {
   # Check ripgrep for telescope.nvim
   if ! checkcmd rg; then
     warn "ripgrep not found, telescope.nvim functionality will be limited"
+  fi
+  
+  # Check bc for version comparison (install if missing on Linux)
+  if is_linux && ! checkcmd bc; then
+    warn "bc (basic calculator) not found, attempting to install for version comparisons"
+    if checkcmd apt-get; then
+      sudo apt-get update && sudo apt-get install -y bc
+    elif checkcmd yum; then
+      sudo yum install -y bc
+    elif checkcmd dnf; then
+      sudo dnf install -y bc
+    elif checkcmd pacman; then
+      sudo pacman -S --noconfirm bc
+    else
+      warn "Could not install bc automatically, version comparisons may not work correctly"
+    fi
   fi
 
   if [ ${#missing_deps[@]} -gt 0 ]; then
@@ -188,7 +217,10 @@ install_jdt_language_server
 install_hack_nerd_font # Required by nvim-web-devicons
 install_lang_formatters
 install_fzf
+
+# Conditionally install cargo based on kernel version (handled in shmisc.sh)
 install_cargo
+
 setup_ctags
 
 warn "================================================"
