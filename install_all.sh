@@ -27,41 +27,47 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "npm"        # Node.js package configuration
-  "misc"       # Utility scripts and configurations
-  "rlwrap"     # Command line wrapper
-  "lisp"       # Common Lisp development environment
-  "emacs"      # Emacs configuration
-  "vifm"       # Vi file manager
-  "alacritty"  # Terminal emulator
-  "tmux"       # Terminal multiplexer
-  "zsh"        # Z shell configuration
-  "nvim"       # Neovim development environment
+  "npm"       # Node.js package configuration
+  "misc"      # Utility scripts and configurations
+  "rlwrap"    # Command line wrapper
+  "lisp"      # Common Lisp development environment
+  "emacs"     # Emacs configuration
+  "vifm"      # Vi file manager
+  "alacritty" # Terminal emulator
+  "tmux"      # Terminal multiplexer
+  "zsh"       # Z shell configuration
+  "nvim"      # Neovim development environment
 )
 
 # Track installation statistics
-declare -g INSTALL_SUCCESS=0
-declare -g INSTALL_FAILED=0
-declare -g INSTALL_SKIPPED=0
+INSTALL_SUCCESS=0
+INSTALL_FAILED=0
+INSTALL_SKIPPED=0
 
 # Enhanced component installation with progress tracking
 install_component() {
   local component=$1
   local component_script="$THISDIR/$component/install.sh"
-  
+
   # Validate component script exists
   [[ -f "$component_script" ]] || {
     warn "Component script not found: $component_script"
     ((INSTALL_SKIPPED++))
     return 0
   }
-  
+
   info "Installing component: $component"
-  
+
   # Execute component installation with timeout and error handling
   local start_time=$(date +%s)
-  
-  if timeout 300 bash "$component_script" "$@" 2>&1; then
+
+  # Use gtimeout on macOS, timeout on Linux
+  local timeout_cmd="timeout"
+  if [[ "$OSTYPE" == "darwin"* ]] && command -v gtimeout >/dev/null 2>&1; then
+    timeout_cmd="gtimeout"
+  fi
+
+  if $timeout_cmd 300 bash "$component_script" "$@" 2>&1; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     success "Component '$component' installed successfully (${duration}s)"
@@ -81,20 +87,20 @@ install_component() {
 # Display installation summary
 show_installation_summary() {
   local total=$((INSTALL_SUCCESS + INSTALL_FAILED + INSTALL_SKIPPED))
-  
+
   printf "\n%b=== Installation Summary ===%b\n" "$COLOR_BOLD$COLOR_CYAN" "$COLOR_RESET"
   printf "  %b✓%b Successful: %d/%d\n" "$COLOR_GREEN" "$COLOR_RESET" "$INSTALL_SUCCESS" "$total"
-  
+
   if [[ $INSTALL_FAILED -gt 0 ]]; then
     printf "  %b✗%b Failed: %d/%d\n" "$COLOR_RED" "$COLOR_RESET" "$INSTALL_FAILED" "$total"
   fi
-  
+
   if [[ $INSTALL_SKIPPED -gt 0 ]]; then
     printf "  %b⚠%b Skipped: %d/%d\n" "$COLOR_YELLOW" "$COLOR_RESET" "$INSTALL_SKIPPED" "$total"
   fi
-  
+
   printf "\n"
-  
+
   if [[ $INSTALL_FAILED -eq 0 ]]; then
     success "🎉 All components installed successfully!"
   else
@@ -107,14 +113,14 @@ show_installation_summary() {
 main() {
   info "Starting dotfiles installation..."
   info "Components to install: ${#COMPONENTS[@]}"
-  
+
   # Install each component
   for component in "${COMPONENTS[@]}"; do
     install_component "$component" "$@" || {
       warn "Continuing with remaining components..."
     }
   done
-  
+
   # Show final summary
   show_installation_summary
 }
