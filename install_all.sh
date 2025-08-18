@@ -1,23 +1,123 @@
 #!/bin/bash
-#############################################
-# Install script for
+###################################################
+# Master Installation Script
 # https://github.com/caesar0301/cool-dotfiles
-# Maintainer: xiaming.chen
-#############################################
-THISDIR=$(dirname $(realpath $0))
-source $THISDIR/lib/shmisc.sh
+#
+# Orchestrates installation of all dotfile components
+# with enhanced error handling and progress tracking.
+#
+# Usage: ./install_all.sh [options]
+# Options: -f (force), -s (symlink), -c (clean)
+#
+# Author: Xiaming Chen
+# License: MIT
+###################################################
 
-components=(alacritty tmux zsh nvim vifm emacs npm misc)
-components+=(lisp rlwrap)
+# Enable strict mode for better error handling
+set -euo pipefail
 
-for key in "${components[@]}"; do
-  info "➜ START INSTALLING $key"
-  sh $THISDIR/$key/install.sh $@
-  if [ $? -eq 0 ]; then
-    info "✔ FINISH INSTALLING $key"
+# Resolve script directory with enhanced error checking
+THISDIR=$(dirname "$(realpath "$0")")
+
+# Load common utilities with validation
+source "$THISDIR/lib/shmisc.sh" || {
+  printf "\033[0;31m✗ Failed to load shmisc.sh\033[0m\n" >&2
+  exit 1
+}
+
+# Component installation order (dependencies first)
+readonly COMPONENTS=(
+  "npm"        # Node.js package configuration
+  "misc"       # Utility scripts and configurations
+  "rlwrap"     # Command line wrapper
+  "lisp"       # Common Lisp development environment
+  "emacs"      # Emacs configuration
+  "vifm"       # Vi file manager
+  "alacritty"  # Terminal emulator
+  "tmux"       # Terminal multiplexer
+  "zsh"        # Z shell configuration
+  "nvim"       # Neovim development environment
+)
+
+# Track installation statistics
+declare -g INSTALL_SUCCESS=0
+declare -g INSTALL_FAILED=0
+declare -g INSTALL_SKIPPED=0
+
+# Enhanced component installation with progress tracking
+install_component() {
+  local component=$1
+  local component_script="$THISDIR/$component/install.sh"
+  
+  # Validate component script exists
+  [[ -f "$component_script" ]] || {
+    warn "Component script not found: $component_script"
+    ((INSTALL_SKIPPED++))
+    return 0
+  }
+  
+  info "Installing component: $component"
+  
+  # Execute component installation with timeout and error handling
+  local start_time=$(date +%s)
+  
+  if timeout 300 bash "$component_script" "$@" 2>&1; then
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    success "Component '$component' installed successfully (${duration}s)"
+    ((INSTALL_SUCCESS++))
   else
-    error "✖ ERROR INSTALLING $key"
+    local exit_code=$?
+    if [[ $exit_code -eq 124 ]]; then
+      error "Component '$component' installation timed out (5 minutes)"
+    else
+      error "Component '$component' installation failed (exit code: $exit_code)"
+    fi
+    ((INSTALL_FAILED++))
+    return $exit_code
   fi
-done
+}
 
-info "🎉 All installed successfully!"
+# Display installation summary
+show_installation_summary() {
+  local total=$((INSTALL_SUCCESS + INSTALL_FAILED + INSTALL_SKIPPED))
+  
+  printf "\n%b=== Installation Summary ===%b\n" "$COLOR_BOLD$COLOR_CYAN" "$COLOR_RESET"
+  printf "  %b✓%b Successful: %d/%d\n" "$COLOR_GREEN" "$COLOR_RESET" "$INSTALL_SUCCESS" "$total"
+  
+  if [[ $INSTALL_FAILED -gt 0 ]]; then
+    printf "  %b✗%b Failed: %d/%d\n" "$COLOR_RED" "$COLOR_RESET" "$INSTALL_FAILED" "$total"
+  fi
+  
+  if [[ $INSTALL_SKIPPED -gt 0 ]]; then
+    printf "  %b⚠%b Skipped: %d/%d\n" "$COLOR_YELLOW" "$COLOR_RESET" "$INSTALL_SKIPPED" "$total"
+  fi
+  
+  printf "\n"
+  
+  if [[ $INSTALL_FAILED -eq 0 ]]; then
+    success "🎉 All components installed successfully!"
+  else
+    warn "⚠️  Some components failed to install. Check the logs above."
+    return 1
+  fi
+}
+
+# Main installation process
+main() {
+  info "Starting dotfiles installation..."
+  info "Components to install: ${#COMPONENTS[@]}"
+  
+  # Install each component
+  for component in "${COMPONENTS[@]}"; do
+    install_component "$component" "$@" || {
+      warn "Continuing with remaining components..."
+    }
+  done
+  
+  # Show final summary
+  show_installation_summary
+}
+
+# Execute main function with all arguments
+main "$@"
