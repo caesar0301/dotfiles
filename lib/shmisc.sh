@@ -421,17 +421,17 @@ install_file_pair() {
   $copycmd "$src" "$dest" || error "Error copying '$src' to '$dest'"
 }
 
+# Install uv
+install_uv() {
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+}
+
 # Install pyenv to manage Python versions
 install_pyenv() {
   if [ ! -e "$HOME/.pyenv" ]; then
     info "Installing pyenv to $HOME/.pyenv..."
     curl -k https://pyenv.run | bash
   fi
-}
-
-# Install uv
-install_uv() {
-  curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
 # Install jenv to manage Java versions
@@ -452,31 +452,6 @@ install_jenv() {
   fi
 
   eval "$(jenv init -)"
-}
-
-# Install jdt-language-server
-install_jdt_language_server() {
-  info "Installing jdt-language-server..."
-  local dpath="$HOME/.local/share/jdt-language-server"
-  local jdtdl="https://download.eclipse.org/jdtls/milestones/1.23.0/jdt-language-server-1.23.0-202304271346.tar.gz"
-  if [ ! -e "$dpath/bin/jdtls" ]; then
-    create_dir "$dpath"
-    curl -L --progress-bar "$jdtdl" | tar zxf - -C "$dpath"
-  else
-    info "$dpath/bin/jdtls already exists"
-  fi
-}
-
-# Install google-java-format
-install_google_java_format() {
-  info "Installing google-java-format..."
-  local dpath="$HOME/.local/share/google-java-format"
-  local fmtdl="https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar"
-  if ! compgen -G "$dpath/google-java-format*.jar" >/dev/null; then
-    curl -L --progress-bar --create-dirs "$fmtdl" -o "$dpath/google-java-format-all-deps.jar"
-  else
-    info "$dpath/google-java-format-all-deps.jar already installed"
-  fi
 }
 
 # Install go version manager
@@ -535,6 +510,39 @@ install_gvm() {
   fi
 
   info "GVM setup complete!"
+}
+
+# Install nvm to manage node versions
+install_nvm() {
+  if [ ! -e "$HOME/.nvm" ]; then
+    info "Installing nvm to $HOME/.nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/refs/heads/master/install.sh | bash
+  fi
+}
+
+# Install jdt-language-server
+install_jdt_language_server() {
+  info "Installing jdt-language-server..."
+  local dpath="$HOME/.local/share/jdt-language-server"
+  local jdtdl="https://download.eclipse.org/jdtls/milestones/1.23.0/jdt-language-server-1.23.0-202304271346.tar.gz"
+  if [ ! -e "$dpath/bin/jdtls" ]; then
+    create_dir "$dpath"
+    curl -L --progress-bar "$jdtdl" | tar zxf - -C "$dpath"
+  else
+    info "$dpath/bin/jdtls already exists"
+  fi
+}
+
+# Install google-java-format
+install_google_java_format() {
+  info "Installing google-java-format..."
+  local dpath="$HOME/.local/share/google-java-format"
+  local fmtdl="https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar"
+  if ! compgen -G "$dpath/google-java-format*.jar" >/dev/null; then
+    curl -L --progress-bar --create-dirs "$fmtdl" -o "$dpath/google-java-format-all-deps.jar"
+  else
+    info "$dpath/google-java-format-all-deps.jar already installed"
+  fi
 }
 
 # Install Go

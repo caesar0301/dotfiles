@@ -28,7 +28,7 @@ ADD_GFWLIST = False
 def get_script_dir() -> Path:
     """
     Get the directory where this script is located.
-    
+
     Returns:
         Path object pointing to the script directory
     """
@@ -38,10 +38,10 @@ def get_script_dir() -> Path:
 def get_resource_path(relative_path: str) -> Path:
     """
     Get absolute path for a resource file relative to the script directory.
-    
+
     Args:
         relative_path: Path relative to the script directory
-        
+
     Returns:
         Absolute path to the resource file
     """
@@ -265,7 +265,7 @@ def finalize_rules(config: Dict[str, Any]) -> None:
     else:
         res.append("MATCH,Proxy")
 
-    config["rules"] = res
+    config["rules"] = [rule for rule in res if all(rule.split(','))]
 
 
 def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
@@ -279,7 +279,7 @@ def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
         Modified configuration dictionary
     """
     # Filter selected proxies by country
-    selected_countries = ["美国", "日本", "香港"]
+    selected_countries = ["美国", "日本"]
     selected_proxies = []
 
     for country in selected_countries:
@@ -300,7 +300,7 @@ def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
 
     # Create country-specific groups
     if ADD_COUNTRY_GROUPS:
-        country_groups = {"美国": "AutoUS", "日本": "AutoJP", "香港": "AutoHK"}
+        country_groups = {"美国": "AutoUS", "日本": "AutoJP"}
         for country, group_name in country_groups.items():
             country_proxies = [
                 proxy for proxy in result["proxies"] if country in proxy["name"]
