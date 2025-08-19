@@ -2,19 +2,11 @@
 -- Organized, concise, and modernized for maintainability
 
 -- === Safely require dependencies ===
-local function safe_require(mod)
-	local ok, m = pcall(require, mod)
-	if not ok then
-		vim.notify("lspconfig: Missing dependency: " .. mod, vim.log.levels.ERROR)
-		return nil
-	end
-	return m
-end
-
-local lspconfig = safe_require("lspconfig")
-local nvim_cmp = safe_require("cmp_nvim_lsp")
-local lsp_status = safe_require("lsp-status")
-local goto_preview = safe_require("goto-preview")
+local utils = require("utils")
+local lspconfig = utils.safe_require("lspconfig")
+local nvim_cmp = utils.safe_require("cmp_nvim_lsp")
+local lsp_status = utils.safe_require("lsp-status")
+local goto_preview = utils.safe_require("goto-preview")
 if not (lspconfig and nvim_cmp and lsp_status and goto_preview) then
 	return
 end
@@ -26,9 +18,9 @@ goto_preview.setup({})
 vim.lsp.set_log_level("error")
 
 -- === Capabilities ===
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = nvim_cmp.default_capabilities(capabilities)
-capabilities = vim.tbl_extend("keep", capabilities, lsp_status.capabilities)
+local common_caps = vim.lsp.protocol.make_client_capabilities()
+common_caps = nvim_cmp.default_capabilities(common_caps)
+common_caps = vim.tbl_extend("keep", common_caps, lsp_status.capabilities)
 
 -- === Keymaps ===
 local function lsp_keymaps(_, bufnr)
@@ -93,29 +85,8 @@ for _, lsp in ipairs(servers) do
 end
 
 -- Python
-local function get_python_path()
-	-- 1. Check local .venv
-	local venv_path = vim.fn.getcwd() .. "/.venv/bin/python"
-	if vim.fn.executable(venv_path) == 1 then
-		return venv_path
-	end
-	-- 2. Check pyenv version
-	local pyenv_path = vim.fn.trim(vim.fn.system("pyenv which python 2>/dev/null"))
-	if vim.fn.executable(pyenv_path) == 1 then
-		return pyenv_path
-	end
-	-- 3. Fallback to system python
-	if vim.fn.executable("/usr/bin/python3") == 1 then
-		return "/usr/bin/python3"
-	elseif vim.fn.executable("python3") == 1 then
-		return "python3"
-	else
-		return "python"
-	end
-end
-
 lspconfig.pyright.setup({
-	settings = { python = { pythonPath = get_python_path() } },
+	settings = { python = { pythonPath = utils.get_python_path() } },
 	on_attach = common_on_attach,
 	capabilities = common_caps,
 })
@@ -133,7 +104,7 @@ lspconfig.clangd.setup({
 			"n",
 			"<leader>sh",
 			":ClangdSwitchSourceHeader<CR>",
-			bopt_s(bufnr, "[clangd] switch source and header")
+			{ buffer = bufnr, desc = "[clangd] switch source and header" }
 		)
 		common_on_attach(client, bufnr)
 	end,
@@ -165,7 +136,7 @@ lspconfig.hls.setup({
 
 -- Golang
 local lastRootPath = nil
-local gomodpath = vim.trim(vim.fn.system("go env GOPATH")) .. "/pkg/mod"
+local gomodpath = utils.safe_system("go env GOPATH", "") .. "/pkg/mod"
 
 lspconfig.gopls.setup({
 	on_attach = common_on_attach,
@@ -200,33 +171,13 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- Java
-local function getJavaBinary()
-	local jdkhone = os.getenv("JAVA_HOME_4JDTLS")
-	if not jdkhome then
-		jdkhome = os.getenv("JAVA_HOME")
-	end
-	if jdkhome then
-		return jdkhome .. "/bin/java"
-	end
-	return "/usr/local/bin/java"
-end
-
-local function getJDTLSHome()
-	local home = os.getenv("HOME")
-	local jdtls_home = os.getenv("JDTLS_HOME")
-	if jdtls_home == nil or jdtls_home == "" then
-		jdtls_home = home .. "/.local/share/jdt-language-server"
-	end
-	return jdtls_home
-end
-
-local jdtls_home = getJDTLSHome()
-local workspace_folder = os.getenv("HOME") .. "/.local/share/eclipse/" .. vim.fn.fnamemodify(root_dir, ":p:h:t")
+local jdtls_home = utils.get_jdtls_home()
+local workspace_folder = os.getenv("HOME") .. "/.local/share/eclipse/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 lspconfig.jdtls.setup({
 	on_attach = common_on_attach,
 	capabilities = common_caps,
 	cmd = {
-		getJavaBinary(),
+		utils.get_java_binary(),
 		"-Declipse.application=org.eclipse.jdt.ls.core.id1",
 		"-Dosgi.bundles.defaultStartLevel=4",
 		"-Declipse.product=org.eclipse.jdt.ls.core.product",

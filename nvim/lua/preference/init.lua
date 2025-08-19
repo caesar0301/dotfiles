@@ -1,5 +1,0 @@
-require("preference.ui")
-require("preference.edit")
-require("preference.tabline")
-require("preference.misc")
-require("preference.keymaps")

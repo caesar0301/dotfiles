@@ -265,16 +265,17 @@ return packer.startup(function(use)
 	-- LaTeX synatx highlighting
 	use("lervag/vimtex")
 
-	-- Rust support (conditionally loaded based on kernel version)
-	if SUPPORTS_RUST_PLUGINS then
+	-- Rust support (conditionally loaded based on system compatibility)
+	if SUPPORTS_MODERN_PLUGINS then
 		use("rust-lang/rust.vim")
 	else
 		-- Fallback message for unsupported systems
 		vim.defer_fn(function()
-			vim.notify(
-				"Rust plugin disabled: Kernel version " .. KERNEL_VERSION .. " < 5.0",
-				vim.log.levels.WARN
-			)
+			if IS_MAC then
+				vim.notify("Rust plugin disabled: Not supported on macOS", vim.log.levels.WARN)
+			else
+				vim.notify("Rust plugin disabled: Kernel version " .. KERNEL_VERSION .. " < 5.0", vim.log.levels.WARN)
+			end
 		end, 100)
 	end
 
@@ -291,16 +292,6 @@ return packer.startup(function(use)
 	use("chrisbra/csv.vim")
 	use("godlygeek/tabular")
 
-	-- Interactive evaluation of lisp and more
-	-- use {
-	--     "Olical/conjure",
-	--     requires = {
-
-	--         {"PaterJason/cmp-conjure"},
-	--         {"kovisoft/paredit"}
-	--     }
-	-- }
-
 	-- Common Lisp dev environment for Vim (alternative to Conjure)
 	use({
 		"vlime/vlime",
@@ -315,7 +306,7 @@ return packer.startup(function(use)
 	-- AI Assistant
 	-------------------
 
-	-- Avante.nvim AI assistant (conditionally loaded based on kernel version)
+	-- Avante.nvim AI assistant (conditionally loaded based on system compatibility)
 	if SUPPORTS_MODERN_PLUGINS then
 		use({
 			"yetone/avante.nvim",
@@ -336,26 +327,33 @@ return packer.startup(function(use)
 				{ "stevearc/dressing.nvim" },
 			},
 			config = function()
-				-- Only configure if kernel requirements are met
+				-- Only configure if system requirements are met
 				if kernel_meets_requirement("5.0") then
 					require("avante").setup({
 						-- Add any avante-specific configuration here
 					})
 				else
-					vim.notify(
-						"Avante.nvim disabled: Kernel version requirements not met",
-						vim.log.levels.WARN
-					)
+					if IS_MAC then
+						vim.notify("Avante.nvim disabled: Not supported on macOS", vim.log.levels.WARN)
+					else
+						vim.notify("Avante.nvim disabled: Kernel version requirements not met", vim.log.levels.WARN)
+					end
 				end
 			end,
 		})
 	else
 		-- Show informative message for unsupported systems
 		vim.defer_fn(function()
-			vim.notify(
-				"Avante.nvim disabled: Kernel version " .. KERNEL_VERSION .. " < 5.0 (required for modern AI features)",
-				vim.log.levels.INFO
-			)
+			if IS_MAC then
+				vim.notify("Avante.nvim disabled: Not supported on macOS", vim.log.levels.INFO)
+			else
+				vim.notify(
+					"Avante.nvim disabled: Kernel version "
+						.. KERNEL_VERSION
+						.. " < 5.0 (required for modern AI features)",
+					vim.log.levels.INFO
+				)
+			end
 		end, 100)
 	end
 end)

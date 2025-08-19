@@ -28,7 +28,7 @@ vim.api.nvim_create_autocmd("QuitPre", {
 
 local function my_on_attach(bufnr)
 	local api = require("nvim-tree.api")
-	local opts = opt_s("[nvim-tree] Help")
+	local opts = { desc = "[nvim-tree] Help" }
 	opts.nowait = true
 	opts.buffer = bufnr
 	-- default mappings

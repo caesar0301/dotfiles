@@ -1,18 +1,7 @@
 -- Utilities for creating configurations
 local util = require("formatter.util")
 local formatter = require("formatter")
-
-function getJavaBin()
-	local jdkhome = os.getenv("JAVA_HOME_4GJF")
-	if jdkhome == nil then
-		jdkhome = os.getenv("JAVA_HOME")
-	end
-	if jdkhome == nil then
-		return "java"
-	else
-		return jdkhome .. "/bin/java"
-	end
-end
+local utils = require("utils")
 
 -- Provides the Format, FormatWrite, FormatLock, and FormatWriteLock commands
 formatter.setup({
@@ -25,12 +14,10 @@ formatter.setup({
 		},
 		java = {
 			function()
-				local gjfjar = os.getenv("GJF_JAR_FILE")
-				if gjfjar == nil then
-					gjfjar = "~/.local/share/google-java-format/google-java-format-all-deps.jar"
-				end
+				local gjfjar =
+					utils.get_env("GJF_JAR_FILE", "~/.local/share/google-java-format/google-java-format-all-deps.jar")
 				return {
-					exe = getJavaBin(),
+					exe = utils.get_java_bin(),
 					args = {
 						"-jar",
 						gjfjar,
