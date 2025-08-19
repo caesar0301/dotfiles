@@ -22,7 +22,6 @@ set -euo pipefail
 THISDIR=$(dirname "$(realpath "$0")")
 
 # Configuration constants
-readonly ZSH_VERSION="5.8"
 readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly ZSH_CONFIG_HOME="$XDG_CONFIG_HOME/zsh"

@@ -955,7 +955,6 @@ install_fzf() {
 }
 
 # Install zsh shell
-# Requires ZSH_VERSION environment variable to be set
 install_zsh() {
   # Check if zsh is already installed
   if checkcmd zsh; then
@@ -963,17 +962,29 @@ install_zsh() {
   fi
 
   info "Installing zsh..."
+  ZSH_VERSION=5.9
 
   # Create necessary directories
   create_dir "$HOME/.local/bin"
   create_dir "/tmp/build-zsh"
 
-  # Download and extract zsh source
-  curl -k -L --progress-bar "http://ftp.funet.fi/pub/unix/shells/zsh/zsh-${ZSH_VERSION}.tar.xz" | tar xJ -C "/tmp/build-zsh/"
+  # Download and extract zsh source from GitHub
+  curl -k -L --progress-bar "https://github.com/zsh-users/zsh/archive/refs/tags/zsh-${ZSH_VERSION}.tar.gz" | tar xz -C "/tmp/build-zsh/"
+
+  # Find the actual zsh source directory
+  local zsh_dir
+  zsh_dir=$(find "/tmp/build-zsh" -maxdepth 1 -type d -name "zsh-*" | head -1)
+  if [[ -z "$zsh_dir" ]]; then
+    error "Could not find zsh source directory in /tmp/build-zsh"
+    ls -la "/tmp/build-zsh/"
+    exit 1
+  fi
+
+  info "Found zsh source directory: $zsh_dir"
 
   # Build and install zsh
   (
-    cd "/tmp/build-zsh/zsh-${ZSH_VERSION}" && ./configure --prefix "$HOME/.local" && make && make install
+    cd "$zsh_dir" && autoconf && ./configure --prefix "$HOME/.local" && make && make install
   )
 
   # Clean up temporary directory
