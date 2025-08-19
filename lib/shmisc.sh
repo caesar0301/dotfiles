@@ -954,43 +954,6 @@ install_fzf() {
   fi
 }
 
-# Install zsh shell
-install_zsh() {
-  # Check if zsh is already installed
-  if checkcmd zsh; then
-    return
-  fi
-
-  info "Installing zsh..."
-  ZSH_VERSION=5.9
-
-  # Create necessary directories
-  create_dir "$HOME/.local/bin"
-  create_dir "/tmp/build-zsh"
-
-  # Download and extract zsh source from GitHub
-  curl -k -L --progress-bar "https://github.com/zsh-users/zsh/archive/refs/tags/zsh-${ZSH_VERSION}.tar.gz" | tar xz -C "/tmp/build-zsh/"
-
-  # Find the actual zsh source directory
-  local zsh_dir
-  zsh_dir=$(find "/tmp/build-zsh" -maxdepth 1 -type d -name "zsh-*" | head -1)
-  if [[ -z "$zsh_dir" ]]; then
-    error "Could not find zsh source directory in /tmp/build-zsh"
-    ls -la "/tmp/build-zsh/"
-    exit 1
-  fi
-
-  info "Found zsh source directory: $zsh_dir"
-
-  # Build and install zsh
-  (
-    cd "$zsh_dir" && autoconf && ./configure --prefix "$HOME/.local" && make && make install
-  )
-
-  # Clean up temporary directory
-  rm -rf "/tmp/build-zsh"
-}
-
 # Install Neovim text editor
 # Arguments:
 #   $1 - Neovim version to install (default: 0.11.0)
