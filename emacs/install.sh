@@ -44,7 +44,7 @@ check_emacs_binary() {
   if ! checkcmd emacs; then
     warn "Emacs not found in PATH"
     warn "Please install Emacs first:"
-    
+
     if is_linux; then
       if checkcmd apt-get; then
         warn "  Ubuntu/Debian: sudo apt-get install emacs"
@@ -58,7 +58,7 @@ check_emacs_binary() {
     elif is_macos; then
       warn "  macOS: brew install emacs"
     fi
-    
+
     warn "Configuration will be installed anyway for future use"
   else
     local emacs_version
@@ -70,7 +70,7 @@ check_emacs_binary() {
 # Check SLIME dependencies for Common Lisp development
 check_slime_dependencies() {
   info "Checking SLIME dependencies..."
-  
+
   local slime_helper="$QUICKLISP_HOME/slime-helper.el"
   if [[ -f "$slime_helper" ]]; then
     success "SLIME helper found: $slime_helper"
@@ -85,18 +85,18 @@ check_slime_dependencies() {
 # Check additional Emacs dependencies
 check_additional_dependencies() {
   info "Checking additional dependencies..."
-  
+
   local optional_deps=(
     "aspell:spell checking"
     "git:version control integration"
     "ripgrep:fast text search"
     "fd:file finding"
   )
-  
+
   for dep_info in "${optional_deps[@]}"; do
     local dep_name="${dep_info%:*}"
     local dep_desc="${dep_info#*:}"
-    
+
     if checkcmd "$dep_name"; then
       info "Found $dep_name ($dep_desc)"
     else
@@ -109,14 +109,14 @@ check_additional_dependencies() {
 handle_emacs_config() {
   info "Installing Emacs configuration..."
   create_dir "$EMACS_CONFIG_HOME"
-  
+
   local installed_count=0
   local failed_count=0
-  
+
   for config_item in "${INSTALL_FILES[@]}"; do
     local src_path="$THISDIR/$config_item"
     local dest_path="$EMACS_CONFIG_HOME/$config_item"
-    
+
     if [[ -e "$src_path" ]]; then
       if install_file_pair "$src_path" "$dest_path"; then
         ((installed_count++))
@@ -129,15 +129,15 @@ handle_emacs_config() {
       ((failed_count++))
     fi
   done
-  
+
   if [[ $failed_count -eq 0 ]]; then
     success "All Emacs configuration files installed ($installed_count items)"
   else
     warn "Installation completed with $failed_count failures"
   fi
-  
+
   info "Configuration directory: $EMACS_CONFIG_HOME"
-  
+
   # Validate configuration syntax if Emacs is available
   if checkcmd emacs && [[ -f "$EMACS_CONFIG_HOME/init.el" ]]; then
     info "Validating Emacs configuration..."
@@ -152,7 +152,7 @@ handle_emacs_config() {
 # Remove Emacs configuration files
 cleanse_emacs() {
   info "Cleansing Emacs configuration..."
-  
+
   local removed_count=0
   for config_item in "${INSTALL_FILES[@]}"; do
     local target_path="$EMACS_CONFIG_HOME/$config_item"
@@ -162,10 +162,10 @@ cleanse_emacs() {
       ((removed_count++))
     fi
   done
-  
+
   # Remove empty configuration directory
   [[ -d "$EMACS_CONFIG_HOME" ]] && rmdir "$EMACS_CONFIG_HOME" 2>/dev/null || true
-  
+
   if [[ $removed_count -gt 0 ]]; then
     success "Emacs configuration cleansed ($removed_count items removed)"
   else
@@ -177,36 +177,36 @@ cleanse_emacs() {
 LINK_INSTEAD_OF_COPY=1
 while getopts fsech opt; do
   case $opt in
-    f) LINK_INSTEAD_OF_COPY=0 ;;
-    s) LINK_INSTEAD_OF_COPY=1 ;;
-    c) cleanse_emacs && exit 0 ;;
-    h|?) usage_me "install.sh" && exit 0 ;;
+  f) LINK_INSTEAD_OF_COPY=0 ;;
+  s) LINK_INSTEAD_OF_COPY=1 ;;
+  c) cleanse_emacs && exit 0 ;;
+  h | ?) usage_me "install.sh" && exit 0 ;;
   esac
 done
 
 # Main installation sequence
 main() {
   info "Starting Emacs configuration installation..."
-  
+
   # Check dependencies
   check_emacs_binary
   check_additional_dependencies
   check_slime_dependencies
-  
+
   # Install configuration
   handle_emacs_config
-  
+
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Configuration directory: $EMACS_CONFIG_HOME"
   info "SLIME helper: $QUICKLISP_HOME/slime-helper.el"
-  
+
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Launch Emacs: %bemacs%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Install packages: %bM-x package-install%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  3. For Lisp development: %bM-x slime%b (after Quicklisp setup)\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  4. Customize configuration in: %b%s%b\n" "$COLOR_CYAN" "$EMACS_CONFIG_HOME" "$COLOR_RESET"
-  
+
   success "Emacs configuration installation completed successfully!"
 }
 

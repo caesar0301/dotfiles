@@ -42,7 +42,7 @@ check_vifm_binary() {
   if ! checkcmd vifm; then
     warn "Vifm binary not found in PATH"
     warn "Please install vifm first:"
-    
+
     if is_linux; then
       if checkcmd apt-get; then
         warn "  Ubuntu/Debian: sudo apt-get install vifm"
@@ -56,11 +56,11 @@ check_vifm_binary() {
     elif is_macos; then
       warn "  macOS: brew install vifm"
     fi
-    
+
     warn "Skipping vifm configuration installation"
     exit 0
   fi
-  
+
   local vifm_version
   vifm_version=$(vifm --version 2>/dev/null | head -1 || echo "unknown")
   info "Found vifm: $vifm_version"
@@ -70,14 +70,14 @@ check_vifm_binary() {
 handle_vifm_config() {
   info "Installing Vifm configuration..."
   create_dir "$VIFM_CONFIG_HOME"
-  
+
   local installed_count=0
   local failed_count=0
-  
+
   for config_item in "${INSTALL_FILES[@]}"; do
     local src_path="$THISDIR/$config_item"
     local dest_path="$VIFM_CONFIG_HOME/$config_item"
-    
+
     if [[ -e "$src_path" ]]; then
       if install_file_pair "$src_path" "$dest_path"; then
         ((installed_count++))
@@ -90,20 +90,20 @@ handle_vifm_config() {
       ((failed_count++))
     fi
   done
-  
+
   if [[ $failed_count -eq 0 ]]; then
     success "All Vifm configuration files installed ($installed_count items)"
   else
     warn "Installation completed with $failed_count failures"
   fi
-  
+
   info "Configuration directory: $VIFM_CONFIG_HOME"
 }
 
 # Remove Vifm configuration files
 cleanse_vifm() {
   info "Cleansing Vifm configuration..."
-  
+
   local removed_count=0
   for config_item in "${INSTALL_FILES[@]}"; do
     local target_path="$VIFM_CONFIG_HOME/$config_item"
@@ -113,10 +113,10 @@ cleanse_vifm() {
       ((removed_count++))
     fi
   done
-  
+
   # Remove empty configuration directory
   [[ -d "$VIFM_CONFIG_HOME" ]] && rmdir "$VIFM_CONFIG_HOME" 2>/dev/null || true
-  
+
   if [[ $removed_count -gt 0 ]]; then
     success "Vifm configuration cleansed ($removed_count items removed)"
   else
@@ -128,32 +128,32 @@ cleanse_vifm() {
 LINK_INSTEAD_OF_COPY=1
 while getopts fsch opt; do
   case $opt in
-    f) LINK_INSTEAD_OF_COPY=0 ;;
-    s) LINK_INSTEAD_OF_COPY=1 ;;
-    c) cleanse_vifm && exit 0 ;;
-    h|?) usage_me "install.sh" && exit 0 ;;
+  f) LINK_INSTEAD_OF_COPY=0 ;;
+  s) LINK_INSTEAD_OF_COPY=1 ;;
+  c) cleanse_vifm && exit 0 ;;
+  h | ?) usage_me "install.sh" && exit 0 ;;
   esac
 done
 
 # Main installation sequence
 main() {
   info "Starting Vifm configuration installation..."
-  
+
   # Check dependencies
   check_vifm_binary
-  
+
   # Install configuration
   handle_vifm_config
-  
+
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Configuration directory: $VIFM_CONFIG_HOME"
-  
+
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Launch vifm: %bvifm%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Press %b?%b for help\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  3. Customize colors and scripts in: %b$VIFM_CONFIG_HOME%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  
+
   success "Vifm configuration installation completed successfully!"
 }
 

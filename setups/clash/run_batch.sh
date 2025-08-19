@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 python clash_config_fetcher.py -t ${TROJANFLARE_CLASHX_URL} \
-    -g -o config.latest
+  -g -o config.latest
 
 python clash_config_fetcher.py -t ${TROJANFLARE_CLASHX_URL} \
-    -g -w -d -o config.gfwlist
+  -g -w -d -o config.gfwlist

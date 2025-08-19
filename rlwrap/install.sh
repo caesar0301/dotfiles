@@ -35,7 +35,7 @@ check_rlwrap_binary() {
   if ! checkcmd rlwrap; then
     warn "Rlwrap not found in PATH"
     warn "Please install rlwrap first:"
-    
+
     if is_linux; then
       if checkcmd apt-get; then
         warn "  Ubuntu/Debian: sudo apt-get install rlwrap"
@@ -49,7 +49,7 @@ check_rlwrap_binary() {
     elif is_macos; then
       warn "  macOS: brew install rlwrap"
     fi
-    
+
     warn "Configuration will be installed anyway for future use"
   else
     local rlwrap_version
@@ -62,20 +62,20 @@ check_rlwrap_binary() {
 handle_rlwrap_config() {
   info "Installing rlwrap configuration..."
   create_dir "$RLWRAP_HOME"
-  
+
   # Configuration files to install
   local config_files=(
     "lisp_completions"
     "sbcl_completions"
   )
-  
+
   local installed_count=0
   local failed_count=0
-  
+
   for config_file in "${config_files[@]}"; do
     local src_path="$THISDIR/$config_file"
     local dest_path="$RLWRAP_HOME/$config_file"
-    
+
     if [[ -f "$src_path" ]]; then
       if install_file_pair "$src_path" "$dest_path"; then
         ((installed_count++))
@@ -88,15 +88,15 @@ handle_rlwrap_config() {
       ((failed_count++))
     fi
   done
-  
+
   if [[ $failed_count -eq 0 ]]; then
     success "All rlwrap configuration files installed ($installed_count items)"
   else
     warn "Installation completed with $failed_count failures"
   fi
-  
+
   info "Configuration directory: $RLWRAP_HOME"
-  
+
   # Provide usage examples
   if checkcmd rlwrap; then
     info "Usage examples:"
@@ -108,12 +108,12 @@ handle_rlwrap_config() {
 # Remove rlwrap configuration files
 cleanse_rlwrap() {
   info "Cleansing rlwrap configuration..."
-  
+
   local config_files=(
     "$RLWRAP_HOME/lisp_completions"
     "$RLWRAP_HOME/sbcl_completions"
   )
-  
+
   local removed_count=0
   for config_file in "${config_files[@]}"; do
     if [[ -f "$config_file" ]]; then
@@ -122,10 +122,10 @@ cleanse_rlwrap() {
       ((removed_count++))
     fi
   done
-  
+
   # Remove empty configuration directory
   [[ -d "$RLWRAP_HOME" ]] && rmdir "$RLWRAP_HOME" 2>/dev/null || true
-  
+
   if [[ $removed_count -gt 0 ]]; then
     success "Rlwrap configuration cleansed ($removed_count items removed)"
   else
@@ -137,32 +137,32 @@ cleanse_rlwrap() {
 LINK_INSTEAD_OF_COPY=1
 while getopts fsch opt; do
   case $opt in
-    f) LINK_INSTEAD_OF_COPY=0 ;;
-    s) LINK_INSTEAD_OF_COPY=1 ;;
-    c) cleanse_rlwrap && exit 0 ;;
-    h|?) usage_me "install.sh" && exit 0 ;;
+  f) LINK_INSTEAD_OF_COPY=0 ;;
+  s) LINK_INSTEAD_OF_COPY=1 ;;
+  c) cleanse_rlwrap && exit 0 ;;
+  h | ?) usage_me "install.sh" && exit 0 ;;
   esac
 done
 
 # Main installation sequence
 main() {
   info "Starting rlwrap configuration installation..."
-  
+
   # Check dependencies
   check_rlwrap_binary
-  
+
   # Install configuration
   handle_rlwrap_config
-  
+
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Configuration directory: $RLWRAP_HOME"
-  
+
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Use with SBCL: %brlwrap -f %s sbcl%b\n" "$COLOR_CYAN" "$RLWRAP_HOME/sbcl_completions" "$COLOR_RESET"
   printf "  2. Use with other Lisps: %brlwrap -f %s <command>%b\n" "$COLOR_CYAN" "$RLWRAP_HOME/lisp_completions" "$COLOR_RESET"
   printf "  3. Create aliases in your shell configuration for convenience\n"
-  
+
   success "Rlwrap configuration installation completed successfully!"
 }
 

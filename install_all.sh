@@ -27,7 +27,6 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "npm"       # Node.js package configuration
   "misc"      # Utility scripts and configurations
   "rlwrap"    # Command line wrapper
   "lisp"      # Common Lisp development environment

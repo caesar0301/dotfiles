@@ -177,6 +177,43 @@ checkcmd() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Check if npm version meets minimum requirement
+check_npm_version() {
+  local min_version="$1"
+  [[ -z "$min_version" ]] && min_version="20.0.0"
+
+  if ! checkcmd npm; then
+    return 1
+  fi
+
+  local npm_version
+  npm_version=$(npm --version 2>/dev/null) || return 1
+
+  # Simple version comparison for major.minor.patch format
+  local major minor patch
+  IFS='.' read -r major minor patch <<<"$npm_version"
+
+  local min_major min_minor min_patch
+  IFS='.' read -r min_major min_minor min_patch <<<"$min_version"
+
+  # Compare major version first
+  [[ $major -gt $min_major ]] && return 0
+  [[ $major -lt $min_major ]] && return 1
+
+  # If major versions are equal, compare minor
+  [[ $minor -gt $min_minor ]] && return 0
+  [[ $minor -lt $min_minor ]] && return 1
+
+  # If minor versions are equal, compare patch
+  [[ $patch -ge $min_patch ]] && return 0
+  return 1
+}
+
+# Check if system supports modern plugins (npm >= 20)
+SUPPORTS_MODERN_PLUGINS() {
+  check_npm_version "20.0.0"
+}
+
 ###################################################
 # PACKAGE MANAGEMENT HELPERS
 ###################################################
@@ -643,422 +680,164 @@ install_file_pair() {
 
 # Install uv Python package manager with verification
 install_uv() {
-  checkcmd uv && {
-    info "uv already installed: $(uv --version)"
-    return
-  }
-
-  info "Installing uv Python package manager..."
-  if curl -LsSf https://astral.sh/uv/install.sh | sh; then
-    success "uv installed successfully"
-    # Verify installation
-    export PATH="$HOME/.cargo/bin:$PATH"
-    checkcmd uv && info "uv version: $(uv --version)"
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    error "Failed to install uv"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-uv.sh"
 }
 
 # Install pyenv with enhanced setup and verification
 install_pyenv() {
-  if [[ -d "$HOME/.pyenv" ]]; then
-    info "pyenv already installed at $HOME/.pyenv"
-    return
-  fi
-
-  info "Installing pyenv Python version manager..."
-  if curl -fsSL https://pyenv.run | bash; then
-    success "pyenv installed successfully"
-
-    # Add to shell configuration
-    local shell_config
-    shell_config=$(current_shell_config)
-    if ! grep -q 'pyenv init' "$shell_config" 2>/dev/null; then
-      info "Adding pyenv to shell configuration"
-      {
-        echo '# pyenv configuration'
-        echo 'export PYENV_ROOT="$HOME/.pyenv"'
-        echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-        echo 'eval "$(pyenv init -)"'
-      } >>"$shell_config"
-    fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    error "Failed to install pyenv"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-pyenv.sh"
 }
 
 # Install jenv Java version manager with platform detection
 install_jenv() {
-  if checkcmd jenv; then
-    info "jenv already installed: $(jenv version-name 2>/dev/null || echo 'installed')"
-    return
-  fi
-
-  info "Installing jenv Java version manager..."
-
-  if is_macos; then
-    if checkcmd brew; then
-      brew install jenv || error "Failed to install jenv via Homebrew"
-    else
-      error "Homebrew not found, required for jenv installation on macOS"
-    fi
-  elif is_linux; then
-    if [[ ! -d "$HOME/.jenv" ]]; then
-      git clone --depth 1 https://github.com/jenv/jenv.git "$HOME/.jenv" || error "Failed to clone jenv repository"
-      export PATH="$HOME/.jenv/bin:$PATH"
-
-      # Add to shell configuration
-      local shell_config
-      shell_config=$(current_shell_config)
-      if ! grep -q 'jenv init' "$shell_config" 2>/dev/null; then
-        info "Adding jenv to shell configuration"
-        {
-          echo '# jenv configuration'
-          echo 'export PATH="$HOME/.jenv/bin:$PATH"'
-          echo 'eval "$(jenv init -)"'
-        } >>"$shell_config"
-      fi
-    fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    error "Unsupported platform for jenv installation"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  # Initialize jenv in current session
-  eval "$(jenv init -)" 2>/dev/null || warn "Failed to initialize jenv in current session"
-  success "jenv installed successfully"
+  "$script_dir/install-jenv.sh"
 }
 
 # Install Go Version Manager with comprehensive setup
 install_gvm() {
-  if checkcmd gvm; then
-    info "gvm already installed: $(gvm version 2>/dev/null || echo 'installed')"
-    return
-  fi
-
-  if [[ -d "$HOME/.gvm" ]]; then
-    warn "$HOME/.gvm already exists, skipping installation"
-    return
-  fi
-
-  info "Installing Go Version Manager (GVM)..."
-
-  # Install GVM
-  if bash -c "$(curl -fsSL https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)"; then
-    success "GVM installed successfully"
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    error "GVM installation failed"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  # Configure shell integration
-  local shell_config gvm_line
-  shell_config=$(current_shell_config)
-  gvm_line='[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"'
-
-  if ! grep -Fq "$gvm_line" "$shell_config" 2>/dev/null; then
-    info "Adding GVM to shell configuration: $(basename "$shell_config")"
-    echo "$gvm_line" >>"$shell_config"
-  fi
-
-  # Source GVM in current session
-  # shellcheck disable=SC1090
-  [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-
-  # Verify installation
-  if command -v gvm >/dev/null 2>&1; then
-    info "GVM verification successful: $(gvm version 2>/dev/null)"
-
-    # Install default Go version
-    local go_version="go1.24.2"
-    info "Installing $go_version as default Go version..."
-    if gvm install "$go_version" -B && gvm use "$go_version" --default; then
-      success "$go_version installed and set as default"
-    else
-      warn "Failed to install default Go version, but GVM is ready"
-    fi
-  else
-    error "GVM installation verification failed"
-  fi
+  "$script_dir/install-gvm.sh"
 }
 
 # Install Node Version Manager with shell integration
 install_nvm() {
-  if [[ -d "$HOME/.nvm" ]]; then
-    info "nvm already installed at $HOME/.nvm"
-    return
-  fi
-
-  info "Installing Node Version Manager (nvm)..."
-
-  # Get latest nvm version
-  local nvm_version
-  nvm_version=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep '"tag_name"' | cut -d'"' -f4 2>/dev/null)
-  nvm_version=${nvm_version:-"v0.39.0"} # fallback version
-
-  # Install nvm
-  local install_url="https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh"
-  if curl -o- "$install_url" | bash; then
-    success "nvm installed successfully"
-
-    # Verify installation
-    export NVM_DIR="$HOME/.nvm"
-    # shellcheck disable=SC1090
-    [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
-
-    if command -v nvm >/dev/null 2>&1; then
-      info "nvm verification successful: $(nvm --version)"
-    else
-      warn "nvm installed but not available in current session. Please restart your shell."
-    fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    error "Failed to install nvm"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-nvm.sh"
 }
 
 # Install jdt-language-server
 install_jdt_language_server() {
-  info "Installing jdt-language-server..."
-  local dpath="$HOME/.local/share/jdt-language-server"
-  local jdtdl="https://download.eclipse.org/jdtls/milestones/1.23.0/jdt-language-server-1.23.0-202304271346.tar.gz"
-  if [ ! -e "$dpath/bin/jdtls" ]; then
-    create_dir "$dpath"
-    curl -L --progress-bar "$jdtdl" | tar zxf - -C "$dpath"
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    info "$dpath/bin/jdtls already exists"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-jdt-language-server.sh"
 }
 
 # Install google-java-format
 install_google_java_format() {
-  info "Installing google-java-format..."
-  local dpath="$HOME/.local/share/google-java-format"
-  local fmtdl="https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar"
-  if ! compgen -G "$dpath/google-java-format*.jar" >/dev/null; then
-    curl -L --progress-bar --create-dirs "$fmtdl" -o "$dpath/google-java-format-all-deps.jar"
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    info "$dpath/google-java-format-all-deps.jar already installed"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-google-java-format.sh"
 }
 
 # Install Go
 install_golang() {
-  if checkcmd go; then
-    return
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  info "Installing Go..."
-  local godl="https://go.dev/dl"
-  local gover=${1:-"1.24.2"}
-  local custom_goroot="$HOME/.local/go"
-
-  create_dir "$(dirname "$custom_goroot")"
-
-  local GO_RELEASE
-  if is_macos; then
-    if is_x86_64; then
-      GO_RELEASE="go${gover}.darwin-amd64"
-    elif is_arm64; then
-      GO_RELEASE="go${gover}.darwin-arm64"
-    else
-      error "Unsupported CPU architecture, exit"
-    fi
-  else # is_linux
-    if is_x86_64; then
-      GO_RELEASE="go${gover}.linux-amd64"
-    elif is_arm64; then
-      GO_RELEASE="go${gover}.linux-arm64"
-    else
-      error "Unsupported CPU architecture, exit"
-    fi
-  fi
-
-  local link="${godl}/${GO_RELEASE}.tar.gz"
-  info "Downloading Go from $link"
-  curl -k -L --progress-bar "$link" | tar -xz -C "$(dirname "$custom_goroot")"
+  "$script_dir/install-golang.sh" "$@"
 }
 
 # Install Hack Nerd Font
 install_hack_nerd_font() {
-  info "Installing Hack Nerd Font and updating font cache..."
-
-  # Check if fontconfig tools are available
-  if ! checkcmd fc-list; then
-    warn "Fontconfig tools (fc-list, fc-cache) not found."
-    return
-  fi
-
-  # Set font directory based on OS
-  local FONTDIR="$HOME/.local/share/fonts"
-  if is_macos; then
-    FONTDIR="$HOME/Library/Fonts"
-  fi
-
-  # Check if font is already installed
-  if ! fc-list | grep "Hack Nerd Font" >/dev/null; then
-    # Create font directory and download font
-    create_dir "$FONTDIR"
-    curl -L --progress-bar "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/Hack.tar.xz" | tar xJ -C "$FONTDIR"
-
-    # Update font cache
-    fc-cache -f
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   else
-    info "Hack Nerd Font already installed"
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
+  "$script_dir/install-hack-nerd-font.sh"
 }
 
 # Install shfmt (shell formatter)
 # Arguments:
 #   $1 - shfmt version to install (default: v3.7.0)
 install_shfmt() {
-  # Check if shfmt is already installed
-  if checkcmd shfmt; then
-    return
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  info "Installing shfmt..."
-
-  # Set version and filename based on OS
-  local shfmtver=${1:-"v3.7.0"}
-  local shfmtfile="shfmt_${shfmtver}_linux_amd64"
-  if [ "$(uname)" == "Darwin" ]; then
-    shfmtfile="shfmt_${shfmtver}_darwin_amd64"
-  fi
-
-  # Create bin directory and download shfmt
-  create_dir "$HOME/.local/bin"
-  curl -L --progress-bar "https://github.com/mvdan/sh/releases/download/${shfmtver}/$shfmtfile" -o "$HOME/.local/bin/shfmt"
-
-  # Make shfmt executable
-  chmod +x "$HOME/.local/bin/shfmt"
+  "$script_dir/install-shfmt.sh" "$@"
 }
 
 # Install fzf (fuzzy finder)
 install_fzf() {
-  # Check if fzf is already installed
-  if [ ! -e "$HOME/.fzf" ]; then
-    info "Installing fzf to $HOME/.fzf..."
-    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-    "$HOME/.fzf/install" --all
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  # Get current shell configuration file
-  local shellconfig
-  shellconfig=$(current_shell_config)
-
-  # Check if fzf is already sourced in shell config
-  if ! grep -r "source.*\.fzf\.zsh" "$shellconfig" >/dev/null; then
-    # Add fzf sourcing to shell configuration
-    local config='[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh'
-    echo >>"$shellconfig"
-    echo "# automatic configs by cool-dotfiles nvim installer" >>"$shellconfig"
-    echo "$config" >>"$shellconfig"
-  fi
+  "$script_dir/install-fzf.sh"
 }
 
 # Install Neovim text editor
 # Arguments:
 #   $1 - Neovim version to install (default: 0.11.0)
 install_neovim() {
-  # Check if Neovim is already installed
-  if checkcmd nvim; then
-    return
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-
-  info "Installing Neovim..."
-
-  # Set version and create local directory
-  local nvimver=${1:-"0.11.0"}
-  create_dir "$HOME/.local"
-
-  # Determine Neovim release based on OS and architecture
-  local NVIM_RELEASE
-  if is_macos; then
-    if is_x86_64; then
-      NVIM_RELEASE="nvim-macos-x86_64"
-    elif is_arm64; then
-      NVIM_RELEASE="nvim-macos-arm64"
-    else
-      error "Unsupported CPU architecture, exit"
-    fi
-  else # is_linux
-    if is_x86_64; then
-      NVIM_RELEASE="nvim-linux-x86_64"
-    elif is_arm64; then
-      NVIM_RELEASE="nvim-linux-arm64"
-    else
-      error "Unsupported CPU architecture, exit"
-    fi
-  fi
-
-  # Download and extract Neovim
-  local link="https://github.com/neovim/neovim/releases/download/v${nvimver}/${NVIM_RELEASE}.tar.gz"
-  info "Downloading Neovim from $link"
-  curl -k -L --progress-bar "$link" | tar -xz --strip-components=1 -C "$HOME/.local"
+  "$script_dir/install-neovim.sh" "$@"
 }
 
 # Install AI code agents
 install_ai_code_agents() {
-  # Define AI code agents to install
-  local agents="@qwen-code/qwen-code @iflow-ai/iflow-cli @google/gemini-cli @anthropic-ai/claude-code"
+  # Check if system supports modern plugins (npm >= 20)
+  if ! SUPPORTS_MODERN_PLUGINS; then
+    warn "npm version 20 or higher is required for AI code agents installation"
+    warn "Current npm version: $(npm --version 2>/dev/null || echo 'not installed')"
+    warn "Please upgrade npm to continue with AI code agents installation"
+    return 1
+  fi
 
-  # Install agents using npm
-  npm_install_lib ${agents}
+  success "System supports modern plugins (npm >= 20), proceeding with AI code agents installation"
 
-  # Install cursor agent CLI
-  curl https://cursor.com/install -fsS | bash
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-cargo.sh"
 }
 
 # Install Rust and Cargo with kernel version check
 install_cargo() {
-  # Check if cargo is already installed
-  if checkcmd cargo; then
-    info "Cargo already installed: $(cargo --version)"
-    return 0
-  fi
-
-  # Check kernel version for compatibility
-  local kernel_version
-  kernel_version=$(get_kernel_version)
-  if is_linux && [[ $(echo "$kernel_version < 5.0" | bc -l 2>/dev/null || echo "1") == "1" ]]; then
-    warn "Kernel version $kernel_version < 5.0, skipping Cargo installation for compatibility"
-    return 0
-  fi
-
-  info "Installing Rust and Cargo..."
-
-  # Choose download method
-  local download_cmd
-  if checkcmd curl; then
-    download_cmd="curl -sSf"
-  elif checkcmd wget; then
-    download_cmd="wget -qO-"
-  else
-    error "curl or wget is required to install Rust/Cargo"
-  fi
-
-  # Install rustup with non-interactive mode
-  if $download_cmd https://sh.rustup.rs | sh -s -- -y --no-modify-path; then
-    success "Rust and Cargo installed successfully"
-
-    # Source environment in current session
-    # shellcheck disable=SC1090
-    [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
-
-    # Add to shell configuration if not present
-    local shell_config
-    shell_config=$(current_shell_config)
-    if ! grep -q 'cargo/env' "$shell_config" 2>/dev/null; then
-      info "Adding Cargo to shell configuration"
-      echo '# Cargo configuration' >>"$shell_config"
-      echo '[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"' >>"$shell_config"
-    fi
-
-    # Verify installation
-    if checkcmd cargo; then
-      info "Cargo verification successful: $(cargo --version)"
-    else
-      warn "Cargo installed but not available in current session. Please restart your shell."
-    fi
-  else
-    error "Rust/Cargo installation failed"
-  fi
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  "$script_dir/install-cargo.sh"
 }

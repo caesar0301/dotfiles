@@ -32,7 +32,7 @@ readonly PKG_R="r"
 
 # Formatter packages for each package manager
 readonly FORMATTERS_PIP="pynvim black sqlparse cmake_format"
-readonly FORMATTERS_NPM="tree-sitter-cli neovim yaml-language-server js-beautify @johnnymorganz/stylua-bin"
+readonly FORMATTERS_NPM="neovim yaml-language-server js-beautify @johnnymorganz/stylua-bin"
 readonly FORMATTERS_GO="github.com/google/yamlfmt/cmd/yamlfmt@latest"
 
 # LSP packages for each package manager
