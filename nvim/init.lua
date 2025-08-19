@@ -16,9 +16,6 @@ require("globals") -- Global variables and system detection (must come first)
 require("packer-config") -- Plugin manager (depends on globals)
 require("autocmds") -- Auto-commands (depends on globals)
 
--- Setup system compatibility checking (depends on globals)
-require("system-check").setup()
-
 -- Load preference settings (depends on utils)
 require("preference")
 

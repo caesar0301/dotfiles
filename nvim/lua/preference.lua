@@ -117,7 +117,9 @@ end)
 -- =====================
 
 -- Neovide UI settings
-vim.print(vim.g.neovide_version)
+if vim.g.neovide_version then
+	vim.print(vim.g.neovide_version)
+end
 --vim.o.guifont = "Source Code Pro:h14"
 vim.g.neovide_remember_window_size = true
 
