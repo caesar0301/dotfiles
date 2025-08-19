@@ -16,6 +16,7 @@ set -euo pipefail
 
 # Resolve script location
 THISDIR=$(dirname "$(realpath "$0")")
+PACKER_HOME="$HOME/.local/share/nvim/site/pack/packer/start/packer.nvim"
 
 # Load common utilities
 source "$THISDIR/../lib/shmisc.sh" || {
@@ -183,10 +184,9 @@ function setup_ctags {
 # Function to handle Neovim installation and configuration
 function handle_neovim {
   # Install plugin manager
-  local packer_home="$HOME/.local/share/nvim/site/pack/packer/start/packer.nvim"
-  if [ ! -e "$packer_home" ]; then
+  if [ ! -e "$PACKER_HOME" ]; then
     info "Installing plugin manager Packer..."
-    git clone --depth 1 https://github.com/wbthomason/packer.nvim "$packer_home"
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim "$PACKER_HOME"
   fi
   install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
 }

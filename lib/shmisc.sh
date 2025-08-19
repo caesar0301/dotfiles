@@ -243,7 +243,7 @@ go_install_lib() {
 rlang_install_lib() {
   [[ $# -eq 0 ]] && error "rlang_install_lib: requires at least one package name"
 
-  checkcmd Rscript || error "R is not installed or not in PATH"
+  checkcmd Rscript || warn "R is not installed or not in PATH" && return 0
 
   local packages=("$@")
   local pkg_str=$(printf "'%s'," "${packages[@]}")
