@@ -32,8 +32,6 @@ readonly PKG_R="r"
 
 # Formatter packages for each package manager
 readonly FORMATTERS_PIP="pynvim black sqlparse cmake_format"
-readonly FORMATTERS_NPM="neovim yaml-language-server js-beautify @johnnymorganz/stylua-bin"
-readonly FORMATTERS_GO="github.com/google/yamlfmt/cmd/yamlfmt@latest"
 
 # LSP packages for each package manager
 readonly LSP_PIP="pyright cmake-language-server"
@@ -115,14 +113,32 @@ function install_lang_formatters {
     warn "Failed to install some pip formatters"
   fi
 
-  # Install npm formatters
-  if ! npm_install_lib ${FORMATTERS_NPM}; then
-    warn "Failed to install some npm formatters"
+  if ! npm_install_lib neovim; then
+    warn "Failed to install neovim"
   fi
 
-  # Install Go formatters
-  if ! go_install_lib ${FORMATTERS_GO}; then
-    warn "Failed to install some Go formatters"
+  if ! checkcmd stylua; then
+    if ! npm_install_lib @johnnymorganz/stylua-bin; then
+      warn "Failed to install stylua"
+    fi
+  fi
+
+  if ! checkcmd js-beautify; then
+    if ! npm_install_lib js-beautify; then
+      warn "Failed to install js-beautify"
+    fi
+  fi
+
+  if ! checkcmd yaml-language-server; then
+    if ! npm_install_lib yaml-language-server; then
+      warn "Failed to install yaml-language-server"
+    fi
+  fi
+
+  if ! checkcmd yamlfmt; then
+    if ! go_install_lib github.com/google/yamlfmt/cmd/yamlfmt@latest; then
+      warn "Failed to install yamlfmt"
+    fi
   fi
 
   info "Language formatters installation completed"
@@ -188,7 +204,11 @@ function handle_neovim {
     info "Installing plugin manager Packer..."
     git clone --depth 1 https://github.com/wbthomason/packer.nvim "$PACKER_HOME"
   fi
-  install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
+  if [ -e "$XDG_CONFIG_HOME/nvim" ]; then
+    warn "Neovim configuration directory already exists, skipping installation"
+  else
+    install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
+  fi
 }
 
 # Function to cleanse all Neovim-related files
