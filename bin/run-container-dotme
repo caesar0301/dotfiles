@@ -30,7 +30,7 @@ if [ ! -d "$HOST_WORKSPACE" ]; then
 fi
 
 # Generate random container name with 6-char suffix
-CONTAINER_NAME="runcontainer-$(openssl rand -hex 3)"
+CONTAINER_NAME="runcontainerdotme"
 DOCKER_CLI=${RUN_CONTAINER_DOCKER_CLI:-docker}
 
 # Check if the container exists and remove it safely
