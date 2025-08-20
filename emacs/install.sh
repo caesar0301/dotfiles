@@ -180,7 +180,10 @@ while getopts fsech opt; do
   f) LINK_INSTEAD_OF_COPY=0 ;;
   s) LINK_INSTEAD_OF_COPY=1 ;;
   c) cleanse_emacs && exit 0 ;;
-  h | ?) usage_me "install.sh" && exit 0 ;;
+  h | ?)
+    usage_me "install.sh"
+    exit 0
+    ;;
   esac
 done
 

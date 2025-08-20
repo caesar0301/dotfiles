@@ -130,8 +130,9 @@ handle_zsh_config() {
       # warn "Existing .zshrc found, creating backup"
       # cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
       warn "Existing .zshrc found, skipping"
+    else
+      install_file_pair "$zshrc_source" "$HOME/.zshrc"
     fi
-    install_file_pair "$zshrc_source" "$HOME/.zshrc"
   else
     warn "Main zshrc file not found: $zshrc_source"
   fi
@@ -249,7 +250,10 @@ while getopts fsech opt; do
   f) LINK_INSTEAD_OF_COPY=0 ;;
   s) LINK_INSTEAD_OF_COPY=1 ;;
   c) cleanse_zsh && exit 0 ;;
-  h | ?) usage_me "install.sh" && exit 0 ;;
+  h | ?)
+    usage_me "install.sh"
+    exit 0
+    ;;
   esac
 done
 

@@ -14,19 +14,22 @@ ARCH="$(uname -m)"
 
 # Normalize arch names
 case "$ARCH" in
-    x86_64|amd64) ARCH="x86_64" ;;
-    aarch64|arm64) ARCH="aarch64" ;;
-    *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+x86_64 | amd64) ARCH="x86_64" ;;
+aarch64 | arm64) ARCH="aarch64" ;;
+*)
+  echo "Unsupported architecture: $ARCH" >&2
+  exit 1
+  ;;
 esac
 
 # Detect correct installer
 if [ "$OS" = "Darwin" ]; then
-    PLATFORM="MacOSX"
+  PLATFORM="MacOSX"
 elif [ "$OS" = "Linux" ]; then
-    PLATFORM="Linux"
+  PLATFORM="Linux"
 else
-    echo "Unsupported OS: $OS" >&2
-    exit 1
+  echo "Unsupported OS: $OS" >&2
+  exit 1
 fi
 
 INSTALLER="Miniconda3-latest-${PLATFORM}-${ARCH}.sh"
