@@ -177,21 +177,21 @@ checkcmd() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Check if npm version meets minimum requirement
-check_npm_version() {
+# Check if node version meets minimum requirement
+check_nodejs_version() {
   local min_version="$1"
   [[ -z "$min_version" ]] && min_version="20.0.0"
 
-  if ! checkcmd npm; then
+  if ! checkcmd node; then
     return 1
   fi
 
-  local npm_version
-  npm_version=$(npm --version 2>/dev/null) || return 1
+  local node_version
+  node_version=$(node --version 2>/dev/null) || return 1
 
   # Simple version comparison for major.minor.patch format
   local major minor patch
-  IFS='.' read -r major minor patch <<<"$npm_version"
+  IFS='.' read -r major minor patch <<<"$node_version"
 
   local min_major min_minor min_patch
   IFS='.' read -r min_major min_minor min_patch <<<"$min_version"
@@ -209,9 +209,9 @@ check_npm_version() {
   return 1
 }
 
-# Check if system supports modern plugins (npm >= 20)
+# Check if system supports modern plugins (node >= 20)
 SUPPORTS_MODERN_PLUGINS() {
-  check_npm_version "20.0.0"
+  check_nodejs_version "20.0.0"
 }
 
 ###################################################

@@ -37,7 +37,7 @@ URL="https://repo.anaconda.com/miniconda/${INSTALLER}"
 
 # Download installer
 echo "Downloading $URL ..."
-curl -fsSL "$URL" -o "/tmp/$INSTALLER"
+curl -kfsSL "$URL" -o "/tmp/$INSTALLER"
 
 # Run installer silently (-b), install to $PREFIX (-p)
 bash "/tmp/$INSTALLER" -b -p "$PREFIX"
