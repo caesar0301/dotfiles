@@ -1,0 +1,75 @@
+#!/bin/bash
+# run-container-dotme $IMAGE <hostdir>:<containerdir>
+set -euo pipefail
+
+# Check if correct number of arguments provided
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 <IMAGE> <hostdir>:<containerdir>"
+  echo "Example: $0 my-image:latest /Users/me/project:/workspace"
+  exit 1
+fi
+
+# Parse arguments
+IMAGE_NAME="$1"
+MOUNT_SPEC="$2"
+
+# Parse the mount specification
+if [[ "$MOUNT_SPEC" =~ ^([^:]+):(.+)$ ]]; then
+  HOST_WORKSPACE="${BASH_REMATCH[1]}"
+  CONTAINER_WORKSPACE="${BASH_REMATCH[2]}"
+else
+  echo "Error: Invalid mount specification. Use format: hostdir:containerdir"
+  echo "Example: /Users/me/project:/workspace"
+  exit 1
+fi
+
+# Validate paths
+if [ ! -d "$HOST_WORKSPACE" ]; then
+  echo "Error: Host directory '$HOST_WORKSPACE' does not exist"
+  exit 1
+fi
+
+# Generate random container name with 6-char suffix
+CONTAINER_NAME="runcontainer-$(openssl rand -hex 3)"
+DOCKER_CLI=${RUN_CONTAINER_DOCKER_CLI:-docker}
+
+# Check if the container exists and remove it safely
+if ${DOCKER_CLI} ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+  echo "Stopping and removing existing container: $CONTAINER_NAME"
+  ${DOCKER_CLI} kill "$CONTAINER_NAME" >/dev/null 2>&1 || echo "Container not running"
+  ${DOCKER_CLI} rm "$CONTAINER_NAME" >/dev/null 2>&1 || echo "Failed to remove container"
+fi
+
+# Run the container
+echo "Starting container: $CONTAINER_NAME"
+echo "Image: $IMAGE_NAME"
+echo "Mount: $HOST_WORKSPACE -> $CONTAINER_WORKSPACE"
+
+# Prepare proxy environment variables
+PROXY_ENV=""
+if [ -n "${http_proxy:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e http_proxy=$http_proxy"
+fi
+if [ -n "${https_proxy:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e https_proxy=$https_proxy"
+fi
+if [ -n "${HTTP_PROXY:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e HTTP_PROXY=$HTTP_PROXY"
+fi
+if [ -n "${HTTPS_PROXY:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e HTTPS_PROXY=$HTTPS_PROXY"
+fi
+if [ -n "${no_proxy:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e no_proxy=$no_proxy"
+fi
+if [ -n "${NO_PROXY:-}" ]; then
+  PROXY_ENV="$PROXY_ENV -e NO_PROXY=$NO_PROXY"
+fi
+
+${DOCKER_CLI} run -d --network host --name "$CONTAINER_NAME" \
+  -v "$HOST_WORKSPACE":"$CONTAINER_WORKSPACE" \
+  $PROXY_ENV \
+  "$IMAGE_NAME" tail -f /dev/null
+
+echo "Container $CONTAINER_NAME started successfully."
+echo "To connect: ${DOCKER_CLI} exec -it $CONTAINER_NAME /bin/bash"
