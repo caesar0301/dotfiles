@@ -8,6 +8,8 @@
 # - Allegro CL Express Edition setup
 # - Essential Common Lisp libraries
 # - SBCL and development tool configuration
+# - Rlwrap command-line wrapper configuration
+# - Lisp and SBCL completion files
 # - Enhanced error handling and validation
 #
 # Author: Xiaming Chen
@@ -22,10 +24,12 @@ THISDIR=$(dirname "$(realpath "$0")")
 
 # Configuration constants
 readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
+readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly QUICKLISP_HOME="$HOME/quicklisp"
 readonly ACL_HOME="$XDG_DATA_HOME/acl"
 readonly CLINIT_FILE="$HOME/.clinit.cl"
 readonly SBCLRC_FILE="$HOME/.sbclrc"
+readonly RLWRAP_HOME="$XDG_CONFIG_HOME/rlwrap"
 
 # Default Lisp libraries to install
 readonly DEFAULT_LISP_LIBS=(
@@ -206,6 +210,81 @@ handle_lisp_config() {
   fi
 }
 
+# Check rlwrap availability
+check_rlwrap_binary() {
+  if ! checkcmd rlwrap; then
+    warn "Rlwrap not found in PATH"
+    warn "Please install rlwrap first:"
+
+    if is_linux; then
+      if checkcmd apt-get; then
+        warn "  Ubuntu/Debian: sudo apt-get install rlwrap"
+      elif checkcmd yum; then
+        warn "  RHEL/CentOS: sudo yum install rlwrap"
+      elif checkcmd dnf; then
+        warn "  Fedora: sudo dnf install rlwrap"
+      elif checkcmd pacman; then
+        warn "  Arch: sudo pacman -S rlwrap"
+      fi
+    elif is_macos; then
+      warn "  macOS: brew install rlwrap"
+    fi
+
+    warn "Configuration will be installed anyway for future use"
+  else
+    local rlwrap_version
+    rlwrap_version=$(rlwrap --version 2>/dev/null | head -1 || echo "unknown")
+    info "Found rlwrap: $rlwrap_version"
+  fi
+}
+
+# Install rlwrap configuration files with validation
+handle_rlwrap_config() {
+  info "Installing rlwrap configuration..."
+  create_dir "$RLWRAP_HOME"
+
+  # Configuration files to install
+  local config_files=(
+    "lisp_completions"
+    "sbcl_completions"
+  )
+
+  local installed_count=0
+  local failed_count=0
+
+  for config_file in "${config_files[@]}"; do
+    local src_path="$THISDIR/$config_file"
+    local dest_path="$RLWRAP_HOME/$config_file"
+
+    if [[ -f "$src_path" ]]; then
+      if install_file_pair "$src_path" "$dest_path"; then
+        ((installed_count++))
+      else
+        ((failed_count++))
+        warn "Failed to install: $config_file"
+      fi
+    else
+      warn "Configuration file not found: $src_path"
+      ((failed_count++))
+    fi
+  done
+
+  if [[ $failed_count -eq 0 ]]; then
+    success "All rlwrap configuration files installed ($installed_count items)"
+  else
+    warn "Installation completed with $failed_count failures"
+  fi
+
+  info "Configuration directory: $RLWRAP_HOME"
+
+  # Provide usage examples
+  if checkcmd rlwrap; then
+    info "Usage examples:"
+    printf "  SBCL with completion: %brlwrap -f %s sbcl%b\n" "$COLOR_CYAN" "$RLWRAP_HOME/sbcl_completions" "$COLOR_RESET"
+    printf "  Generic Lisp: %brlwrap -f %s <lisp-command>%b\n" "$COLOR_CYAN" "$RLWRAP_HOME/lisp_completions" "$COLOR_RESET"
+  fi
+}
+
 # Remove Common Lisp configuration
 cleanse_lisp() {
   info "Cleansing Common Lisp configuration..."
@@ -215,6 +294,7 @@ cleanse_lisp() {
     "$SBCLRC_FILE"
     "$QUICKLISP_HOME"
     "$ACL_HOME"
+    "$RLWRAP_HOME"
   )
 
   local removed_count=0
@@ -253,22 +333,26 @@ main() {
 
   # Check prerequisites
   check_lisp_implementation
+  check_rlwrap_binary
 
   # Installation steps
   install_quicklisp
   install_essential_libraries
   install_allegro_cl
   handle_lisp_config
+  handle_rlwrap_config
 
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Quicklisp home: $QUICKLISP_HOME"
   info "Configuration files: $CLINIT_FILE, $SBCLRC_FILE"
+  info "Rlwrap configuration: $RLWRAP_HOME"
 
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Start SBCL: %bsbcl%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  2. Load libraries: %b(ql:quickload 'library-name)%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  3. For Emacs integration, install SLIME\n"
+  printf "  2. Start SBCL with rlwrap: %brlwrap -f %s sbcl%b\n" "$COLOR_CYAN" "$RLWRAP_HOME/sbcl_completions" "$COLOR_RESET"
+  printf "  3. Load libraries: %b(ql:quickload 'library-name)%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  4. For Emacs integration, install SLIME\n"
 
   success "Common Lisp development environment setup completed successfully!"
 }

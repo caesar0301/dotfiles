@@ -27,15 +27,14 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "misc"      # Utility scripts and configurations
-  "rlwrap"    # Command line wrapper
-  "lisp"      # Common Lisp development environment
-  "emacs"     # Emacs configuration
-  "vifm"      # Vi file manager
-  "alacritty" # Terminal emulator
-  "tmux"      # Terminal multiplexer
   "zsh"       # Z shell configuration
+  "tmux"      # Terminal multiplexer
   "nvim"      # Neovim development environment
+  "vifm"      # Vi file manager
+  "emacs"     # Emacs configuration
+  "misc"      # Utility scripts and configurations
+  # "lisp"      # Common Lisp development environment
+  # "alacritty" # Terminal emulator
 )
 
 # Track installation statistics
