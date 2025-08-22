@@ -187,14 +187,6 @@ return packer.startup(function(use)
 	use("nvim-treesitter/nvim-treesitter")
 	use("nvim-treesitter/nvim-treesitter-refactor")
 
-	-- Rainbow delimiters for Neovim with Tree-sitter
-	use({
-		"HiPhish/rainbow-delimiters.nvim",
-		requires = {
-			{ "nvim-treesitter/nvim-treesitter" },
-		},
-	})
-
 	-- Highlight arguments' definitions and usages, using Treesitter
 	use({
 		"m-demare/hlargs.nvim",
