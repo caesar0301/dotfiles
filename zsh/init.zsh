@@ -58,7 +58,7 @@ zinit light caesar0301/zsh-shell-proxy
 _load_custom_extensions
 
 autoload -U parseopts zargs zcalc zed zmv
-autoload -U compinit && compinit
+autoload -Uz compinit && compinit -u
 zinit cdreplay -q
 
 ###------------------------------------------------
