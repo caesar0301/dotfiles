@@ -190,11 +190,21 @@ check_nodejs_version() {
   node_version=$(node --version 2>/dev/null) || return 1
 
   # Simple version comparison for major.minor.patch format
-  local major minor patch
-  IFS='.' read -r major minor patch <<<"$node_version"
+  # Initialize variables to avoid unbound variable errors
+  local major="" minor="" patch=""
+  IFS='.' read -r major minor patch <<<"${node_version#v}"  # Remove leading 'v' if present
 
-  local min_major min_minor min_patch
+  # Initialize min version variables
+  local min_major="" min_minor="" min_patch=""
   IFS='.' read -r min_major min_minor min_patch <<<"$min_version"
+
+  # Set defaults for unset variables (in case version has fewer components)
+  [[ -z "$major" ]] && major=0
+  [[ -z "$minor" ]] && minor=0
+  [[ -z "$patch" ]] && patch=0
+  [[ -z "$min_major" ]] && min_major=0
+  [[ -z "$min_minor" ]] && min_minor=0
+  [[ -z "$min_patch" ]] && min_patch=0
 
   # Compare major version first
   [[ $major -gt $min_major ]] && return 0
