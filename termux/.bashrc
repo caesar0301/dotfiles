@@ -16,6 +16,10 @@ alias grhk='git reset --keep'
 alias grhs='git reset --soft'
 alias grsh="git reset --soft HEAD^ && git reset --hard HEAD"
 
+# Diff aliases
+alias gd='git diff --ws-error-highlight=all'
+alias gdc='git diff --cached'
+
 # Commit and push all modified files with a generated message
 function git-quick-update() {
   local modified_files commit_message
