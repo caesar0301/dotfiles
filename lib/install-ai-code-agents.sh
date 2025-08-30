@@ -17,7 +17,7 @@ main() {
   info "Installing AI code agents..."
 
   # Define AI code agents to install
-  local agents="@qwen-code/qwen-code @iflow-ai/iflow-cli @google/gemini-cli @anthropic-ai/claude-code"
+  local agents="@qwen-code/qwen-code @google/gemini-cli @anthropic-ai/claude-code"
 
   # Install agents using npm
   npm_install_lib ${agents}
