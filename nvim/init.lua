@@ -13,7 +13,7 @@
 -- Load core modules from lua directory in correct dependency order
 require("utils") -- Utility functions (no dependencies)
 require("globals") -- Global variables and system detection (must come first)
-require("lazy-config") -- Plugin manager (depends on globals)
+require("lazy-config-optimized") -- Plugin manager (depends on globals)
 require("autocmds") -- Auto-commands (depends on globals)
 
 -- Load preference settings (depends on utils)

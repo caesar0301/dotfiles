@@ -1,1 +1,1 @@
-require("lazy-config")
+require("lazy-config-optimized")
