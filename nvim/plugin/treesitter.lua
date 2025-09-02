@@ -9,6 +9,7 @@ require("nvim-treesitter.configs").setup({
 		"java",
 		"markdown",
 		"markdown_inline",
+		"yaml",
 	},
 	autotag = {
 		enable = true,

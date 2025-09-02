@@ -1,5 +1,4 @@
 .DS_Store
-nvim/plugin/packer_compiled.lua
 nvim/spell/
 
 emacs/lisp/lisp
@@ -11,3 +10,4 @@ package-lock.json
 package.json
 vifm/colors/colors
 vifm/scripts/scripts
+nvim/lazy-lock.json

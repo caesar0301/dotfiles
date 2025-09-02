@@ -1,1 +1,1 @@
-require("packerman")
+require("lazy-config")

@@ -27,12 +27,12 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"       # Z shell configuration
-  "tmux"      # Terminal multiplexer
-  "nvim"      # Neovim development environment
-  "vifm"      # Vi file manager
-  "emacs"     # Emacs configuration
-  "misc"      # Utility scripts and configurations
+  "zsh"   # Z shell configuration
+  "tmux"  # Terminal multiplexer
+  "nvim"  # Neovim development environment
+  "vifm"  # Vi file manager
+  "emacs" # Emacs configuration
+  "misc"  # Utility scripts and configurations
   # "lisp"      # Common Lisp development environment
   # "alacritty" # Terminal emulator
 )

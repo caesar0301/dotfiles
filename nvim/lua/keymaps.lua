@@ -39,7 +39,7 @@ vim.keymap.set("i", "<C-e>", "<ESC>A", { desc = "Goto line tail" })
 vim.cmd([[
 cnoreabbrev <expr> format (getcmdtype() == ':' && getcmdline() == 'format') ? 'Format' : 'format'
 ]])
-vim.keymap.set("n", "<leader>af", ":w<CR><bar>:Format<CR>", {desc = "Format current buffer"} )
+vim.keymap.set("n", "<leader>af", ":w<CR><bar>:Format<CR>", { desc = "Format current buffer" })
 
 -- Move line in visual mode
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected downwards" })

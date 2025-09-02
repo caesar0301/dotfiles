@@ -45,13 +45,6 @@ bingo() {
   tmux attach -t "$SESSION_NAME"
 }
 
-# update nvim plugins
-function nvim-update-plugins {
-  nvim --headless -c "PackerClean" -c "PackerUpdate" \
-    -c "TSUpdate lua python go java vim vimdoc luadoc markdown" \
-    -c 'qall'
-}
-
 # Load custom extensions under $ZSH_PLUGIN_DIR
 _zinit_ice_plugin() {
   plugin_path=$1

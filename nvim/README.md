@@ -31,7 +31,7 @@
 | Path                                 | Purpose                        |
 |--------------------------------------|--------------------------------|
 | `~/.config/nvim`                     | Nvim runtime directory         |
-| `~/.config/nvim/lua/packerman`       | Packer.nvim plugin declarations|
+| `~/.config/nvim/lua/plugins/`        | Modular plugin configurations  |
 | `~/.config/nvim/plugin/`             | Plugin setup scripts           |
 | `~/.config/nvim/after/plugin`        | User plugin preferences        |
 

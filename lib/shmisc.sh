@@ -192,7 +192,7 @@ check_nodejs_version() {
   # Simple version comparison for major.minor.patch format
   # Initialize variables to avoid unbound variable errors
   local major="" minor="" patch=""
-  IFS='.' read -r major minor patch <<<"${node_version#v}"  # Remove leading 'v' if present
+  IFS='.' read -r major minor patch <<<"${node_version#v}" # Remove leading 'v' if present
 
   # Initialize min version variables
   local min_major="" min_minor="" min_patch=""
