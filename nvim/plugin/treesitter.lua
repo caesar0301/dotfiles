@@ -1,13 +1,14 @@
 require("nvim-treesitter.configs").setup({
 	ensure_installed = {
 		"lua",
+		"luadoc",
+		"vim",
+		"vimdoc",
 		"python",
 		"go",
 		"java",
-		"vim",
-		"vimdoc",
-		"luadoc",
 		"markdown",
+		"markdown_inline",
 	},
 	autotag = {
 		enable = true,

@@ -293,4 +293,14 @@ return packer.startup(function(use)
 			{ "kovisoft/paredit" },
 		},
 	})
+
+	-- AI companion
+	use({
+		"olimorris/codecompanion.nvim",
+		requires = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"MeanderingProgrammer/render-markdown.nvim",
+		},
+	})
 end)
