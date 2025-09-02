@@ -4,6 +4,7 @@
 # https://github.com/caesar0301/cool-dotfiles
 #
 # Features:
+# - Lazy.nvim plugin manager with auto-installation
 # - Language formatters and linters
 # - Language Server Protocol (LSP) support
 # - Code navigation tools (ctags, ripgrep)
