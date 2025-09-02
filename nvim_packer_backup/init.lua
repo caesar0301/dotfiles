@@ -3,17 +3,17 @@
 --       Xiaming Chen - @caesar0301
 --
 -- Prerequisites:
---       lazy.nvim: https://github.com/folke/lazy.nvim
+--       packer: https://github.com/wbthomason/packer.nvim
 --       neovim: https://neovim.io/
 --
--- Usage: Plugins auto-install on first startup
+-- Usage: :PackerInstall
 -------------------------------------------------------------
 
 -- Setup globals that I expect to be always available.
 -- Load core modules from lua directory in correct dependency order
 require("utils") -- Utility functions (no dependencies)
 require("globals") -- Global variables and system detection (must come first)
-require("lazy-config") -- Plugin manager (depends on globals)
+require("packer-config") -- Plugin manager (depends on globals)
 require("autocmds") -- Auto-commands (depends on globals)
 
 -- Load preference settings (depends on utils)

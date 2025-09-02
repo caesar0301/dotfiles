@@ -16,7 +16,7 @@ set -euo pipefail
 
 # Resolve script location
 THISDIR=$(dirname "$(realpath "$0")")
-LAZY_HOME="$HOME/.local/share/nvim/lazy/lazy.nvim"
+PACKER_HOME="$HOME/.local/share/nvim/site/pack/packer/start/packer.nvim"
 
 # Load common utilities
 source "$THISDIR/../lib/shmisc.sh" || {
@@ -200,9 +200,9 @@ function setup_ctags {
 # Function to handle Neovim installation and configuration
 function handle_neovim {
   # Install plugin manager
-  if [ ! -e "$LAZY_HOME" ]; then
-    info "Installing plugin manager Lazy.nvim..."
-    git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$LAZY_HOME"
+  if [ ! -e "$PACKER_HOME" ]; then
+    info "Installing plugin manager Packer..."
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim "$PACKER_HOME"
   fi
   if [ -e "$XDG_CONFIG_HOME/nvim" ]; then
     warn "Neovim configuration directory already exists, skipping installation"
@@ -215,7 +215,7 @@ function handle_neovim {
 function cleanse_all {
   rm -rf "$HOME/.ctags"
   rm -rf "$XDG_CONFIG_HOME/nvim"
-  rm -rf "$XDG_DATA_HOME/nvim/lazy"
+  rm -rf "$XDG_DATA_HOME/nvim/site/pack"
   info "All Neovim files cleansed!"
 }
 
@@ -247,6 +247,6 @@ install_cargo
 setup_ctags
 
 warn "================================================"
-warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
+warn "Run :PackerInstall in Neovim to install plugins:"
 warn "Run :checkhealth to validate overall health"
 warn "================================================"
