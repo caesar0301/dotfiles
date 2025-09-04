@@ -29,8 +29,29 @@ if [ ! -d "$HOST_WORKSPACE" ]; then
   exit 1
 fi
 
-# Generate random container name with 6-char suffix
-CONTAINER_NAME="runcontainerdotme"
+# Parse image name to extract repository and tag/version
+# Example: docker.io/redis/redis:1.2.3 -> repo=redis, tag=1.2.3
+# Example: nginx:latest -> repo=nginx, tag=latest
+if [[ "$IMAGE_NAME" =~ ^([^:]+):(.+)$ ]]; then
+  REPO_NAME="${BASH_REMATCH[1]}"
+  TAG_VERSION="${BASH_REMATCH[2]}"
+else
+  # If no tag specified, use 'latest'
+  REPO_NAME="$IMAGE_NAME"
+  TAG_VERSION="latest"
+fi
+
+# Extract just the repository name (remove registry and path)
+# Example: docker.io/redis/redis -> redis
+# Example: nginx -> nginx
+if [[ "$REPO_NAME" =~ /([^/]+)$ ]]; then
+  REPO_BASENAME="${BASH_REMATCH[1]}"
+else
+  REPO_BASENAME="$REPO_NAME"
+fi
+
+# Generate container name in format: runcontainerdotme-tag-version
+CONTAINER_NAME="runcontainerdotme-${REPO_BASENAME}-${TAG_VERSION}"
 DOCKER_CLI=${RUN_CONTAINER_DOCKER_CLI:-docker}
 
 # Check if the container exists and remove it safely
