@@ -6,7 +6,7 @@ normal = { family = "Hack Nerd Font", style = "Regular" }
 bold = { family = "Hack Nerd Font", style = "Bold" }
 italic = { family = "Hack Nerd Font", style = "Italic" }
 bold_italic = { family = "Hack Nerd Font", style = "Bold Italic" }
-size = 16.0
+size = 14.0
 
 [[keyboard.bindings]]
 action = "Paste"
