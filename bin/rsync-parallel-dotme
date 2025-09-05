@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# parallel_rsync.sh
+#
+# Copy files/directories in parallel using rsync
+# Optimized for local transfers, preserves symlinks, permissions, xattrs, sparse files.
+#
+# Usage:
+#   ./parallel_rsync.sh <source_dir> <dest_dir> [concurrency]
+#
+# Example:
+#   ./parallel_rsync.sh /home/t4 /apsara/t4 6
+#
+
+set -euo pipefail
+
+SRC="$1"
+DST="$2"
+JOBS="${3:-4}"  # Default concurrency = 4
+
+if [[ -z "$SRC" || -z "$DST" ]]; then
+    echo "Usage: $0 <source_dir> <dest_dir> [concurrency]"
+    exit 1
+fi
+
+SRC="${SRC%/}/"
+DST="${DST%/}/"
+
+echo "Starting parallel rsync from '$SRC' → '$DST' with $JOBS concurrent jobs..."
+echo "---------------------------------------------------------------"
+
+mkdir -p "$DST"
+
+# Parallel rsync: each first-level file/dir copied by separate rsync process
+find "$SRC" -mindepth 1 -maxdepth 1 -print0 | \
+    xargs -0 -P "$JOBS" -I {} \
+    rsync -aXS --links \
+          --human-readable \
+          --info=progress2 \
+          --inplace --partial \
+          "{}" "$DST"
+
+echo "---------------------------------------------------------------"
+echo "✅ All rsync jobs completed."
