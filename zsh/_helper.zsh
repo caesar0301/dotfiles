@@ -13,7 +13,7 @@ function zshup {
   zinit self-update
 
   # Plugin parallel update
-  zinit update --all --parallel 8
+  zinit update --all --parallel 4
 
   # Update custom plugins
   # old_path=$(pwd)
