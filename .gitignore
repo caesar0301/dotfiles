@@ -11,3 +11,4 @@ package.json
 vifm/colors/colors
 vifm/scripts/scripts
 nvim/lazy-lock.json
+nvim/plugin/packer_compiled.lua
