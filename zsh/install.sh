@@ -178,11 +178,12 @@ install_zsh_plugins() {
 # Remove Zsh configuration and plugins
 cleanse_zsh() {
   info "Cleansing Zsh configuration..."
+  cp -L $HOME/.zshrc $HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)
 
   local items_to_remove=(
+    "$HOME/.zshrc"
     "$ZINIT_HOME"
     "$PROXY_CONFIG"
-    #"$HOME/.zshrc"
     "$ZSH_CONFIG_HOME"
   )
 
@@ -192,9 +193,6 @@ cleanse_zsh() {
       info "Removed: $item"
     fi
   done
-
-  # Remove backup files
-  rm -f "$HOME/.zshrc.backup."* 2>/dev/null || true
 
   success "Zsh configuration cleansed successfully"
 }
