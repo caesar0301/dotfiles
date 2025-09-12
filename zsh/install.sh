@@ -178,7 +178,9 @@ install_zsh_plugins() {
 # Remove Zsh configuration and plugins
 cleanse_zsh() {
   info "Cleansing Zsh configuration..."
-  cp -L $HOME/.zshrc $HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)
+  if [ -e $HOME/.zshrc ]; then
+    cp -L $HOME/.zshrc $HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)
+  fi
 
   local items_to_remove=(
     "$HOME/.zshrc"
