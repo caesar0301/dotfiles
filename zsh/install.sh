@@ -178,6 +178,9 @@ install_zsh_plugins() {
     install_file_pair "$plugin_dir" "$target_plugins_dir/$plugin_name"
   done < <(find "$plugins_dir" -name "*.plugin.zsh" -print0 2>/dev/null || true)
 
+  # Comment out to skip custom development plugins of my self
+  git clone --depth=1 https://github.com/caesar0301/zsh-caesardev.git $target_plugins_dir/zsh-caesardev
+
   success "Custom plugins installed"
 }
 

@@ -21,7 +21,7 @@ function zshup {
     for plugin in $(ls -d $ZSH_PLUGIN_DIR/*); do
       if [ -e ${plugin}/.git ]; then
         echo -n "Updating plugin ${plugin}..."
-        cd $plugin && git pull -q && echo "done" && cd ${old_path}
+        cd $plugin && git reset --hard HEAD && git pull -q && echo "done" && cd ${old_path}
       fi
     done
   fi

@@ -16,11 +16,11 @@ set -euo pipefail
 
 SRC="$1"
 DST="$2"
-JOBS="${3:-4}"  # Default concurrency = 4
+JOBS="${3:-4}" # Default concurrency = 4
 
 if [[ -z "$SRC" || -z "$DST" ]]; then
-    echo "Usage: $0 <source_dir> <dest_dir> [concurrency]"
-    exit 1
+  echo "Usage: $0 <source_dir> <dest_dir> [concurrency]"
+  exit 1
 fi
 
 SRC="${SRC%/}/"
@@ -32,13 +32,13 @@ echo "---------------------------------------------------------------"
 mkdir -p "$DST"
 
 # Parallel rsync: each first-level file/dir copied by separate rsync process
-find "$SRC" -mindepth 1 -maxdepth 1 -print0 | \
-    xargs -0 -P "$JOBS" -I {} \
+find "$SRC" -mindepth 1 -maxdepth 1 -print0 |
+  xargs -0 -P "$JOBS" -I {} \
     rsync -aXS --links \
-          --human-readable \
-          --info=progress2 \
-          --inplace --partial \
-          "{}" "$DST"
+    --human-readable \
+    --info=progress2 \
+    --inplace --partial \
+    "{}" "$DST"
 
 echo "---------------------------------------------------------------"
 echo "✅ All rsync jobs completed."
