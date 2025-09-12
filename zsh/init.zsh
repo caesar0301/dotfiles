@@ -52,8 +52,7 @@ zinit light zsh-users/zsh-autosuggestions
 zinit ice pick "zsh-syntax-highlighting.zsh" wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Custom extensions
-zinit light caesar0301/zsh-caesardev
+# Custom shell proxy
 zinit light caesar0301/zsh-shell-proxy
 _load_custom_extensions
 

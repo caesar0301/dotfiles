@@ -16,15 +16,15 @@ function zshup {
   zinit update --all --parallel 4
 
   # Update custom plugins
-  # old_path=$(pwd)
-  # if [ -e ${ZSH_PLUGIN_DIR} ]; then
-  #   for plugin in $(ls -d $ZSH_PLUGIN_DIR/*); do
-  #     if [ -e ${plugin}/.git ]; then
-  #       echo -n "Updating plugin ${plugin}..."
-  #       cd $plugin && git pull -q && echo "done" && cd ${old_path}
-  #     fi
-  #   done
-  # fi
+  old_path=$(pwd)
+  if [ -e ${ZSH_PLUGIN_DIR} ]; then
+    for plugin in $(ls -d $ZSH_PLUGIN_DIR/*); do
+      if [ -e ${plugin}/.git ]; then
+        echo -n "Updating plugin ${plugin}..."
+        cd $plugin && git pull -q && echo "done" && cd ${old_path}
+      fi
+    done
+  fi
 }
 
 bingo() {
