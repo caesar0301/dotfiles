@@ -56,7 +56,7 @@ _zinit_ice_plugin() {
 }
 
 # Load custom extensions
-_load_custom_extensions() {
+_zinit_ice_custom_extensions() {
   if [ -e ${ZSH_PLUGIN_DIR} ]; then
     # subdirectory plugins
     for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type d); do

@@ -56,7 +56,7 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light caesar0301/zsh-shell-proxy
 
 # User custom plugins
-_load_custom_extensions
+_zinit_ice_custom_extensions
 
 autoload -U parseopts zargs zcalc zed zmv
 autoload -Uz compinit && compinit -u
