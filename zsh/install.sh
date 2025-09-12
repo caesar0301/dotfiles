@@ -124,18 +124,7 @@ handle_zsh_config() {
   create_dir "$ZSH_CONFIG_HOME"
 
   # Install main .zshrc file
-  local zshrc_source="$THISDIR/zshrc"
-  if [[ -f "$zshrc_source" ]]; then
-    if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
-      warn "Existing .zshrc found, creating backup"
-      cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
-      warn "Existing .zshrc found, skipping"
-    else
-      install_file_pair "$zshrc_source" "$HOME/.zshrc"
-    fi
-  else
-    warn "Main zshrc file not found: $zshrc_source"
-  fi
+  install_file_pair "$THISDIR/zshrc" "$HOME/.zshrc"
 
   # Install configuration files
   for config_file in "${INSTALL_FILES[@]}"; do

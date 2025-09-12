@@ -647,13 +647,15 @@ get_kernel_version() {
   fi
 }
 
-# Enhanced file installation with backup and verification
 install_file_pair() {
   [[ $# -ne 2 ]] && error "install_file_pair: requires source and destination paths"
 
   local src="$1" dest="$2" dest_dir backup_suffix
+
+  # Ensure the source file/directory exists
   [[ -e "$src" ]] || error "Source does not exist: $src"
 
+  # Resolve the destination directory path and create it if necessary
   dest_dir=$(dirname "$dest")
   create_dir "$dest_dir"
 
@@ -661,9 +663,23 @@ install_file_pair() {
   if [[ -e "$dest" ]]; then
     backup_suffix=".backup.$(date +%Y%m%d_%H%M%S)"
     info "Creating backup: ${dest}${backup_suffix}"
+
+    # If the destination is a symbolic link, back up the real file it points to
     if [[ -L "$dest" ]]; then
-      # Handle symlinks by copying the link itself
-      cp -P "$dest" "${dest}${backup_suffix}"
+      local real_dest
+      real_dest=$(readlink -f "$dest")
+
+      # Check if the real destination exists before attempting to copy
+      if [[ -e "$real_dest" ]]; then
+        if [[ -d "$real_dest" ]]; then
+          cp -rL "$real_dest" "${dest}${backup_suffix}"
+        else
+          cp -L "$real_dest" "${dest}${backup_suffix}"
+        fi
+      else
+        info "Skipping backup: Symbolic link target does not exist: $real_dest"
+      fi
+    # If the destination is a regular file or directory, back it up normally
     elif [[ -d "$dest" ]]; then
       cp -r "$dest" "${dest}${backup_suffix}"
     else
@@ -673,15 +689,19 @@ install_file_pair() {
 
   # Install file (copy or symlink)
   if [[ ${LINK_INSTEAD_OF_COPY:-0} == 1 ]]; then
+    # Create a symbolic link from the real source path to the destination
     ln -sf "$(realpath "$src")" "$dest" || error "Failed to create symlink: $src -> $dest"
     info "Symlinked: $(basename "$src") -> $(basename "$dest")"
   else
-    cp -r "$src" "$dest" || error "Failed to copy: $src -> $dest"
+    # Copy the source, dereferencing any symlinks within it
+    cp -rL "$src" "$dest" || error "Failed to copy: $src -> $dest"
     info "Copied: $(basename "$src") -> $(basename "$dest")"
   fi
 
-  # Verify installation
+  # Verify that the installation was successful
   [[ -e "$dest" ]] || error "Installation verification failed: $dest"
+
+  info "Installation successful."
 }
 
 ###################################################
