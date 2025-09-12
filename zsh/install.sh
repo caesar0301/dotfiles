@@ -127,8 +127,8 @@ handle_zsh_config() {
   local zshrc_source="$THISDIR/zshrc"
   if [[ -f "$zshrc_source" ]]; then
     if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
-      # warn "Existing .zshrc found, creating backup"
-      # cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
+      warn "Existing .zshrc found, creating backup"
+      cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
       warn "Existing .zshrc found, skipping"
     else
       install_file_pair "$zshrc_source" "$HOME/.zshrc"
@@ -193,7 +193,7 @@ cleanse_zsh() {
   local items_to_remove=(
     "$ZINIT_HOME"
     "$PROXY_CONFIG"
-    "$HOME/.zshrc"
+    #"$HOME/.zshrc"
     "$ZSH_CONFIG_HOME"
   )
 
