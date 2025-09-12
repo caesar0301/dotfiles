@@ -116,34 +116,6 @@ install_zsh() {
   exit 1
 }
 
-# Install Zsh configuration files with enhanced validation
-handle_zsh_config() {
-  info "Installing Zsh configuration..."
-
-  # Create Zsh config directory
-  create_dir "$ZSH_CONFIG_HOME"
-
-  # Install main .zshrc file
-  install_file_pair "$THISDIR/zshrc" "$HOME/.zshrc"
-
-  # Install configuration files
-  for config_file in "${INSTALL_FILES[@]}"; do
-    local src_path="$THISDIR/$config_file"
-    local dest_path="$ZSH_CONFIG_HOME/$config_file"
-
-    if [[ -f "$src_path" ]]; then
-      install_file_pair "$src_path" "$dest_path"
-    else
-      warn "Configuration file not found: $src_path"
-    fi
-  done
-
-  # Install custom plugins
-  install_zsh_plugins
-
-  success "Zsh configuration installed"
-}
-
 # Install custom Zsh plugins
 install_zsh_plugins() {
   local plugins_dir="$THISDIR/plugins"
@@ -163,7 +135,6 @@ install_zsh_plugins() {
     plugin_dir=$(dirname "$plugin_file")
     local plugin_name
     plugin_name=$(basename "$plugin_dir")
-
     install_file_pair "$plugin_dir" "$target_plugins_dir/$plugin_name"
   done < <(find "$plugins_dir" -name "*.plugin.zsh" -print0 2>/dev/null || true)
 
@@ -173,6 +144,36 @@ install_zsh_plugins() {
   fi
 
   success "Custom plugins installed"
+}
+
+# Install Zsh configuration files with enhanced validation
+handle_zsh_config() {
+  info "Installing Zsh configuration..."
+
+  # Create Zsh config directory
+  create_dir "$ZSH_CONFIG_HOME"
+
+  # Install main .zshrc file
+  if [ ! -e $HOME/.zshrc ]; then
+    install_file_pair "$THISDIR/zshrc" "$HOME/.zshrc"
+  fi
+
+  # Install configuration files
+  for config_file in "${INSTALL_FILES[@]}"; do
+    local src_path="$THISDIR/$config_file"
+    local dest_path="$ZSH_CONFIG_HOME/$config_file"
+
+    if [[ -f "$src_path" ]]; then
+      install_file_pair "$src_path" "$dest_path"
+    else
+      warn "Configuration file not found: $src_path"
+    fi
+  done
+
+  # Install custom plugins
+  install_zsh_plugins
+
+  success "Zsh configuration installed"
 }
 
 # Remove Zsh configuration and plugins
