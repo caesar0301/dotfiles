@@ -708,6 +708,21 @@ install_file_pair() {
 # DEVELOPMENT ENVIRONMENT INSTALLATION
 ###################################################
 
+# Install homebrew (for both linux and macos)
+install_homebrew() {
+  if checkcmd brew; then
+    info "brew already installed"
+    exit 0
+  fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-homebrew.sh"
+}
+
 # Install uv Python package manager with verification
 install_uv() {
   local script_dir

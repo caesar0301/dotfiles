@@ -206,6 +206,7 @@ install_dev_environment() {
 
   # Core dependencies
   local core_deps=(
+    "install_homebrew"
     "install_zsh"   # Zsh shell binary
     "install_pyenv" # Python version manager
   )
