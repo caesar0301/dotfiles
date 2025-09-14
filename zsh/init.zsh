@@ -48,6 +48,9 @@ zinit light zsh-users/zsh-completions
 zinit ice lucid wait='0' atload='_zsh_autosuggest_start'
 zinit light zsh-users/zsh-autosuggestions
 
+# flatpak auto completion
+zinit light bilelmoussaoui/flatpak-zsh-completion
+
 # Command output highlighting
 zinit ice pick "zsh-syntax-highlighting.zsh" wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
