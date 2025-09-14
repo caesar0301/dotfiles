@@ -24,22 +24,30 @@ export ZSH_PLUGIN_DIR=${ZSH_PLUGIN_DIR}
 ### ZI MANAGER
 ###------------------------------------------------
 
-autoload -Uz _zi && (( ${+_comps} )) && _comps[zi]=_zi
+autoload -Uz _zi
+[[ -v _comps ]] && _comps[zi]=_zi
 
 # Oh-My-Zsh libs
-zinit ice wait lucid; zinit snippet OMZL::clipboard.zsh
-zinit ice wait lucid; zinit snippet OMZL::completion.zsh
-zinit ice wait lucid; zinit snippet OMZL::functions.zsh
-zinit ice wait lucid; zinit snippet OMZL::spectrum.zsh
+zinit ice wait lucid
+zinit snippet OMZL::clipboard.zsh
+zinit ice wait lucid
+zinit snippet OMZL::completion.zsh
+zinit ice wait lucid
+zinit snippet OMZL::functions.zsh
+zinit ice wait lucid
+zinit snippet OMZL::spectrum.zsh
 
 # Theme
 zinit ice pick"async.zsh" src"pure.zsh"
 zinit light sindresorhus/pure
 
 # Efficiency
-zinit ice pick"z.sh" wait lucid; zinit load rupa/z
-zinit ice wait lucid; zinit snippet OMZP::vi-mode
-zinit ice wait lucid; zinit snippet OMZP::alias-finder
+zinit ice pick"z.sh" wait lucid
+zinit load rupa/z
+zinit ice wait lucid
+zinit snippet OMZP::vi-mode
+zinit ice wait lucid
+zinit snippet OMZP::alias-finder
 
 # Auto command completion
 zinit light zsh-users/zsh-completions
