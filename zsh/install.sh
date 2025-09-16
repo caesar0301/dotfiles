@@ -130,17 +130,17 @@ install_zsh_plugins() {
   create_dir "$target_plugins_dir"
 
   # Find and install plugin directories
-  while IFS= read -r -d '' plugin_file; do
+  find "$plugins_dir" -name "*.plugin.zsh" -print0 2>/dev/null | while IFS= read -r -d '' plugin_file; do
     local plugin_dir
     plugin_dir=$(dirname "$plugin_file")
     local plugin_name
     plugin_name=$(basename "$plugin_dir")
     install_file_pair "$plugin_dir" "$target_plugins_dir/$plugin_name"
-  done < <(find "$plugins_dir" -name "*.plugin.zsh" -print0 2>/dev/null || true)
+  done
 
   # Comment out to skip custom development plugins of my self
-  if [ ! -e $target_plugins_dir/zsh-caesardev ]; then
-    git clone --depth=1 https://github.com/caesar0301/zsh-caesardev.git $target_plugins_dir/zsh-caesardev
+  if [ ! -e "$target_plugins_dir/zsh-caesardev" ]; then
+    git clone --depth=1 https://github.com/caesar0301/zsh-caesardev.git "$target_plugins_dir/zsh-caesardev"
   fi
 
   success "Custom plugins installed"
@@ -255,7 +255,7 @@ done
 
 # Main installation sequence
 main() {
-  info "Starting Zsh development environment setup..."
+  info "Starting Zsh environment setup..."
 
   # Installation steps
   install_dev_environment

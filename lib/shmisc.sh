@@ -711,7 +711,7 @@ install_file_pair() {
 # Install homebrew (for both linux and macos)
 install_homebrew() {
   if checkcmd brew; then
-    info "brew already installed" && exit 0
+    info "brew already installed" && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -725,10 +725,10 @@ install_homebrew() {
 # Install uv Python package manager with verification
 install_uv() {
   if checkcmd uv; then
-    info "uv already installed" && exit 0
+    info "uv already installed" && return
   fi
   if checkcmd brew; then
-    brew install uv && exit 0
+    brew install uv && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -742,10 +742,10 @@ install_uv() {
 # Install pyenv with enhanced setup and verification
 install_pyenv() {
   if checkcmd pyenv; then
-    info "pyenv already installed" && exit 0
+    info "pyenv already installed" && return
   fi
   if checkcmd brew; then
-    brew install pyenv && exit 0
+    brew install pyenv && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -759,10 +759,10 @@ install_pyenv() {
 # Install jenv Java version manager with platform detection
 install_jenv() {
   if checkcmd jenv; then
-    info "jenv already installed" && exit 0
+    info "jenv already installed" && return
   fi
   if checkcmd brew; then
-    brew install jenv && exit 0
+    brew install jenv && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -787,10 +787,10 @@ install_gvm() {
 # Install Node Version Manager with shell integration
 install_nvm() {
   if checkcmd nvm; then
-    info "nvm already installed" && exit 0
+    info "nvm already installed" && return
   fi
   if checkcmd brew; then
-    brew install nvm && exit 0
+    brew install nvm && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -826,10 +826,10 @@ install_google_java_format() {
 # Install Go
 install_golang() {
   if checkcmd go; then
-    info "golang already installed" && exit 0
+    info "golang already installed" && return
   fi
   if checkcmd brew; then
-    brew install golang && exit 0
+    brew install golang && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -856,10 +856,10 @@ install_hack_nerd_font() {
 #   $1 - shfmt version to install (default: v3.7.0)
 install_shfmt() {
   if checkcmd shfmt; then
-    info "shfmt already installed" && exit 0
+    info "shfmt already installed" && return
   fi
   if checkcmd brew; then
-    brew install shfmt && exit 0
+    brew install shfmt && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -873,10 +873,10 @@ install_shfmt() {
 # Install fzf (fuzzy finder)
 install_fzf() {
   if checkcmd fzf; then
-    info "fzf already installed" && exit 0
+    info "fzf already installed" && return
   fi
   if checkcmd brew; then
-    brew install fzf && exit 0
+    brew install fzf && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -892,10 +892,10 @@ install_fzf() {
 #   $1 - Neovim version to install (default: 0.11.0)
 install_neovim() {
   if checkcmd nvim; then
-    info "neovim already installed" && exit 0
+    info "neovim already installed" && return
   fi
   if checkcmd brew; then
-    brew install neovim && exit 0
+    brew install neovim && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
