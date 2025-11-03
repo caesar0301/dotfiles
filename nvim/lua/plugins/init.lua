@@ -4,11 +4,11 @@
 
 return {
 	-- Import plugin specifications from category modules
+	{ import = "plugins.ai" },
 	{ import = "plugins.ui" },
 	{ import = "plugins.lsp" },
 	{ import = "plugins.search" },
 	{ import = "plugins.git" },
 	{ import = "plugins.syntax" },
 	{ import = "plugins.languages" },
-	{ import = "plugins.utils" },
 }
