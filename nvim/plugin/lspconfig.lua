@@ -3,11 +3,12 @@
 
 -- === Safely require dependencies ===
 local utils = require("utils")
-local lspconfig = utils.safe_require("lspconfig")
 local nvim_cmp = utils.safe_require("cmp_nvim_lsp")
 local lsp_status = utils.safe_require("lsp-status")
 local goto_preview = utils.safe_require("goto-preview")
-if not (lspconfig and nvim_cmp and lsp_status and goto_preview) then
+-- lspconfig.util is still available for utility functions
+local lspconfig_util = utils.safe_require("lspconfig.util")
+if not (nvim_cmp and lsp_status and goto_preview) then
 	return
 end
 
@@ -78,21 +79,23 @@ local servers = {
 }
 
 for _, lsp in ipairs(servers) do
-	lspconfig[lsp].setup({
+	vim.lsp.config(lsp, {
 		on_attach = common_on_attach,
 		capabilities = common_caps,
 	})
+	vim.lsp.enable(lsp)
 end
 
 -- Python
-lspconfig.pyright.setup({
+vim.lsp.config("pyright", {
 	settings = { python = { pythonPath = utils.get_python_path() } },
 	on_attach = common_on_attach,
 	capabilities = common_caps,
 })
+vim.lsp.enable("pyright")
 
 -- Clangd
-lspconfig.clangd.setup({
+vim.lsp.config("clangd", {
 	handlers = lsp_status.extensions.clangd.setup(),
 	init_options = {
 		clangdFileStatus = true,
@@ -109,9 +112,10 @@ lspconfig.clangd.setup({
 		common_on_attach(client, bufnr)
 	end,
 })
+vim.lsp.enable("clangd")
 
 -- YAMl
-lspconfig.yamlls.setup({
+vim.lsp.config("yamlls", {
 	capabilities = common_caps,
 	on_attach = common_on_attach,
 	settings = {
@@ -122,9 +126,10 @@ lspconfig.yamlls.setup({
 		},
 	},
 })
+vim.lsp.enable("yamlls")
 
 -- Haskell
-lspconfig.hls.setup({
+vim.lsp.config("hls", {
 	on_attach = common_on_attach,
 	capabilities = common_caps,
 	settings = {
@@ -133,12 +138,13 @@ lspconfig.hls.setup({
 		},
 	},
 })
+vim.lsp.enable("hls")
 
 -- Golang
 local lastRootPath = nil
 local gomodpath = utils.safe_system("go env GOPATH", "") .. "/pkg/mod"
 
-lspconfig.gopls.setup({
+vim.lsp.config("gopls", {
 	on_attach = common_on_attach,
 	cmd = { "gopls", "serve" },
 	filetypes = { "go", "gomod" },
@@ -147,7 +153,7 @@ lspconfig.gopls.setup({
 		if string.find(fullpath, gomodpath) and lastRootPath ~= nil then
 			return lastRootPath
 		end
-		local root = lspconfig.util.root_pattern("go.mod", ".git")(fname)
+		local root = lspconfig_util and lspconfig_util.root_pattern("go.mod", ".git")(fname) or nil
 		if root ~= nil then
 			lastRootPath = root
 		end
@@ -162,6 +168,7 @@ lspconfig.gopls.setup({
 		},
 	},
 })
+vim.lsp.enable("gopls")
 
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*.go",
@@ -173,7 +180,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- Java
 local jdtls_home = utils.get_jdtls_home()
 local workspace_folder = os.getenv("HOME") .. "/.local/share/eclipse/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-lspconfig.jdtls.setup({
+vim.lsp.config("jdtls", {
 	on_attach = common_on_attach,
 	capabilities = common_caps,
 	cmd = {
@@ -202,3 +209,4 @@ lspconfig.jdtls.setup({
 		workspace = os.getenv("HOME") .. "/.cache/jdtls/workspace",
 	},
 })
+vim.lsp.enable("jdtls")
