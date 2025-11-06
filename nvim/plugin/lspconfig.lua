@@ -3,7 +3,7 @@
 
 -- === Safely require dependencies ===
 local utils = require("utils")
-local lspconfig = utils.safe_require("lspconfig")
+local lspconfig = vim.lsp.config
 local nvim_cmp = utils.safe_require("cmp_nvim_lsp")
 local lsp_status = utils.safe_require("lsp-status")
 local goto_preview = utils.safe_require("goto-preview")
