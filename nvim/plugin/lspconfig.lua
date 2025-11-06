@@ -6,7 +6,6 @@ local utils = require("utils")
 local nvim_cmp = utils.safe_require("cmp_nvim_lsp")
 local lsp_status = utils.safe_require("lsp-status")
 local goto_preview = utils.safe_require("goto-preview")
-local clangd_extensions = utils.safe_require("clangd_extensions")
 -- lspconfig.util is still available for utility functions
 local lspconfig_util = utils.safe_require("lspconfig.util")
 if not (nvim_cmp and lsp_status and goto_preview) then
@@ -96,39 +95,24 @@ vim.lsp.config("pyright", {
 vim.lsp.enable("pyright")
 
 -- Clangd
-if clangd_extensions then
-	clangd_extensions.setup({
-		server = {
-			handlers = lsp_status.extensions.clangd.setup(),
-			init_options = {
-				clangdFileStatus = true,
-			},
-			cmd = { "clangd", "--background-index=true" },
-			capabilities = common_caps,
-			on_attach = function(client, bufnr)
-				vim.keymap.set(
-					"n",
-					"<leader>sh",
-					":ClangdSwitchSourceHeader<CR>",
-					{ buffer = bufnr, desc = "[clangd] switch source and header" }
-				)
-				common_on_attach(client, bufnr)
-			end,
-		},
-	})
-else
-	-- Fallback if clangd_extensions is not available
-	vim.lsp.config("clangd", {
-		handlers = lsp_status.extensions.clangd.setup(),
-		init_options = {
-			clangdFileStatus = true,
-		},
-		cmd = { "clangd", "--background-index=true" },
-		capabilities = common_caps,
-		on_attach = common_on_attach,
-	})
-	vim.lsp.enable("clangd")
-end
+vim.lsp.config("clangd", {
+	handlers = lsp_status.extensions.clangd.setup(),
+	init_options = {
+		clangdFileStatus = true,
+	},
+	cmd = { "clangd", "--background-index=true" },
+	capabilities = common_caps,
+	on_attach = function(client, bufnr)
+		vim.keymap.set(
+			"n",
+			"<leader>sh",
+			":ClangdSwitchSourceHeader<CR>",
+			{ buffer = bufnr, desc = "[clangd] switch source and header" }
+		)
+		common_on_attach(client, bufnr)
+	end,
+})
+vim.lsp.enable("clangd")
 
 -- YAMl
 vim.lsp.config("yamlls", {
