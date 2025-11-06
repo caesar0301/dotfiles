@@ -98,4 +98,13 @@ return {
 			{ "<leader>dc", "<cmd>DapContinue<cr>", desc = "Continue debugging" },
 		},
 	},
+
+	-- Enhanced clangd LSP features
+	{
+		"p00f/clangd_extensions.nvim",
+		ft = { "c", "cpp", "objc", "objcpp" },
+		dependencies = {
+			"neovim/nvim-lspconfig",
+		},
+	},
 }
