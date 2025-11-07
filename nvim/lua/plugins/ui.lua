@@ -69,6 +69,16 @@ return {
 		event = "BufReadPost",
 	},
 
+	-- Expand visual selection incrementally
+	{
+		"terryma/vim-expand-region",
+		event = "VeryLazy",
+		config = function()
+			vim.keymap.set("v", "+", "<Plug>(expand_region_expand)", { desc = "Expand visual selection" })
+			vim.keymap.set("v", "_", "<Plug>(expand_region_shrink)", { desc = "Shrink visual selection" })
+		end,
+	},
+
 	-- displays a popup with possible keybindings of the command you started typing
 	{
 		"folke/which-key.nvim",
