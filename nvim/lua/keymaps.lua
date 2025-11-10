@@ -34,13 +34,6 @@ vim.keymap.set("i", "<C-a>", "<ESC>I", { desc = "Goto line head" })
 vim.keymap.set("n", "<C-e>", "<ESC>$", { desc = "Goto line tail" })
 vim.keymap.set("i", "<C-e>", "<ESC>A", { desc = "Goto line tail" })
 
--- Plugin: formatter.nvim
--- Alias :format to :Format (safe command-line abbreviation)
-vim.cmd([[
-cnoreabbrev <expr> format (getcmdtype() == ':' && getcmdline() == 'format') ? 'Format' : 'format'
-]])
-vim.keymap.set("n", "<leader>af", ":w<CR><bar>:Format<CR>", { desc = "Format current buffer" })
-
 -- Move line in visual mode
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected downwards" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected upwards" })

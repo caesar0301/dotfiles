@@ -56,7 +56,7 @@
 
 - **LSP Management:** `nvim-lspconfig`
 - **Auto-completion:** `nvim-cmp`, `nvim-treesitter`
-- **Code Formatting:** `formatter.nvim`
+- **Code Formatting:** `conform.nvim`
 - **File Explorer/Tabline:** `nvim-tree`, `barbar.nvim`
 - **Code Structure:** `tagbar` (requires `universal-ctags`/`gotags`)
 - **Fuzzy Finder:** `nvim-telescope`

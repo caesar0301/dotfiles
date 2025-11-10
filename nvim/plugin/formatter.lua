@@ -1,89 +1,72 @@
--- Utilities for creating configurations
-local util = require("formatter.util")
-local formatter = require("formatter")
+-- Conform.nvim configuration for code formatting
+local conform = require("conform")
 local utils = require("utils")
 
--- Provides the Format, FormatWrite, FormatLock, and FormatWriteLock commands
-formatter.setup({
-	logging = true,
+-- Setup conform.nvim
+conform.setup({
+	log = true,
 	log_level = vim.log.levels.DEBUG,
-	filetype = {
-		-- Formatter configurations for filetypes go here and will be executed in order
-		lua = {
-			require("formatter.filetypes.lua").stylua,
-		},
-		java = {
-			function()
+	formatters_by_ft = {
+		-- Formatter configurations for filetypes
+		lua = { "stylua" },
+		java = { "google_java_format" },
+		c = { "clang_format" },
+		cpp = { "clang_format" },
+		go = { "gofmt" },
+		json = { "prettierd", "prettier" },
+		proto = { "buf" },
+		python = { "black" },
+		yaml = { "yamlfmt" },
+		latex = { "latexindent" },
+		r = { "styler" },
+		rust = { "rustfmt" },
+		sh = { "shfmt" },
+		zsh = { "shfmt" },
+		sql = { "sqlfluff" },
+		cmake = { "cmake_format" },
+		xhtml = { "tidy" },
+		xml = { "xmllint" },
+		toml = { "taplo" },
+	},
+	-- Format on save configuration
+	format_on_save = {
+		timeout_ms = 500,
+		lsp_fallback = true,
+	},
+	-- Custom formatters
+	formatters = {
+		google_java_format = {
+			command = utils.get_java_bin(),
+			args = function()
 				local gjfjar =
 					utils.get_env("GJF_JAR_FILE", "~/.local/share/google-java-format/google-java-format-all-deps.jar")
-				return {
-					exe = utils.get_java_bin(),
-					args = {
-						"-jar",
-						gjfjar,
-						"-",
-					},
-					stdin = true,
-				}
+				return { "-jar", vim.fn.expand(gjfjar), "-" }
 			end,
-		},
-		c = {
-			require("formatter.filetypes.c").clangformat,
-		},
-		cpp = {
-			require("formatter.filetypes.cpp").clangformat,
-		},
-		go = {
-			require("formatter.filetypes.go").gofmt,
-		},
-		json = {
-			require("formatter.filetypes.json").jsbeautify,
-		},
-		proto = {
-			require("formatter.filetypes.proto").buf_format,
-		},
-		python = {
-			require("formatter.filetypes.python").black,
-		},
-		yaml = {
-			require("formatter.filetypes.yaml").yamlfmt,
-		},
-		latex = {
-			require("formatter.filetypes.latex").latexindent,
-		},
-		r = {
-			require("formatter.filetypes.r").styler,
-		},
-		rust = {
-			require("formatter.filetypes.rust").rustfmt,
-		},
-		sh = {
-			require("formatter.filetypes.sh").shfmt,
-		},
-		zsh = {
-			require("formatter.filetypes.sh").shfmt,
-		},
-		sql = {
-			require("formatter.filetypes.sql").sqlfluff,
-		},
-		cmake = {
-			require("formatter.filetypes.cmake").cmakeformat,
-		},
-		xhtml = {
-			require("formatter.filetypes.xhtml").tidy,
-		},
-		xml = {
-			require("formatter.filetypes.xml").xmllint,
-		},
-		toml = {
-			require("formatter.filetypes.toml").taplo,
-		},
-		-- Use the special "*" filetype for defining formatter configurations on
-		-- any filetype
-		["*"] = {
-			-- "formatter.filetypes.any" defines default configurations for any
-			-- filetype
-			require("formatter.filetypes.any").remove_trailing_whitespace,
+			stdin = true,
 		},
 	},
 })
+
+-- Create Format and FormatWrite commands
+vim.api.nvim_create_user_command("Format", function(args)
+	local range = nil
+	if args.range ~= 0 then
+		range = {
+			start = { args.line1, 0 },
+			["end"] = { args.line2, 0 },
+		}
+	end
+	conform.format({ async = true, lsp_fallback = true, range = range })
+end, { range = true, desc = "Format code with conform.nvim" })
+
+vim.api.nvim_create_user_command("FormatWrite", function(args)
+	local range = nil
+	if args.range ~= 0 then
+		range = {
+			start = { args.line1, 0 },
+			["end"] = { args.line2, 0 },
+		}
+	end
+	conform.format({ async = false, lsp_fallback = true, range = range })
+	vim.cmd("write")
+end, { range = true, desc = "Format code and write buffer with conform.nvim" })

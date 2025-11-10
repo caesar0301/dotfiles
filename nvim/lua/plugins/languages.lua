@@ -2,17 +2,16 @@
 return {
 	-- Code style formatter
 	{
-		"mhartington/formatter.nvim",
-		cmd = { "Format", "FormatWrite" },
-		keys = {
-			{ "<leader>f", "<cmd>Format<cr>", desc = "Format code" },
-		},
+		"stevearc/conform.nvim",
+		event = "VimEnter",
 		config = function()
 			-- Load configuration from plugin/formatter.lua
 			local config_path = vim.fn.stdpath("config") .. "/plugin/formatter.lua"
 			if vim.fn.filereadable(config_path) == 1 then
 				dofile(config_path)
 			end
+			-- Create keymap after commands are created
+			vim.keymap.set("n", "<leader>af", "<cmd>Format<cr>", { desc = "Format code" })
 		end,
 	},
 
