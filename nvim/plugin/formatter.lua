@@ -28,11 +28,11 @@ conform.setup({
 		xml = { "xmllint" },
 		toml = { "taplo" },
 	},
-	-- Format on save configuration
-	format_on_save = {
-		timeout_ms = 500,
-		lsp_fallback = true,
-	},
+	-- Format on save configuration (disabled)
+	-- format_on_save = {
+	-- 	timeout_ms = 500,
+	-- 	lsp_fallback = true,
+	-- },
 	-- Custom formatters
 	formatters = {
 		google_java_format = {
