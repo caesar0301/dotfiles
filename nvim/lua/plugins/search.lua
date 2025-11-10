@@ -53,6 +53,32 @@ return {
 			if vim.fn.filereadable(config_path) == 1 then
 				dofile(config_path)
 			end
+
+			-- Additional Telescope keymaps
+			vim.keymap.set(
+				"n",
+				"<leader>ff",
+				require("telescope.builtin").find_files,
+				{ desc = "[telescope] Find files" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>fw",
+				require("telescope.builtin").grep_string,
+				{ desc = "[telescope] Find current word" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>fg",
+				require("telescope.builtin").live_grep,
+				{ desc = "[telescope] Search everywhere" }
+			)
+
+			local function live_grep_directory()
+				local dir = vim.fn.input("Directory: ", vim.fn.expand("%:p:h"), "dir")
+				require("telescope.builtin").live_grep({ cwd = dir })
+			end
+			vim.keymap.set("n", "<leader>fd", live_grep_directory, { desc = "[telescope] Search in directory" })
 		end,
 	},
 

@@ -4,6 +4,10 @@ return {
 	{
 		"airblade/vim-gitgutter",
 		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			-- Keymaps for gitgutter
+			vim.keymap.set("n", "<leader>gu", "<cmd>GitGutterToggle<cr>", { desc = "Toggle GitGutter" })
+		end,
 	},
 
 	-- Git signs for better git integration
@@ -26,5 +30,9 @@ return {
 		dependencies = {
 			"nvim-telescope/telescope.nvim", -- optional: for multi-select
 		},
+		config = function()
+			-- Keymaps for gitignore
+			vim.keymap.set("n", "<leader>gi", require("gitignore").generate, { desc = "Add gitignore" })
+		end,
 	},
 }
