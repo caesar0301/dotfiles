@@ -67,7 +67,11 @@ return {
 			"nvim-lua/lsp-status.nvim",
 		},
 		config = function()
-			require("lualine").setup()
+			require("lualine").setup({
+				options = {
+					theme = "powerline_dark",
+				},
+			})
 		end,
 	},
 
