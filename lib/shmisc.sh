@@ -887,6 +887,26 @@ install_fzf() {
   "$script_dir/install-fzf.sh"
 }
 
+# Install universal-ctags (required by Tagbar)
+install_universal_ctags() {
+  if checkcmd ctags; then
+    # Verify it's universal-ctags or exuberant-ctags, not BSD/GNU Emacs ctags
+    local ctags_version
+    ctags_version=$(ctags --version 2>/dev/null || echo "")
+    if echo "$ctags_version" | grep -qiE "(universal|exuberant)"; then
+      info "universal-ctags or exuberant-ctags already installed" && return
+    fi
+  fi
+
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-universal-ctags.sh" "$@"
+}
+
 # Install Neovim text editor
 # Arguments:
 #   $1 - Neovim version to install (default: 0.11.0)

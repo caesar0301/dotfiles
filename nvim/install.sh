@@ -241,6 +241,7 @@ install_jdt_language_server
 install_hack_nerd_font # Required by nvim-web-devicons
 install_lang_formatters
 install_fzf
+install_universal_ctags # Required by Tagbar
 
 # Conditionally install cargo based on kernel version (handled in shmisc.sh)
 install_cargo
