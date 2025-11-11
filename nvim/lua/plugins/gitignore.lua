@@ -2,11 +2,17 @@
 return {
 	"wintermute-cell/gitignore.nvim",
 	cmd = { "Gitignore" },
+	keys = {
+		{
+			"<leader>gi",
+			function()
+				require("gitignore").generate()
+			end,
+			desc = "Add gitignore",
+		},
+	},
 	dependencies = {
 		"nvim-telescope/telescope.nvim", -- optional: for multi-select
 	},
-	config = function()
-		-- Keymaps for gitignore
-		vim.keymap.set("n", "<leader>gi", require("gitignore").generate, { desc = "Add gitignore" })
-	end,
+	config = function() end,
 }

@@ -3,11 +3,12 @@ return {
 	"akinsho/toggleterm.nvim",
 	version = "v2.13.1",
 	cmd = { "ToggleTerm", "TermExec" },
-	keys = { "<C-\\>" },
+	keys = {
+		{ "<C-\\>", desc = "Toggle terminal" },
+		{ "<leader>T", "<cmd>ToggleTerm<cr>", desc = "ToggleTerm" },
+	},
 	config = function()
 		require("toggleterm").setup()
-		-- Keymaps for toggleterm
-		vim.keymap.set("n", "<leader>T", "<cmd>:ToggleTerm<cr>", { desc = "ToggleTerm" })
 
 		-- Terminal mode navigation (move in/out of terminal splits)
 		function _G.set_terminal_keymaps()

@@ -2,6 +2,9 @@
 return {
 	"stevearc/conform.nvim",
 	event = "VimEnter",
+	keys = {
+		{ "<leader>af", "<cmd>Format<cr>", desc = "Format code" },
+	},
 	config = function()
 		local conform = require("conform")
 		local utils = require("utils")
@@ -76,8 +79,5 @@ return {
 			conform.format({ async = false, lsp_fallback = true, range = range })
 			vim.cmd("write")
 		end, { range = true, desc = "Format code and write buffer with conform.nvim" })
-
-		-- Create keymap after commands are created
-		vim.keymap.set("n", "<leader>af", "<cmd>Format<cr>", { desc = "Format code" })
 	end,
 }

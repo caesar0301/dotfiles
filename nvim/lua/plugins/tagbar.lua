@@ -2,6 +2,10 @@
 return {
 	"preservim/tagbar",
 	cmd = "TagbarToggle",
+	keys = {
+		{ "<leader>tt", "<cmd>TagbarToggle<CR>", desc = "[tagbar] Toggle tagbar" },
+		{ "<F9>", "<cmd>TagbarToggle<CR>", desc = "[tagbar] Toggle tagbar" },
+	},
 	config = function()
 		-- Tagbar settings
 		vim.g.tagbar_position = "right"
@@ -115,9 +119,5 @@ return {
 				P = "method",
 			},
 		}
-
-		-- Keymaps for tagbar
-		vim.keymap.set("n", "<leader>tt", ":TagbarToggle<CR>", { desc = "[tagbar] Toggle tagbar" })
-		vim.keymap.set("n", "<F9>", ":TagbarToggle<CR>", { desc = "[tagbar] Toggle tagbar" })
 	end,
 }

@@ -8,6 +8,35 @@ return {
 		{ "<leader>tg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
 		{ "<leader>tb", "<cmd>Telescope buffers<cr>", desc = "Find buffers" },
 		{ "<leader>th", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
+		{
+			"<leader>ff",
+			function()
+				require("telescope.builtin").find_files()
+			end,
+			desc = "[telescope] Find files",
+		},
+		{
+			"<leader>fw",
+			function()
+				require("telescope.builtin").grep_string()
+			end,
+			desc = "[telescope] Find current word",
+		},
+		{
+			"<leader>fg",
+			function()
+				require("telescope.builtin").live_grep()
+			end,
+			desc = "[telescope] Search everywhere",
+		},
+		{
+			"<leader>fd",
+			function()
+				local dir = vim.fn.input("Directory: ", vim.fn.expand("%:p:h"), "dir")
+				require("telescope.builtin").live_grep({ cwd = dir })
+			end,
+			desc = "[telescope] Search in directory",
+		},
 	},
 	dependencies = {
 		"nvim-lua/plenary.nvim",
@@ -90,26 +119,5 @@ return {
 				},
 			},
 		})
-
-		-- Additional Telescope keymaps
-		vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "[telescope] Find files" })
-		vim.keymap.set(
-			"n",
-			"<leader>fw",
-			require("telescope.builtin").grep_string,
-			{ desc = "[telescope] Find current word" }
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>fg",
-			require("telescope.builtin").live_grep,
-			{ desc = "[telescope] Search everywhere" }
-		)
-
-		local function live_grep_directory()
-			local dir = vim.fn.input("Directory: ", vim.fn.expand("%:p:h"), "dir")
-			require("telescope.builtin").live_grep({ cwd = dir })
-		end
-		vim.keymap.set("n", "<leader>fd", live_grep_directory, { desc = "[telescope] Search in directory" })
 	end,
 }

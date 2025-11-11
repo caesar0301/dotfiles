@@ -2,6 +2,11 @@
 return {
 	"nvim-tree/nvim-tree.lua",
 	cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile" },
+	keys = {
+		{ "<F8>", "<cmd>NvimTreeFindFileToggle!<cr>", desc = "[nvim-tree] Toggle find file" },
+		{ "<leader>N", "<cmd>NvimTreeFindFileToggle!<cr>", desc = "[nvim-tree] Toggle find file" },
+		{ "<leader>nn", "<cmd>NvimTreeFindFileToggle!<cr>", desc = "[nvim-tree] Toggle find file" },
+	},
 	dependencies = {
 		"nvim-tree/nvim-web-devicons",
 		"antosha417/nvim-lsp-file-operations",
@@ -68,15 +73,5 @@ return {
 				dotfiles = false,
 			},
 		})
-
-		-- Keymaps for nvim-tree
-		vim.keymap.set("n", "<F8>", "<cmd>:NvimTreeFindFileToggle!<cr>", { desc = "[nvim-tree] Toggle find file" })
-		vim.keymap.set("n", "<leader>N", "<cmd>:NvimTreeFindFileToggle!<cr>", { desc = "[nvim-tree] Toggle find file" })
-		vim.keymap.set(
-			"n",
-			"<leader>nn",
-			"<cmd>:NvimTreeFindFileToggle!<cr>",
-			{ desc = "[nvim-tree] Toggle find file" }
-		)
 	end,
 }
