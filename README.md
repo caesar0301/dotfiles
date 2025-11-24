@@ -30,7 +30,7 @@ Run `sh zsh/install.sh` and refer to [zsh/README.md](zsh/README.md)
 
 Plugins:
 
-* [caesardev](https://github.com/caesar0301/zsh-plugin-caesardev): my personal daily dev plugins
+* [caesardev](https://github.com/caesar0301/zsh-caesardev): my personal daily dev plugins
 
 ### Tmux
 
