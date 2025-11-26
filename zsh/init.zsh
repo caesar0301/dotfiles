@@ -13,6 +13,9 @@ ZSH_PLUGIN_DIR="${ZSH_CONFIG_DIR}/plugins/"
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 ZINIT_WORKDIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit"
 
+# Enable profiling to identify slow sections
+# zmodload zsh/zprof
+
 source "${ZINIT_HOME}/zinit.zsh"
 source "${ZSH_CONFIG_DIR}/_helper.zsh"
 
@@ -50,6 +53,7 @@ zinit ice wait lucid
 zinit snippet OMZP::alias-finder
 
 # Auto command completion
+zinit ice wait lucid
 zinit light zsh-users/zsh-completions
 
 # Fish-like auto suggestions on history
@@ -57,20 +61,23 @@ zinit ice lucid wait='0' atload='_zsh_autosuggest_start'
 zinit light zsh-users/zsh-autosuggestions
 
 # flatpak auto completion
+zinit ice wait lucid
 zinit light bilelmoussaoui/flatpak-zsh-completion
 
 # Command output highlighting
 zinit ice pick "zsh-syntax-highlighting.zsh" wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Shell proxy
-zinit light caesar0301/zsh-shell-proxy
-
 # User custom plugins
 _zinit_ice_custom_extensions
 
 autoload -U parseopts zargs zcalc zed zmv
-autoload -Uz compinit && compinit -u
+autoload -Uz compinit
+if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit -u
+else
+  compinit -C -u
+fi
 zinit cdreplay -q
 
 ###------------------------------------------------
@@ -104,3 +111,6 @@ export PATH=$HOME/.npm-global/bin:$PATH
 
 # respect fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Show profiling results on startup
+# zprof
