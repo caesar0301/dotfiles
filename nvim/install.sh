@@ -75,20 +75,7 @@ function check_dependencies {
   fi
 
   # Check bc for version comparison (install if missing on Linux)
-  if is_linux && ! checkcmd bc; then
-    warn "bc (basic calculator) not found, attempting to install for version comparisons"
-    if checkcmd apt-get; then
-      sudo apt-get update && sudo apt-get install -y bc
-    elif checkcmd yum; then
-      sudo yum install -y bc
-    elif checkcmd dnf; then
-      sudo dnf install -y bc
-    elif checkcmd pacman; then
-      sudo pacman -S --noconfirm bc
-    else
-      warn "Could not install bc automatically, version comparisons may not work correctly"
-    fi
-  fi
+  install_bc
 
   if [ ${#missing_deps[@]} -gt 0 ]; then
     error "Missing required dependencies: ${missing_deps[*]}"
@@ -112,10 +99,6 @@ function install_lang_formatters {
   # Install pip formatters
   if ! pip_install_lib ${FORMATTERS_PIP}; then
     warn "Failed to install some pip formatters"
-  fi
-
-  if ! npm_install_lib neovim; then
-    warn "Failed to install neovim"
   fi
 
   if ! checkcmd stylua; then
@@ -209,6 +192,10 @@ function handle_neovim {
     warn "Neovim configuration directory already exists, skipping installation"
   else
     install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
+  fi
+
+  if ! npm_install_lib neovim; then
+    warn "Failed to install neovim"
   fi
 }
 

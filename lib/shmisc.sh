@@ -953,3 +953,9 @@ install_cargo() {
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   "$script_dir/install-cargo.sh"
 }
+
+install_bc() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  "$script_dir/install-bc.sh"
+}
