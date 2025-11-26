@@ -202,8 +202,44 @@ vim.opt.swapfile = false
 vim.opt.spelllang = vim.opt.spelllang + "en_us" + "cjk"
 vim.opt.spell = false
 
--- In case of invalid default Python3 version
-local nvimpy = utils.get_env("NVIM_PYTHON3", "")
-if nvimpy ~= "" then
-	vim.g.python3_host_prog = nvimpy .. "/bin/python3"
+-- Python3 provider configuration
+-- Priority:
+-- 1. NVIM_PYTHON3 environment variable (explicit override)
+-- 2. Auto-detect pyenv neovim virtualenv
+-- 3. Use system Python (fallback)
+local function setup_python3_provider()
+	local python_path = nil
+
+	-- 1. Check explicit environment variable
+	local nvimpy = utils.get_env("NVIM_PYTHON3", "")
+	if nvimpy ~= "" then
+		local explicit_path = nvimpy .. "/bin/python3"
+		if vim.fn.executable(explicit_path) == 1 then
+			python_path = explicit_path
+		end
+	end
+
+	-- 2. Auto-detect pyenv neovim virtualenv
+	if not python_path then
+		local pyenv_root = utils.get_env("PYENV_ROOT", vim.fn.expand("~/.pyenv"))
+		local neovim_venv = pyenv_root .. "/versions/neovim/bin/python3"
+		if vim.fn.executable(neovim_venv) == 1 then
+			python_path = neovim_venv
+		end
+	end
+
+	-- 3. Try to find pyenv Python (fallback to system Python handled by Neovim)
+	if not python_path then
+		local pyenv_python = vim.fn.trim(vim.fn.system("pyenv which python3 2>/dev/null"))
+		if pyenv_python ~= "" and vim.fn.executable(pyenv_python) == 1 then
+			python_path = pyenv_python
+		end
+	end
+
+	-- Set the Python provider if we found a valid path
+	if python_path then
+		vim.g.python3_host_prog = python_path
+	end
 end
+
+setup_python3_provider()

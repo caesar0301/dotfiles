@@ -959,3 +959,20 @@ install_bc() {
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   "$script_dir/install-bc.sh"
 }
+
+# Install Neovim Python provider (dedicated pyenv virtualenv)
+install_nvim_python() {
+  if ! checkcmd pyenv; then
+    warn "pyenv is not installed, skipping Neovim Python provider setup"
+    info "Install pyenv first using: install_pyenv"
+    return 1
+  fi
+
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-nvim-python.sh"
+}

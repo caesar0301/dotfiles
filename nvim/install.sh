@@ -194,6 +194,8 @@ function handle_neovim {
     install_file_pair "$THISDIR" "$XDG_CONFIG_HOME/nvim"
   fi
 
+  install_nvim_python
+
   if ! npm_install_lib neovim; then
     warn "Failed to install neovim"
   fi
