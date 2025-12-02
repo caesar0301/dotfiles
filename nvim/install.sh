@@ -25,18 +25,8 @@ source "$THISDIR/../lib/shmisc.sh" || {
   exit 1
 }
 
-# Package manager keys and their packages
-readonly PKG_PIP="pip"
-readonly PKG_NPM="npm"
-readonly PKG_GO="go"
-
-# Formatter packages for each package manager
-readonly FORMATTERS_PIP="pynvim black sqlparse cmake_format"
-
-# LSP packages for each package manager
-readonly LSP_PIP="pyright cmake-language-server"
+readonly FORMATTERS_PIP="pynvim cmake_format"
 readonly LSP_R="languageserver"
-readonly LSP_GO="golang.org/x/tools/gopls@latest github.com/jstemmer/gotags@latest"
 
 function check_dependencies {
   local missing_deps=()
@@ -54,19 +44,6 @@ function check_dependencies {
     fi
   fi
 
-  # Check essential package managers
-  local required_cmds=(
-    "${PKG_PIP}"
-    "${PKG_NPM}"
-    "${PKG_GO}"
-  )
-
-  for cmd in "${required_cmds[@]}"; do
-    if ! checkcmd "$cmd"; then
-      missing_deps+=("$cmd")
-    fi
-  done
-
   # Check ripgrep for telescope.nvim
   if ! checkcmd rg; then
     warn "ripgrep not found, telescope.nvim functionality will be limited"
@@ -74,54 +51,75 @@ function check_dependencies {
 
   # Check bc for version comparison (install if missing on Linux)
   install_bc
-
-  if [ ${#missing_deps[@]} -gt 0 ]; then
-    error "Missing required dependencies: ${missing_deps[*]}"
-    return 1
-  fi
 }
 
 function install_lang_formatters {
   info "Installing language formatters..."
-
-  # Install Java formatter
-  if ! install_google_java_format; then
-    warn "Failed to install google-java-format"
-  fi
-
-  # Install shell formatter
-  if ! install_shfmt; then
-    warn "Failed to install shfmt"
-  fi
 
   # Install pip formatters
   if ! pip_install_lib ${FORMATTERS_PIP}; then
     warn "Failed to install some pip formatters"
   fi
 
-  if ! checkcmd stylua; then
-    if ! npm_install_lib @johnnymorganz/stylua-bin; then
-      warn "Failed to install stylua"
-    fi
-  fi
+  # Install formatters via brew (preferred) or fallback to npm/go/pip/script
+  local formatter_packages=(
+    "stylua"
+    "js-beautify"
+    "yaml-language-server"
+    "yamlfmt"
+    "shfmt"
+    "google-java-format"
+    "black"
+    "sqlparse"
+  )
 
-  if ! checkcmd js-beautify; then
-    if ! npm_install_lib js-beautify; then
-      warn "Failed to install js-beautify"
+  for pkg in "${formatter_packages[@]}"; do
+    if checkcmd "$pkg"; then
+      info "$pkg already installed"
+      continue
     fi
-  fi
 
-  if ! checkcmd yaml-language-server; then
-    if ! npm_install_lib yaml-language-server; then
-      warn "Failed to install yaml-language-server"
+    if checkcmd brew; then
+      if brew install "$pkg" 2>/dev/null; then
+        success "Installed $pkg via brew"
+        continue
+      fi
     fi
-  fi
 
-  if ! checkcmd yamlfmt; then
-    if ! go_install_lib github.com/google/yamlfmt/cmd/yamlfmt@latest; then
-      warn "Failed to install yamlfmt"
-    fi
-  fi
+    # Fallback to npm/go/script for specific packages
+    case "$pkg" in
+    stylua)
+      if ! npm_install_lib @johnnymorganz/stylua-bin; then
+        warn "Failed to install stylua"
+      fi
+      ;;
+    js-beautify | yaml-language-server)
+      if ! npm_install_lib "$pkg"; then
+        warn "Failed to install $pkg"
+      fi
+      ;;
+    yamlfmt)
+      if ! go_install_lib github.com/google/yamlfmt/cmd/yamlfmt@latest; then
+        warn "Failed to install yamlfmt"
+      fi
+      ;;
+    shfmt)
+      if ! install_shfmt; then
+        warn "Failed to install shfmt"
+      fi
+      ;;
+    google-java-format)
+      if ! install_google_java_format; then
+        warn "Failed to install google-java-format"
+      fi
+      ;;
+    black | sqlparse)
+      if ! pip_install_lib "$pkg"; then
+        warn "Failed to install $pkg"
+      fi
+      ;;
+    esac
+  done
 
   info "Language formatters installation completed"
 }
@@ -129,20 +127,51 @@ function install_lang_formatters {
 function install_lsp_deps {
   info "Installing LSP servers..."
 
-  # Install pip LSP servers
-  if ! pip_install_lib ${LSP_PIP}; then
-    warn "Failed to install some pip LSP servers"
-  fi
-
   # Install R LSP server
   if ! rlang_install_lib ${LSP_R}; then
     warn "Failed to install R language server"
   fi
 
-  # Install Go LSP servers
-  if ! go_install_lib ${LSP_GO}; then
-    warn "Failed to install some Go LSP servers"
-  fi
+  # Install LSP servers via brew (preferred) or fallback to pip/go
+  local lsp_packages=(
+    "pyright"
+    "cmake-language-server"
+    "gopls"
+    "gotags"
+  )
+
+  for pkg in "${lsp_packages[@]}"; do
+    if checkcmd "$pkg"; then
+      info "$pkg already installed"
+      continue
+    fi
+
+    if checkcmd brew; then
+      if brew install "$pkg" 2>/dev/null; then
+        success "Installed $pkg via brew"
+        continue
+      fi
+    fi
+
+    # Fallback to pip/go for specific packages
+    case "$pkg" in
+    pyright | cmake-language-server)
+      if ! pip_install_lib "$pkg"; then
+        warn "Failed to install $pkg"
+      fi
+      ;;
+    gopls)
+      if ! go_install_lib "golang.org/x/tools/gopls@latest"; then
+        warn "Failed to install gopls"
+      fi
+      ;;
+    gotags)
+      if ! go_install_lib "github.com/jstemmer/gotags@latest"; then
+        warn "Failed to install gotags"
+      fi
+      ;;
+    esac
+  done
 
   info "LSP servers installation completed"
 }
