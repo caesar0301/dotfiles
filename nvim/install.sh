@@ -177,35 +177,50 @@ function cleanse_all {
   info "All Neovim files cleansed!"
 }
 
-# Change to 0 to install a copy instead of soft link
-LINK_INSTEAD_OF_COPY=1
-while getopts fsech opt; do
-  case $opt in
-  f) LINK_INSTEAD_OF_COPY=0 ;;
-  s) LINK_INSTEAD_OF_COPY=1 ;;
-  c) cleanse_all && exit 0 ;;
-  h | ?)
-    usage_me "install.sh"
-    exit 0
-    ;;
-  esac
-done
+function main {
+  # Parse command line options
+  # Change to 0 to install a copy instead of soft link
+  LINK_INSTEAD_OF_COPY=1
+  while getopts fsech opt; do
+    case $opt in
+    f) LINK_INSTEAD_OF_COPY=0 ;;
+    s) LINK_INSTEAD_OF_COPY=1 ;;
+    c) cleanse_all && exit 0 ;;
+    h | ?)
+      usage_me "install.sh"
+      exit 0
+      ;;
+    esac
+  done
 
-install_neovim && handle_neovim
+  # Install Neovim and configure
+  install_neovim && handle_neovim
 
-check_dependencies
+  # Check required dependencies
+  check_dependencies
 
-install_lsp_deps
-install_jdt_language_server
-install_hack_nerd_font # Required by nvim-web-devicons
-install_lang_formatters
-install_fzf
-install_universal_ctags # Required by Tagbar
+  # Install LSP servers
+  install_lsp_deps
 
-# Conditionally install cargo based on kernel version (handled in shmisc.sh)
-install_cargo
+  # Install JDTLS if INSTALL_JDTLS=1 is set
+  if [[ "${INSTALL_JDTLS:-0}" == "1" ]]; then
+    info "JDTLS installation enabled via INSTALL_JDTLS=1"
+    install_jdt_language_server
+  fi
 
-warn "================================================"
-warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
-warn "Run :checkhealth to validate overall health"
-warn "================================================"
+  # Install fonts and formatters
+  install_hack_nerd_font # Required by nvim-web-devicons
+  install_lang_formatters
+
+  # Install additional tools
+  install_fzf
+  install_universal_ctags # Required by Tagbar
+  install_cargo           # Conditionally based on kernel version
+
+  warn "================================================"
+  warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
+  warn "Run :checkhealth to validate overall health"
+  warn "================================================"
+}
+
+main "$@"

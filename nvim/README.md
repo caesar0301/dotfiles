@@ -52,6 +52,16 @@
 | `JAVA_HOME_4GJF`     | Java executable for google-java-formatter   | Uses `JAVA_HOME`                             |
 | `GJF_JAR_FILE`       | Jar path for google-java-formatter          | `~/.local/share/google-java-format/google-java-format-all-deps.jar` |
 
+**Example:**
+```bash
+# Install with JDTLS
+INSTALL_JDTLS=1 sh nvim/install.sh
+
+# Or set in your environment
+export INSTALL_JDTLS=1
+sh nvim/install.sh
+```
+
 ## Features
 
 - **LSP Management:** `nvim-lspconfig`
