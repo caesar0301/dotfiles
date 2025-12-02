@@ -652,55 +652,50 @@ install_file_pair() {
 
   local src="$1" dest="$2" dest_dir backup_suffix
 
-  # Ensure the source file/directory exists
   [[ -e "$src" ]] || error "Source does not exist: $src"
 
-  # Resolve the destination directory path and create it if necessary
   dest_dir=$(dirname "$dest")
   create_dir "$dest_dir"
 
-  # Create backup if destination exists
-  if [[ -e "$dest" ]]; then
+  # Backup existing files/directories (skip symlinks)
+  if [[ -e "$dest" ]] && ! [[ -L "$dest" ]]; then
     backup_suffix=".backup.$(date +%Y%m%d_%H%M%S)"
     info "Creating backup: ${dest}${backup_suffix}"
-
-    # If the destination is a symbolic link, back up the real file it points to
-    if [[ -L "$dest" ]]; then
-      local real_dest
-      real_dest=$(readlink -f "$dest")
-
-      # Check if the real destination exists before attempting to copy
-      if [[ -e "$real_dest" ]]; then
-        if [[ -d "$real_dest" ]]; then
-          cp -rL "$real_dest" "${dest}${backup_suffix}"
-        else
-          cp -L "$real_dest" "${dest}${backup_suffix}"
-        fi
-      else
-        info "Skipping backup: Symbolic link target does not exist: $real_dest"
-      fi
-    # If the destination is a regular file or directory, back it up normally
-    elif [[ -d "$dest" ]]; then
+    if [[ -d "$dest" ]]; then
       cp -r "$dest" "${dest}${backup_suffix}"
     else
       cp "$dest" "${dest}${backup_suffix}"
     fi
   fi
 
-  # Install file (copy or symlink)
+  # Install as symlink or copy
   if [[ ${LINK_INSTEAD_OF_COPY:-0} == 1 ]]; then
-    # Create a symbolic link from the real source path to the destination
-    ln -sf "$(realpath "$src")" "$dest" || error "Failed to create symlink: $src -> $dest"
+    local src_real
+    src_real=$(cd "$(dirname "$src")" && pwd)/$(basename "$src")
+
+    if [[ -L "$dest" ]]; then
+      local dest_link dest_resolved
+      dest_link=$(readlink "$dest")
+      dest_resolved=$(cd "$(dirname "$dest")" 2>/dev/null && readlink -f "$dest" 2>/dev/null || echo "")
+
+      if [[ "$dest_link" == "$src_real" ]] || [[ "$dest_resolved" == "$src_real" ]]; then
+        info "Symlink already exists and points to correct location: $dest"
+        return 0
+      fi
+      rm -f "$dest"
+    elif [[ -e "$dest" ]]; then
+      rm -rf "$dest"
+    fi
+
+    ln -sf "$src_real" "$dest" || error "Failed to create symlink: $src_real -> $dest"
     info "Symlinked: $(basename "$src") -> $(basename "$dest")"
   else
-    # Copy the source, dereferencing any symlinks within it
+    [[ -e "$dest" ]] && rm -rf "$dest"
     cp -rL "$src" "$dest" || error "Failed to copy: $src -> $dest"
     info "Copied: $(basename "$src") -> $(basename "$dest")"
   fi
 
-  # Verify that the installation was successful
   [[ -e "$dest" ]] || error "Installation verification failed: $dest"
-
   info "Installation successful."
 }
 
@@ -1042,7 +1037,17 @@ change_shell_to_zsh() {
 
   # Check current shell
   local current_shell
-  current_shell=$(getent passwd "$(whoami)" | cut -d: -f7 2>/dev/null || echo "$SHELL")
+  if is_macos; then
+    # On macOS, use dscl to get the shell
+    current_shell=$(dscl . -read "/Users/$(whoami)" UserShell 2>/dev/null | awk '{print $2}' || echo "$SHELL")
+  else
+    # On Linux, use getent if available, otherwise fallback to $SHELL
+    if command -v getent >/dev/null 2>&1; then
+      current_shell=$(getent passwd "$(whoami)" | cut -d: -f7 2>/dev/null || echo "$SHELL")
+    else
+      current_shell="$SHELL"
+    fi
+  fi
 
   # Check if already using zsh
   if [[ "$current_shell" == "$zsh_path" ]] || [[ "$current_shell" == *"/zsh" ]]; then
@@ -1078,4 +1083,82 @@ change_shell_to_zsh() {
     info "Please manually change your shell by running:"
     info "  chsh -s $zsh_path"
   fi
+}
+
+# Configure Homebrew to use custom repositories (Aliyun mirrors)
+configure_homebrew_mirrors() {
+  # Check if brew is available
+  if ! command -v brew >/dev/null 2>&1; then
+    warn "Homebrew not found, skipping mirror configuration"
+    return 0
+  fi
+
+  info "Configuring Homebrew to use Aliyun mirrors..."
+
+  # Configure Homebrew core repository
+  if brew --repo >/dev/null 2>&1; then
+    if git -C "$(brew --repo)" remote set-url origin https://mirrors.aliyun.com/homebrew/brew.git 2>/dev/null; then
+      success "Homebrew core repository configured"
+    else
+      warn "Failed to configure Homebrew core repository"
+    fi
+  fi
+
+  # Configure Homebrew core formula repository
+  if brew --repo homebrew/core >/dev/null 2>&1; then
+    if git -C "$(brew --repo homebrew/core)" remote set-url origin https://mirrors.aliyun.com/homebrew/homebrew-core.git 2>/dev/null; then
+      success "Homebrew core formula repository configured"
+    else
+      warn "Failed to configure Homebrew core formula repository"
+    fi
+  fi
+
+  # Configure Homebrew cask repository
+  if brew --repo homebrew/cask >/dev/null 2>&1; then
+    if git -C "$(brew --repo homebrew/cask)" remote set-url origin https://mirrors.aliyun.com/homebrew/homebrew-cask.git 2>/dev/null; then
+      success "Homebrew cask repository configured"
+    else
+      warn "Failed to configure Homebrew cask repository"
+    fi
+  fi
+
+  # Configure Homebrew Bottles domain
+  # Add to shell configuration file (prefer zsh config if available, otherwise use profile)
+  local shell_rcfile
+  if [[ -f "${ZDOTDIR:-${HOME}}/.zshrc" ]]; then
+    shell_rcfile="${ZDOTDIR:-${HOME}}/.zshrc"
+  elif [[ -f "${ZDOTDIR:-${HOME}}/.zprofile" ]]; then
+    shell_rcfile="${ZDOTDIR:-${HOME}}/.zprofile"
+  elif [[ -f "${HOME}/.bashrc" ]]; then
+    shell_rcfile="${HOME}/.bashrc"
+  elif [[ -f "${HOME}/.bash_profile" ]]; then
+    shell_rcfile="${HOME}/.bash_profile"
+  elif [[ -f "${HOME}/.profile" ]]; then
+    shell_rcfile="${HOME}/.profile"
+  else
+    # Default to .zshrc if zsh is likely being used
+    shell_rcfile="${ZDOTDIR:-${HOME}}/.zshrc"
+  fi
+
+  # Add HOMEBREW_BOTTLE_DOMAIN if not already present
+  if [[ -f "$shell_rcfile" ]]; then
+    if ! grep -q "HOMEBREW_BOTTLE_DOMAIN" "$shell_rcfile" 2>/dev/null; then
+      echo "" >>"$shell_rcfile"
+      echo "# Homebrew Bottles mirror" >>"$shell_rcfile"
+      echo "export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew-bottles" >>"$shell_rcfile"
+      success "Added HOMEBREW_BOTTLE_DOMAIN to $shell_rcfile"
+    else
+      info "HOMEBREW_BOTTLE_DOMAIN already configured in $shell_rcfile"
+    fi
+  else
+    # Create file if it doesn't exist
+    echo "# Homebrew Bottles mirror" >"$shell_rcfile"
+    echo "export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew-bottles" >>"$shell_rcfile"
+    success "Created $shell_rcfile with HOMEBREW_BOTTLE_DOMAIN"
+  fi
+
+  # Export for current session
+  export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew-bottles
+
+  success "Homebrew mirrors configured successfully"
 }

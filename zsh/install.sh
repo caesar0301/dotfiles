@@ -194,9 +194,31 @@ main() {
     info "AI code agents installation enabled via INSTALL_AI_CODE_AGENTS=1"
   fi
 
+  # Install core dependencies
+  local homebrew_installed=false
+  for dep_func in "${core_deps[@]}"; do
+    if [[ "$dep_func" == "install_homebrew" ]]; then
+      homebrew_installed=true
+    fi
+    
+    if declare -f "$dep_func" >/dev/null; then
+      info "Installing dependency: ${dep_func#install_}"
+      if ! "$dep_func"; then
+        warn "Failed to install ${dep_func#install_}, continuing..."
+      fi
+    else
+      warn "Dependency function not found: $dep_func"
+    fi
+  done
+
   # Installation steps
   handle_shell_proxy
   handle_zsh_config
+
+  # Configure Homebrew mirrors if Homebrew was installed
+  if [[ "$homebrew_installed" == "true" ]] && command -v brew >/dev/null 2>&1; then
+    configure_homebrew_mirrors
+  fi
 
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
