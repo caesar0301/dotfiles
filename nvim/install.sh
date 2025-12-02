@@ -29,7 +29,6 @@ source "$THISDIR/../lib/shmisc.sh" || {
 readonly PKG_PIP="pip"
 readonly PKG_NPM="npm"
 readonly PKG_GO="go"
-readonly PKG_R="r"
 
 # Formatter packages for each package manager
 readonly FORMATTERS_PIP="pynvim black sqlparse cmake_format"
@@ -60,7 +59,6 @@ function check_dependencies {
     "${PKG_PIP}"
     "${PKG_NPM}"
     "${PKG_GO}"
-    "${PKG_R}"
   )
 
   for cmd in "${required_cmds[@]}"; do
