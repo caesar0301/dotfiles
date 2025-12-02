@@ -976,3 +976,106 @@ install_nvim_python() {
   fi
   "$script_dir/install-nvim-python.sh"
 }
+
+# Install Zinit plugin manager for Zsh
+install_zinit() {
+  info "Installing Zinit plugin manager..."
+  local zinit_home="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
+
+  if [[ -d "$zinit_home/.git" ]]; then
+    info "Zinit already installed, updating..."
+    if git -C "$zinit_home" pull --quiet; then
+      success "Zinit updated successfully"
+    else
+      warn "Failed to update Zinit, continuing with existing installation"
+    fi
+    return 0
+  fi
+
+  # Check git availability
+  checkcmd git || error "Git is required to install Zinit"
+
+  # Create Zinit directory
+  create_dir "$(dirname "$zinit_home")"
+
+  # Clone Zinit repository
+  if git clone --depth 1 --quiet https://github.com/zdharma-continuum/zinit.git "$zinit_home"; then
+    success "Zinit installed successfully"
+    info "Zinit location: $zinit_home"
+  else
+    error "Failed to clone Zinit repository"
+  fi
+}
+
+# Install Zsh shell (check if available)
+install_zsh() {
+  # Check if zsh is executable
+  if command -v zsh >/dev/null 2>&1; then
+    info "Zsh already installed: $(zsh --version)"
+    return 0
+  fi
+
+  # Zsh not found, provide installation instructions
+  print_message "$COLOR_RED" "$LOG_ERROR" "Zsh is not installed or not in PATH" >&2
+  printf "\n%bInstallation Instructions:%b\n" "$COLOR_BOLD$COLOR_YELLOW" "$COLOR_RESET"
+  printf "Please install Zsh from: %bhttps://sourceforge.net/projects/zsh/files/%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "\nQuick installation options:\n"
+  printf "  • %bUbuntu/Debian:%b sudo apt install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
+  printf "  • %bCentOS/RHEL:%b sudo yum install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
+  printf "  • %bmacOS:%b brew install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
+  printf "  • %bSource:%b Download from SourceForge and build from source\n" "$COLOR_GREEN" "$COLOR_RESET"
+  printf "\n"
+  exit 1
+}
+
+# Change default shell to zsh
+change_shell_to_zsh() {
+  # Check if zsh is available
+  if ! command -v zsh >/dev/null 2>&1; then
+    warn "Zsh not found in PATH, skipping shell change"
+    return 0
+  fi
+
+  # Get full path to zsh
+  local zsh_path
+  zsh_path=$(command -v zsh)
+
+  # Check current shell
+  local current_shell
+  current_shell=$(getent passwd "$(whoami)" | cut -d: -f7 2>/dev/null || echo "$SHELL")
+
+  # Check if already using zsh
+  if [[ "$current_shell" == "$zsh_path" ]] || [[ "$current_shell" == *"/zsh" ]]; then
+    info "Default shell is already zsh: $current_shell"
+    return 0
+  fi
+
+  info "Current shell: $current_shell"
+  info "Changing default shell to zsh: $zsh_path"
+
+  # Verify zsh is in /etc/shells (required by chsh on some systems)
+  if ! grep -q "^$zsh_path$" /etc/shells 2>/dev/null; then
+    warn "Zsh path not found in /etc/shells"
+    if is_macos; then
+      info "On macOS, you may need to add zsh to /etc/shells manually:"
+      info "  echo '$zsh_path' | sudo tee -a /etc/shells"
+    fi
+  fi
+
+  # Change shell using chsh
+  if command -v chsh >/dev/null 2>&1; then
+    if chsh -s "$zsh_path" 2>/dev/null; then
+      success "Default shell changed to zsh"
+      info "The change will take effect in new terminal sessions"
+      info "To use zsh immediately, run: exec zsh"
+    else
+      warn "Failed to change shell using chsh"
+      info "You can manually change your shell by running:"
+      info "  chsh -s $zsh_path"
+    fi
+  else
+    warn "chsh command not found, cannot change shell automatically"
+    info "Please manually change your shell by running:"
+    info "  chsh -s $zsh_path"
+  fi
+}

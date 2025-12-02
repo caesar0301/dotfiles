@@ -42,4 +42,47 @@ Zsh plugins are managed by [zinit project](https://github.com/zdharma-continuum/
 
 ## Configurable ENV vars
 
+### Shell Configuration
 * `SHELLPROXY_URL`: proxy address used by `shell-proxy` plugin.
+
+### Installation Configuration
+
+The installer supports optional environment variables to control which dependencies are installed:
+
+#### Core Dependencies
+By default, the installer installs:
+- Zsh shell binary (`install_zsh`)
+- Python version manager (`install_pyenv`)
+
+#### Optional Dependencies
+
+**Homebrew Installation:**
+```bash
+# Enable Homebrew installation
+INSTALL_HOMEBREW=1 sh zsh/install.sh
+```
+
+**Optional Development Tools:**
+To install optional dependencies, edit `zsh/install.sh` and uncomment the desired tools in the `optional_deps` array:
+```bash
+local optional_deps=(
+  "install_jenv"     # Java version manager
+  "install_gvm"      # Go version manager
+  "install_nvm"      # Node version manager
+)
+```
+
+Available optional dependencies:
+- `install_jenv` - Java version manager
+- `install_gvm` - Go version manager  
+- `install_nvm` - Node version manager
+
+**Example:**
+```bash
+# Install with Homebrew
+INSTALL_HOMEBREW=1 sh zsh/install.sh
+
+# Or set in your environment
+export INSTALL_HOMEBREW=1
+sh zsh/install.sh
+```

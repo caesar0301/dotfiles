@@ -40,82 +40,6 @@ readonly INSTALL_FILES=(
   "_helper.zsh"
 )
 
-# Install Zinit plugin manager with enhanced validation
-install_zinit() {
-  info "Installing Zinit plugin manager..."
-
-  if [[ -d "$ZINIT_HOME/.git" ]]; then
-    info "Zinit already installed, updating..."
-    if git -C "$ZINIT_HOME" pull --quiet; then
-      success "Zinit updated successfully"
-    else
-      warn "Failed to update Zinit, continuing with existing installation"
-    fi
-    return 0
-  fi
-
-  # Check git availability
-  checkcmd git || error "Git is required to install Zinit"
-
-  # Create Zinit directory
-  create_dir "$(dirname "$ZINIT_HOME")"
-
-  # Clone Zinit repository
-  if git clone --depth 1 --quiet https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"; then
-    success "Zinit installed successfully"
-    info "Zinit location: $ZINIT_HOME"
-  else
-    error "Failed to clone Zinit repository"
-  fi
-}
-
-# Configure shell proxy settings with validation
-handle_shell_proxy() {
-  info "Configuring shell proxy settings..."
-
-  local proxy_source="$THISDIR/config/proxy-config"
-
-  # Validate source file exists
-  [[ -f "$proxy_source" ]] || {
-    warn "Proxy configuration file not found: $proxy_source"
-    return 0
-  }
-
-  # Check if proxy config already exists and is not a symlink
-  if [[ -f "$PROXY_CONFIG" && ! -L "$PROXY_CONFIG" ]]; then
-    warn "Proxy configuration already exists: $PROXY_CONFIG"
-    warn "Skipping to preserve existing settings"
-    return 0
-  fi
-
-  # Create config directory
-  create_dir "$(dirname "$PROXY_CONFIG")"
-
-  # Install proxy configuration
-  install_file_pair "$proxy_source" "$PROXY_CONFIG"
-  success "Proxy configuration installed"
-}
-
-install_zsh() {
-  # Check if zsh is executable
-  if command -v zsh >/dev/null 2>&1; then
-    info "Zsh already installed: $(zsh --version)"
-    return 0
-  fi
-
-  # Zsh not found, provide installation instructions
-  error "Zsh is not installed or not in PATH"
-  printf "\n%bInstallation Instructions:%b\n" "$COLOR_BOLD$COLOR_YELLOW" "$COLOR_RESET"
-  printf "Please install Zsh from: %bhttps://sourceforge.net/projects/zsh/files/%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "\nQuick installation options:\n"
-  printf "  • %bUbuntu/Debian:%b sudo apt install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
-  printf "  • %bCentOS/RHEL:%b sudo yum install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
-  printf "  • %bmacOS:%b brew install zsh\n" "$COLOR_GREEN" "$COLOR_RESET"
-  printf "  • %bSource:%b Download from SourceForge and build from source\n" "$COLOR_GREEN" "$COLOR_RESET"
-
-  exit 1
-}
-
 # Install custom Zsh plugins
 install_zsh_plugins() {
   local plugins_dir="$THISDIR/plugins"
@@ -146,6 +70,33 @@ install_zsh_plugins() {
   success "Custom plugins installed"
 }
 
+# Configure shell proxy settings with validation
+handle_shell_proxy() {
+  info "Configuring shell proxy settings..."
+
+  local proxy_source="$THISDIR/config/proxy-config"
+
+  # Validate source file exists
+  [[ -f "$proxy_source" ]] || {
+    warn "Proxy configuration file not found: $proxy_source"
+    return 0
+  }
+
+  # Check if proxy config already exists and is not a symlink
+  if [[ -f "$PROXY_CONFIG" && ! -L "$PROXY_CONFIG" ]]; then
+    warn "Proxy configuration already exists: $PROXY_CONFIG"
+    warn "Skipping to preserve existing settings"
+    return 0
+  fi
+
+  # Create config directory
+  create_dir "$(dirname "$PROXY_CONFIG")"
+
+  # Install proxy configuration
+  install_file_pair "$proxy_source" "$PROXY_CONFIG"
+  success "Proxy configuration installed"
+}
+
 # Install Zsh configuration files with enhanced validation
 handle_zsh_config() {
   info "Installing Zsh configuration..."
@@ -170,8 +121,8 @@ handle_zsh_config() {
     fi
   done
 
-  # Install custom plugins
-  install_zsh_plugins
+  # Change default shell to zsh if not already
+  change_shell_to_zsh
 
   success "Zsh configuration installed"
 }
@@ -200,45 +151,6 @@ cleanse_zsh() {
   success "Zsh configuration cleansed successfully"
 }
 
-# Install development environment dependencies
-install_dev_environment() {
-  info "Installing development environment dependencies..."
-
-  # Core dependencies
-  local core_deps=(
-    "install_homebrew"
-    "install_zsh"   # Zsh shell binary
-    "install_pyenv" # Python version manager
-  )
-
-  # Optional dependencies (commented out by default)
-  local optional_deps=(
-    # "install_jenv"     # Java version manager
-    # "install_gvm"      # Go version manager
-    # "install_nvm"      # Node version manager
-  )
-
-  # Install core dependencies
-  for dep_func in "${core_deps[@]}"; do
-    if declare -f "$dep_func" >/dev/null; then
-      info "Installing dependency: ${dep_func#install_}"
-      if ! "$dep_func"; then
-        warn "Failed to install ${dep_func#install_}, continuing..."
-      fi
-    else
-      warn "Dependency function not found: $dep_func"
-    fi
-  done
-
-  # Install AI code agents if available
-  if declare -f "install_ai_code_agents" >/dev/null; then
-    info "Installing AI code agents..."
-    install_ai_code_agents || warn "Failed to install AI code agents"
-  fi
-
-  success "Development environment dependencies installed"
-}
-
 # Process command line options
 LINK_INSTEAD_OF_COPY=1
 while getopts fsech opt; do
@@ -257,9 +169,32 @@ done
 main() {
   info "Starting Zsh environment setup..."
 
+  # Core dependencies
+  local core_deps=(
+    "install_zsh"         # Zsh shell binary
+    "install_zinit"       # Zinit plugin manager
+    "install_zsh_plugins" # Zsh plugins
+    "install_pyenv"       # Python version manager
+  )
+
+  # Add homebrew if INSTALL_HOMEBREW=1 is set
+  if [[ "${INSTALL_HOMEBREW:-0}" == "1" ]]; then
+    core_deps+=("install_homebrew")
+    info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
+  fi
+
+  if [[ "${INSTALL_DEVENV:-0}" == "1" ]]; then
+    core_deps+=("install_jenv" "install_gvm" "install_nvm")
+    info "Development environment installation enabled via INSTALL_DEVENV=1"
+  fi
+
+  # Install AI code agents if available
+  if [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]]; then
+    core_deps+=("install_ai_code_agents")
+    info "AI code agents installation enabled via INSTALL_AI_CODE_AGENTS=1"
+  fi
+
   # Installation steps
-  install_dev_environment
-  install_zinit
   handle_shell_proxy
   handle_zsh_config
 
