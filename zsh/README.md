@@ -85,6 +85,13 @@ Enable AI code agents (requires npm >= 20):
 INSTALL_AI_CODE_AGENTS=1 sh zsh/install.sh
 ```
 
+**Custom Development Plugins:**
+Enable custom development plugins (zsh-caesardev):
+```bash
+# Install custom development plugins
+INSTALL_CAESARDEV=1 sh zsh/install.sh
+```
+
 **Combined Examples:**
 ```bash
 # Install with Homebrew and development tools

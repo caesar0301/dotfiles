@@ -62,9 +62,12 @@ install_zsh_plugins() {
     install_file_pair "$plugin_dir" "$target_plugins_dir/$plugin_name"
   done
 
-  # Comment out to skip custom development plugins of my self
-  if [ ! -e "$target_plugins_dir/zsh-caesardev" ]; then
-    git clone --depth=1 https://github.com/caesar0301/zsh-caesardev.git "$target_plugins_dir/zsh-caesardev"
+  # Install custom development plugins (INSTALL_CAESARDEV=1 to enable)
+  if [[ "${INSTALL_CAESARDEV:-0}" == "1" ]]; then
+    if [ ! -e "$target_plugins_dir/zsh-caesardev" ]; then
+      info "Installing zsh-caesardev plugin..."
+      git clone --depth=1 https://github.com/caesar0301/zsh-caesardev.git "$target_plugins_dir/zsh-caesardev"
+    fi
   fi
 
   success "Custom plugins installed"
