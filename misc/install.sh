@@ -4,7 +4,6 @@
 # https://github.com/caesar0301/cool-dotfiles
 #
 # Features:
-# - Local utility scripts installation
 # - SBCL completion configuration
 # - Kitty terminal configuration
 # - Enhanced error handling and validation
@@ -22,7 +21,6 @@ THISDIR=$(dirname "$(realpath "$0")")
 # Configuration constants
 readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
-readonly LOCAL_BIN_DIR="$HOME/.local/bin"
 readonly KITTY_CONFIG_HOME="$XDG_CONFIG_HOME/kitty"
 readonly SBCL_COMPLETIONS="$HOME/.sbcl_completions"
 
@@ -30,46 +28,6 @@ readonly SBCL_COMPLETIONS="$HOME/.sbcl_completions"
 source "$THISDIR/../lib/shmisc.sh" || {
   printf "\033[0;31m✗ Failed to load shmisc.sh\033[0m\n" >&2
   exit 1
-}
-
-# Install local utility scripts with validation
-install_local_bins() {
-  local bin_source_dir="$THISDIR/../bin"
-
-  [[ -d "$bin_source_dir" ]] || {
-    warn "Binary source directory not found: $bin_source_dir"
-    return 0
-  }
-
-  info "Installing local utility scripts..."
-  create_dir "$LOCAL_BIN_DIR"
-
-  local installed_count=0
-  local failed_count=0
-
-  # Install each script individually with validation
-  while IFS= read -r -d '' script_file; do
-    local script_name
-    script_name=$(basename "$script_file")
-    local dest_path="$LOCAL_BIN_DIR/$script_name"
-
-    if cp "$script_file" "$dest_path" && chmod +x "$dest_path"; then
-      info "Installed script: $script_name"
-      ((installed_count++))
-    else
-      warn "Failed to install script: $script_name"
-      ((failed_count++))
-    fi
-  done < <(find "$bin_source_dir" -type f -executable -print0 2>/dev/null || true)
-
-  if [[ $installed_count -gt 0 ]]; then
-    success "Installed $installed_count utility scripts"
-    info "Scripts location: $LOCAL_BIN_DIR"
-  else
-    warn "No utility scripts found to install"
-  fi
-
-  [[ $failed_count -eq 0 ]] || warn "$failed_count scripts failed to install"
 }
 
 # Configure SBCL auto-completion with rlwrap
@@ -156,22 +114,6 @@ cleanse_all() {
 
   local removed_count=0
 
-  # Remove utility scripts
-  local bin_source_dir="$THISDIR/../bin"
-  if [[ -d "$bin_source_dir" ]]; then
-    while IFS= read -r -d '' script_file; do
-      local script_name
-      script_name=$(basename "$script_file")
-      local installed_script="$LOCAL_BIN_DIR/$script_name"
-
-      if [[ -f "$installed_script" ]]; then
-        rm -f "$installed_script"
-        info "Removed script: $script_name"
-        ((removed_count++))
-      fi
-    done < <(find "$bin_source_dir" -type f -executable -print0 2>/dev/null || true)
-  fi
-
   # Remove SBCL completions
   if [[ -f "$SBCL_COMPLETIONS" ]]; then
     rm -f "$SBCL_COMPLETIONS"
@@ -182,9 +124,6 @@ cleanse_all() {
   # Remove Kitty configuration
   cleanse_kitty
   [[ -f "$KITTY_CONFIG_HOME/kitty.conf" ]] || ((removed_count++))
-
-  # Remove empty directories
-  [[ -d "$LOCAL_BIN_DIR" ]] && rmdir "$LOCAL_BIN_DIR" 2>/dev/null || true
 
   if [[ $removed_count -gt 0 ]]; then
     success "Miscellaneous configurations cleansed ($removed_count items removed)"
@@ -212,20 +151,17 @@ main() {
   info "Starting miscellaneous tools installation..."
 
   # Installation steps
-  install_local_bins
   handle_rlwrap_completions
   handle_kitty_config
 
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
-  info "Utility scripts: $LOCAL_BIN_DIR"
   info "SBCL completions: $SBCL_COMPLETIONS"
   info "Kitty configuration: $KITTY_CONFIG_HOME"
 
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
-  printf "  1. Add %b$LOCAL_BIN_DIR%b to your PATH if not already added\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  2. Use rlwrap with SBCL: %brlwrap sbcl%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  3. Launch Kitty to use the new configuration\n"
+  printf "  1. Use rlwrap with SBCL: %brlwrap sbcl%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  2. Launch Kitty to use the new configuration\n"
 
   success "Miscellaneous tools installation completed successfully!"
 }

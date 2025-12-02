@@ -2,7 +2,7 @@
 
 # Decrypt .zshenv.local.enc file and set up local environment
 #
-# Usage: ./decrypt-zshenv-dotme [alias] [encrypted_file]
+# Usage: ./dotme-decrypt-zshenv [alias] [encrypted_file]
 #   alias: GPG alias to use (default: "default")
 #   encrypted_file: Path to encrypted file (default: auto-detect in script directory)
 
@@ -33,7 +33,7 @@ main() {
   local encrypted_file="${2:-}"
   local backup_dir="$HOME"
   local target_file="$HOME/.zshenv.local"
-  local gpg_tool="gpg-dotme"
+  local gpg_tool="dotme-gpg"
 
   # Show help if requested
   if [[ "$alias_name" == "help" || "$alias_name" == "-h" || "$alias_name" == "--help" ]]; then

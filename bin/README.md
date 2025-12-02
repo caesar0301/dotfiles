@@ -1,14 +1,14 @@
 # Bin Directory - Custom Tools and Utilities
 
-This directory contains custom tools and utilities, including the `xxx-dotme` series of personalized tools designed to enhance development workflows.
+This directory contains custom tools and utilities, including the `dotme-xxx` series of personalized tools designed to enhance development workflows.
 
 ## Overview
 
-The `xxx-dotme` series consists of wrapper scripts and enhanced versions of common development tools, customized for personal use cases and improved user experience.
+The `dotme-xxx` series consists of wrapper scripts and enhanced versions of common development tools, customized for personal use cases and improved user experience.
 
 ## Tools Overview
 
-### Google Java Format (`google-java-format-dotme`)
+### Google Java Format (`dotme-google-java-format`)
 
 An enhanced wrapper for Google Java Format with improved Java detection, error handling, and user experience.
 
@@ -23,19 +23,19 @@ An enhanced wrapper for Google Java Format with improved Java detection, error h
 **Usage:**
 ```bash
 # Format a single file
-google-java-format-dotme MyFile.java
+dotme-google-java-format MyFile.java
 
 # Check setup and versions
-google-java-format-dotme --check-version
+dotme-google-java-format --check-version
 
 # Dry run to see what would be formatted
-google-java-format-dotme --dry-run *.java
+dotme-google-java-format --dry-run *.java
 
 # Format directory in-place
-google-java-format-dotme -i src/main/java/
+dotme-google-java-format -i src/main/java/
 
 # Get help
-google-java-format-dotme --help
+dotme-google-java-format --help
 ```
 
 **Environment Variables:**
@@ -43,23 +43,55 @@ google-java-format-dotme --help
 - `JAVA_HOME`: Fallback Java installation
 - `GJF_JAR_FILE`: Custom path to GJF JAR file
 
-### Homebrew Wrapper (`brew-dotme`)
+### GPG Helper (`dotme-gpg`)
 
-Enhanced Homebrew wrapper with cross-platform support and pyenv conflict resolution.
-
-**Features:**
-- Automatic Homebrew path detection (macOS Intel/Apple Silicon, Linux)
-- pyenv conflict resolution
-- Performance optimizations
-- Better error handling
+Convenient GPG operations using key aliases for encryption and decryption.
 
 **Usage:**
 ```bash
-# Use like regular brew
-brew-dotme install package-name
-brew-dotme update
-brew-dotme upgrade
+# Decrypt and display
+dotme-gpg dec <alias> <encrypted_file>
+
+# Encrypt file
+dotme-gpg enc <alias> <file_to_encrypt>
+
+# Decrypt, edit, and re-encrypt
+dotme-gpg edit <alias> <encrypted_file>
 ```
+
+### Decrypt Zshenv (`dotme-decrypt-zshenv`)
+
+Decrypt and set up local zshenv environment file.
+
+**Usage:**
+```bash
+# Decrypt with default alias
+dotme-decrypt-zshenv
+
+# Decrypt with specific alias
+dotme-decrypt-zshenv my-alias
+
+# Decrypt specific file
+dotme-decrypt-zshenv my-alias /path/to/file.enc
+```
+
+### Run Container (`dotme-run-container`)
+
+Docker container runner with convenient mount and proxy configurations.
+
+**Usage:**
+```bash
+# Run container with volume mount
+dotme-run-container my-image:latest /path/to/host:/path/in/container
+```
+
+### Install Python (`dotme-install-python`)
+
+Python installation helper with version management support.
+
+### Rsync Parallel (`dotme-rsync-parallel`)
+
+Parallel rsync wrapper for faster file synchronization.
 
 ## Installation and Setup
 
@@ -69,9 +101,9 @@ brew-dotme upgrade
    - Java 8 or higher
    - Google Java Format JAR file (automatically detected from common locations)
 
-2. **Homebrew Wrapper:**
-   - Homebrew installed (automatically detected)
-   - Optional: pyenv (conflicts are automatically resolved)
+2. **GPG Helper:**
+   - GPG installed and configured
+   - Valid GPG keys for aliases
 
 ### Setup
 
@@ -110,13 +142,6 @@ The script checks these common Java locations:
 - `/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home` (macOS)
 - `/System/Library/Java/JavaVirtualMachines/1.8.jdk/Contents/Home` (macOS)
 
-### Homebrew Locations
-The script checks these Homebrew locations:
-- `/usr/local/bin/brew` (Intel Mac, Linux)
-- `/opt/homebrew/bin/brew` (Apple Silicon Mac)
-- `/home/linuxbrew/.linuxbrew/bin/brew` (Linux)
-- `$HOME/.linuxbrew/bin/brew` (User-installed Linux)
-
 ## Troubleshooting
 
 ### Google Java Format Issues
@@ -135,21 +160,17 @@ The script checks these Homebrew locations:
    - Use `--check-version` to verify setup
    - Ensure Java 8+ is installed
 
-### Homebrew Wrapper Issues
+### GPG Issues
 
-1. **"Homebrew not found" error:**
-   - Install Homebrew from https://brew.sh
-   - Ensure it's in one of the expected locations
-
-2. **pyenv conflicts:**
-   - The script automatically resolves pyenv conflicts
-   - No manual intervention required
+1. **"No GPG private key found" error:**
+   - Import your GPG private key
+   - Verify key aliases are configured correctly
 
 ## Contributing
 
-When adding new tools to the `xxx-dotme` series:
+When adding new tools to the `dotme-xxx` series:
 
-1. Follow the naming convention: `tool-name-dotme`
+1. Follow the naming convention: `dotme-tool-name`
 2. Include comprehensive error handling
 3. Add colored output for better UX
 4. Provide help/usage information
@@ -168,9 +189,9 @@ When adding new tools to the `xxx-dotme` series:
 ## Related Documentation
 
 - [Google Java Format Documentation](https://github.com/google/google-java-format)
-- [Homebrew Documentation](https://docs.brew.sh/)
+- [GPG Documentation](https://gnupg.org/documentation/)
 - [Java Installation Guide](https://adoptium.net/)
 
 ---
 
-*Last updated: $(date)*
+*Last updated: 2024*

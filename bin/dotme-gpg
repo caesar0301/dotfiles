@@ -5,9 +5,9 @@ set -euo pipefail
 # Provides convenient GPG operations using key aliases
 #
 # Usage:
-#   gpg-dotme dec <alias> <encrypted_file>     - Decrypt and display
-#   gpg-dotme enc <alias> <file_to_encrypt>    - Encrypt file
-#   gpg-dotme edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
+#   dotme-gpg dec <alias> <encrypted_file>     - Decrypt and display
+#   dotme-gpg enc <alias> <file_to_encrypt>    - Encrypt file
+#   dotme-gpg edit <alias> <encrypted_file>    - Decrypt, edit, re-encrypt
 
 # Replace associative array with parallel arrays for compatibility
 ALIASES=("drjaminchen" "ninjacaesar")

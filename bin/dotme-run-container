@@ -1,5 +1,5 @@
 #!/bin/bash
-# run-container-dotme $IMAGE <hostdir>:<containerdir>
+# dotme-run-container $IMAGE <hostdir>:<containerdir>
 set -euo pipefail
 
 # Check if correct number of arguments provided

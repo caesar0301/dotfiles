@@ -4,6 +4,7 @@
 # https://github.com/caesar0301/cool-dotfiles
 #
 # Features:
+# - Local utility scripts (dotme-xxx series)
 # - Python version management (pyenv)
 # - Homebrew package manager (optional)
 # - Development environment version managers
@@ -25,10 +26,53 @@ set -euo pipefail
 # Resolve script directory
 THISDIR=$(dirname "$(realpath "$0")")
 
+# Configuration constants
+readonly LOCAL_BIN_DIR="$HOME/.local/bin"
+
 # Load common utilities with validation
 source "$THISDIR/../lib/shmisc.sh" || {
   printf "\033[0;31m✗ Failed to load shmisc.sh\033[0m\n" >&2
   exit 1
+}
+
+# Install local utility scripts with validation
+install_local_bins() {
+  local bin_source_dir="$THISDIR/../bin"
+
+  [[ -d "$bin_source_dir" ]] || {
+    warn "Binary source directory not found: $bin_source_dir"
+    return 0
+  }
+
+  info "Installing local utility scripts..."
+  create_dir "$LOCAL_BIN_DIR"
+
+  local installed_count=0
+  local failed_count=0
+
+  # Install each script individually with validation
+  while IFS= read -r -d '' script_file; do
+    local script_name
+    script_name=$(basename "$script_file")
+    local dest_path="$LOCAL_BIN_DIR/$script_name"
+
+    if cp "$script_file" "$dest_path" && chmod +x "$dest_path"; then
+      info "Installed script: $script_name"
+      ((++installed_count))
+    else
+      warn "Failed to install script: $script_name"
+      ((++failed_count))
+    fi
+  done < <(find "$bin_source_dir" -type f -executable -print0 2>/dev/null || true)
+
+  if [[ $installed_count -gt 0 ]]; then
+    success "Installed $installed_count utility scripts"
+    info "Scripts location: $LOCAL_BIN_DIR"
+  else
+    warn "No utility scripts found to install"
+  fi
+
+  [[ $failed_count -eq 0 ]] || warn "$failed_count scripts failed to install"
 }
 
 # Process command line options
@@ -44,6 +88,9 @@ done
 # Main installation sequence
 main() {
   info "Starting essential development tools installation..."
+
+  # Install local utility scripts first
+  install_local_bins
 
   # Core dependencies
   local core_deps=(
@@ -94,14 +141,16 @@ main() {
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
 
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
+  printf "  • Local utility scripts: %b$LOCAL_BIN_DIR%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • pyenv: Python version manager\n"
   [[ "$homebrew_installed" == "true" ]] && printf "  • Homebrew: Package manager\n"
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
 
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
-  printf "  1. Restart your shell or run: %bexec \$SHELL%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  2. Version managers will be available after shell reload\n"
+  printf "  1. Add %b$LOCAL_BIN_DIR%b to your PATH if not already added\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  2. Restart your shell or run: %bexec \$SHELL%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  3. Version managers will be available after shell reload\n"
 
   success "Essential development tools installation completed successfully!"
 }
