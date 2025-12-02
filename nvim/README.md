@@ -16,7 +16,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone --depth=1 https://github.com/caesar0301/cool-dotfiles.git ~/.dotfiles
+   git clone --depth=1 https://github.com/caesar0301/dotfiles.git ~/.dotfiles
    ```
 2. **Install Neovim configurations:**
    ```bash
