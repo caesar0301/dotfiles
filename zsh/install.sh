@@ -183,9 +183,9 @@ main() {
     info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
   fi
 
-  if [[ "${INSTALL_DEVENV:-0}" == "1" ]]; then
+  if [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]]; then
     core_deps+=("install_jenv" "install_gvm" "install_nvm")
-    info "Development environment installation enabled via INSTALL_DEVENV=1"
+    info "Development environment installation enabled via INSTALL_EXTRA_VENV=1"
   fi
 
   # Install AI code agents if available

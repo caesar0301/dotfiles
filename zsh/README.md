@@ -52,7 +52,11 @@ The installer supports optional environment variables to control which dependenc
 #### Core Dependencies
 By default, the installer installs:
 - Zsh shell binary (`install_zsh`)
+- Zinit plugin manager (`install_zinit`)
+- Zsh plugins (`install_zsh_plugins`)
 - Python version manager (`install_pyenv`)
+
+The installer will also automatically change your default shell to zsh if it's not already set.
 
 #### Optional Dependencies
 
@@ -62,27 +66,36 @@ By default, the installer installs:
 INSTALL_HOMEBREW=1 sh zsh/install.sh
 ```
 
-**Optional Development Tools:**
-To install optional dependencies, edit `zsh/install.sh` and uncomment the desired tools in the `optional_deps` array:
+**Development Environment Tools:**
+Enable Java, Go, and Node version managers:
 ```bash
-local optional_deps=(
-  "install_jenv"     # Java version manager
-  "install_gvm"      # Go version manager
-  "install_nvm"      # Node version manager
-)
+# Install jenv, gvm, and nvm
+INSTALL_EXTRA_VENV=1 sh zsh/install.sh
 ```
 
-Available optional dependencies:
+This installs:
 - `install_jenv` - Java version manager
 - `install_gvm` - Go version manager  
 - `install_nvm` - Node version manager
 
-**Example:**
+**AI Code Agents:**
+Enable AI code agents (requires npm >= 20):
 ```bash
-# Install with Homebrew
-INSTALL_HOMEBREW=1 sh zsh/install.sh
+# Install AI code agents
+INSTALL_AI_CODE_AGENTS=1 sh zsh/install.sh
+```
+
+**Combined Examples:**
+```bash
+# Install with Homebrew and development tools
+INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 sh zsh/install.sh
 
 # Or set in your environment
 export INSTALL_HOMEBREW=1
+export INSTALL_EXTRA_VENV=1
+export INSTALL_AI_CODE_AGENTS=1
 sh zsh/install.sh
+
+# Full installation with all optional components
+INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 sh zsh/install.sh
 ```
