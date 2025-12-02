@@ -149,38 +149,6 @@ function install_lsp_deps {
   info "LSP servers installation completed"
 }
 
-function setup_ctags {
-  local ctags_home="$HOME/.ctags.d"
-  create_dir "$ctags_home"
-
-  if [ ! -d "$THISDIR/../ctags" ]; then
-    error "Ctags configuration directory not found"
-    return 1
-  fi
-
-  local config_files=($(find "$THISDIR/../ctags" -maxdepth 1 -type f -name "*.ctags"))
-  if [ ${#config_files[@]} -eq 0 ]; then
-    warn "No ctags configuration files found"
-    return 0
-  fi
-
-  # Install each ctags configuration file
-  local success=true
-  for config_file in "${config_files[@]}"; do
-    if ! install_file_pair "$config_file" "$ctags_home/$(basename "$config_file")"; then
-      warn "Failed to install ctags config: $(basename "$config_file")"
-      success=false
-    fi
-  done
-
-  if [ "$success" = true ]; then
-    info "Ctags configuration completed"
-  else
-    warn "Some ctags configurations failed to install"
-    return 1
-  fi
-}
-
 # Function to handle Neovim installation and configuration
 function handle_neovim {
   # Install plugin manager
@@ -225,6 +193,8 @@ done
 
 install_neovim && handle_neovim
 
+check_dependencies
+
 install_lsp_deps
 install_jdt_language_server
 install_hack_nerd_font # Required by nvim-web-devicons
@@ -234,8 +204,6 @@ install_universal_ctags # Required by Tagbar
 
 # Conditionally install cargo based on kernel version (handled in shmisc.sh)
 install_cargo
-
-setup_ctags
 
 warn "================================================"
 warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
