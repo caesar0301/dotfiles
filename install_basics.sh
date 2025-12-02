@@ -1,12 +1,12 @@
 #!/bin/bash
 ###################################################
-# Master Installation Script
+# Basic Installation Script
 # https://github.com/caesar0301/cool-dotfiles
 #
-# Orchestrates installation of all dotfile components
-# with enhanced error handling and progress tracking.
+# Installs essential dotfile components for a minimal
+# but functional development environment.
 #
-# Usage: ./install_all.sh [options]
+# Usage: ./install_basics.sh [options]
 # Options: -f (force), -s (symlink), -c (clean)
 #
 # Author: Xiaming Chen
@@ -25,17 +25,12 @@ source "$THISDIR/lib/shmisc.sh" || {
   exit 1
 }
 
-# Component installation order (dependencies first)
+# Basic component installation order (dependencies first)
 readonly COMPONENTS=(
   "zsh"        # Z shell configuration
   "essentials" # Essential development tools (pyenv, homebrew, etc.)
   "tmux"       # Terminal multiplexer
   "nvim"       # Neovim development environment
-  "emacs"      # Emacs configuration
-  "vifm"       # Vi file manager
-  "misc"       # Utility scripts and configurations
-  "lisp"       # Common Lisp development environment
-  "alacritty"  # Terminal emulator
 )
 
 # Track installation statistics
@@ -101,7 +96,7 @@ show_installation_summary() {
   printf "\n"
 
   if [[ $INSTALL_FAILED -eq 0 ]]; then
-    success "🎉 All components installed successfully!"
+    success "🎉 Basic components installed successfully!"
   else
     warn "⚠️  Some components failed to install. Check the logs above."
     return 1
@@ -110,8 +105,8 @@ show_installation_summary() {
 
 # Main installation process
 main() {
-  info "Starting dotfiles installation..."
-  info "Components to install: ${#COMPONENTS[@]}"
+  info "Starting basic dotfiles installation..."
+  info "Components to install: ${COMPONENTS[*]}"
 
   # Install each component
   for component in "${COMPONENTS[@]}"; do

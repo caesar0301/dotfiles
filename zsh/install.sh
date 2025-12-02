@@ -172,38 +172,15 @@ done
 main() {
   info "Starting Zsh environment setup..."
 
-  # Core dependencies
+  # Core Zsh dependencies
   local core_deps=(
     "install_zsh"         # Zsh shell binary
     "install_zinit"       # Zinit plugin manager
     "install_zsh_plugins" # Zsh plugins
-    "install_pyenv"       # Python version manager
   )
 
-  # Add homebrew if INSTALL_HOMEBREW=1 is set
-  if [[ "${INSTALL_HOMEBREW:-0}" == "1" ]]; then
-    core_deps+=("install_homebrew")
-    info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
-  fi
-
-  if [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]]; then
-    core_deps+=("install_jenv" "install_gvm" "install_nvm")
-    info "Development environment installation enabled via INSTALL_EXTRA_VENV=1"
-  fi
-
-  # Install AI code agents if available
-  if [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]]; then
-    core_deps+=("install_ai_code_agents")
-    info "AI code agents installation enabled via INSTALL_AI_CODE_AGENTS=1"
-  fi
-
   # Install core dependencies
-  local homebrew_installed=false
   for dep_func in "${core_deps[@]}"; do
-    if [[ "$dep_func" == "install_homebrew" ]]; then
-      homebrew_installed=true
-    fi
-    
     if declare -f "$dep_func" >/dev/null; then
       info "Installing dependency: ${dep_func#install_}"
       if ! "$dep_func"; then
@@ -218,11 +195,6 @@ main() {
   handle_shell_proxy
   handle_zsh_config
 
-  # Configure Homebrew mirrors if Homebrew was installed
-  if [[ "$homebrew_installed" == "true" ]] && command -v brew >/dev/null 2>&1; then
-    configure_homebrew_mirrors
-  fi
-
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Zsh configuration: $ZSH_CONFIG_HOME"
@@ -233,6 +205,7 @@ main() {
   printf "  1. Restart your shell or run: %bexec zsh%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Plugins will be installed automatically on first run\n"
   printf "  3. Configure proxy settings in: %b$PROXY_CONFIG%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  4. Run essentials/install.sh to install development tools (pyenv, homebrew, etc.)\n"
 
   success "Zsh development environment setup completed successfully!"
 }
