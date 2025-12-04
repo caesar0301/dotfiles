@@ -20,7 +20,7 @@ set -euo pipefail
 THISDIR=$(dirname "$(realpath "$0")")
 
 # Configuration constants
-readonly TMUX_VERSION="3.5a"
+readonly TMUX_VERSION="3.6"
 readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly TMUX_CONFIG_HOME="$XDG_CONFIG_HOME/tmux"
