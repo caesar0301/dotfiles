@@ -100,8 +100,6 @@ main() {
   # Add homebrew if INSTALL_HOMEBREW=1 is set
   if [[ "${INSTALL_HOMEBREW:-0}" == "1" ]]; then
     core_deps+=("install_homebrew")
-    export HOMEBREW_CORE_GIT_REMOTE=${HOMEBREW_CORE_GIT_REMOTE:-"https://mirrors.ustc.edu.cn/homebrew-core.git"}
-    export HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_BOTTLE_DOMAIN:-"https://mirrors.ustc.edu.cn/homebrew-bottles"}
     info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
   fi
 
