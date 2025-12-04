@@ -12,9 +12,12 @@ ZSH_CONFIG_DIR="${HOME}/.config/zsh"
 ZSH_PLUGIN_DIR="${ZSH_CONFIG_DIR}/plugins/"
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 ZINIT_WORKDIR="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit"
+ZINIT_PROFILING="${ZINIT_PROFILING:-0}"
 
 # Enable profiling to identify slow sections
-# zmodload zsh/zprof
+if [[ x$ZINIT_PROFILING == "x1" ]]; then 
+  zmodload zsh/zprof
+fi
 
 source "${ZINIT_HOME}/zinit.zsh"
 source "${ZSH_CONFIG_DIR}/_helper.zsh"
@@ -113,4 +116,6 @@ export PATH=$HOME/.npm-global/bin:$PATH
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Show profiling results on startup
-# zprof
+if [[ x$ZINIT_PROFILING == "x1" ]]; then 
+  zprof
+fi
