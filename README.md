@@ -105,4 +105,4 @@ See [bin/README.md](bin/README.md) for detailed documentation.
 
 ## License
 
-MIT
+MIT License
