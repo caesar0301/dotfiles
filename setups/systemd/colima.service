@@ -1,0 +1,15 @@
+[Unit]
+Description=Colima Container Runtime
+Documentation=https://github.com/abiosoft/colima
+After=network.target
+
+[Service]
+Type=simple
+# Adjust the path below if 'which colima' gives a different result
+ExecStart=/home/linuxbrew/.linuxbrew/bin/colima start --foreground
+ExecStop=/home/linuxbrew/.linuxbrew/bin/colima stop
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
