@@ -16,6 +16,8 @@ LOCAL_DIR="${LOCAL_DIR:-$HOME/Documents/Aliyunpan/Research}"
 PAN_DIR="${PAN_DIR:-/Research}"
 # Sync mode: upload (local->cloud), download (cloud->local)
 SYNC_MODE="${SYNC_MODE:-download}"
+# Sync policy: exclusive (delete extra files in target), increment (keep extra files)
+SYNC_POLICY="${SYNC_POLICY:-increment}"
 # Drive type: backup, resource
 DRIVE_TYPE="${DRIVE_TYPE:-resource}"
 
@@ -80,6 +82,12 @@ if [[ "$SYNC_MODE" != "upload" && "$SYNC_MODE" != "download" ]]; then
     exit 1
 fi
 
+# Validate sync policy
+if [[ "$SYNC_POLICY" != "exclusive" && "$SYNC_POLICY" != "increment" ]]; then
+    log_error "Invalid sync policy: $SYNC_POLICY (must be 'exclusive' or 'increment')"
+    exit 1
+fi
+
 # Validate drive type
 if [[ "$DRIVE_TYPE" != "backup" && "$DRIVE_TYPE" != "resource" ]]; then
     log_error "Invalid drive type: $DRIVE_TYPE (must be 'backup' or 'resource')"
@@ -96,10 +104,12 @@ log_info "  Config: $ALIYUNPAN_CONFIG_DIR"
 log_info "  Local:  $LOCAL_DIR"
 log_info "  Remote: $PAN_DIR"
 log_info "  Mode:   $SYNC_MODE"
+log_info "  Policy: $SYNC_POLICY"
 log_info "  Drive:  $DRIVE_TYPE"
 
 exec "$ALIYUNPAN_BIN" sync start \
     -ldir "$LOCAL_DIR" \
     -pdir "$PAN_DIR" \
     -mode "$SYNC_MODE" \
+    -policy "$SYNC_POLICY" \
     -drive "$DRIVE_TYPE"

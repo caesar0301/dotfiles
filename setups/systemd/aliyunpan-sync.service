@@ -14,6 +14,7 @@ Environment="ALIYUNPAN_CONFIG_DIR=%h/.config/aliyunpan"
 Environment="LOCAL_DIR=%h/Documents/Aliyunpan/Research"
 Environment="PAN_DIR=/Research"
 Environment="SYNC_MODE=download"
+Environment="SYNC_POLICY=exclusive"
 Environment="DRIVE_TYPE=resource"
 
 # Script location - adjust path as needed
