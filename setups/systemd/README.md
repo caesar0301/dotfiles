@@ -9,6 +9,7 @@ This directory contains systemd service unit files for managing various services
 | `mihomo.service` | Mihomo (Clash Meta) proxy daemon | System service |
 | `colima.service` | Colima container runtime (Docker alternative) | User service |
 | `minikube.service` | Minikube Kubernetes cluster | System service |
+| `aliyunpan-sync.service` | Aliyun Drive file synchronization | User service |
 
 ## Installation
 
@@ -41,6 +42,13 @@ cp colima.service ~/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user enable colima
 systemctl --user start colima
+
+# Aliyunpan sync service
+mkdir -p ~/.config/systemd/user
+cp aliyunpan-sync.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable aliyunpan-sync
+systemctl --user start aliyunpan-sync
 ```
 
 ## Service Management
@@ -97,4 +105,31 @@ Minikube runs a local Kubernetes cluster. This service:
 **Prerequisites:**
 - Docker installed and running
 - Minikube binary at `/usr/bin/minikube`
+
+### aliyunpan-sync.service
+
+Syncs files between local directory and Aliyun Drive. This service:
+- Runs after network is online
+- Configurable via environment variables
+- Automatically restarts on failure
+- Includes security hardening options
+
+**Prerequisites:**
+- aliyunpan binary installed (`pip install aliyunpan` or download from GitHub)
+- Authenticated with Aliyun Drive (run `aliyunpan login` first)
+
+**Configuration:**
+
+The service can be configured via environment variables in the service file:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ALIYUNPAN_VERBOSE` | `0` | Enable verbose logging |
+| `ALIYUNPAN_CONFIG_DIR` | `~/.config/aliyunpan` | Config directory |
+| `LOCAL_DIR` | `~/Documents/Aliyunpan` | Local sync directory |
+| `PAN_DIR` | `/Research` | Remote directory on Aliyun Drive |
+| `SYNC_MODE` | `download` | Sync mode: `upload` or `download` |
+| `DRIVE_TYPE` | `resource` | Drive type: `backup` or `resource` |
+
+To customize, edit `~/.config/systemd/user/aliyunpan-sync.service` after copying.
 

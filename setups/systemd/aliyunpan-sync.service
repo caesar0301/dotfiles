@@ -1,0 +1,37 @@
+[Unit]
+Description=Aliyunpan Sync Service
+Documentation=https://github.com/tickstep/aliyunpan
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Environment configuration (override as needed)
+Environment="ALIYUNPAN_BIN=/home/linuxbrew/.linuxbrew/bin/aliyunpan"
+Environment="ALIYUNPAN_VERBOSE=1"
+Environment="ALIYUNPAN_CONFIG_DIR=%h/.config/aliyunpan"
+Environment="LOCAL_DIR=%h/Documents/Aliyunpan/Research"
+Environment="PAN_DIR=/Research"
+Environment="SYNC_MODE=download"
+Environment="DRIVE_TYPE=resource"
+
+# Script location - adjust path as needed
+ExecStart=%h/.dotfiles/setups/systemd/aliyunpan-sync.sh
+
+# Restart configuration
+Restart=on-failure
+RestartSec=30
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aliyunpan-sync
+
+[Install]
+WantedBy=default.target
+
