@@ -56,7 +56,7 @@ zinit ice wait lucid
 zinit snippet OMZP::alias-finder
 
 # Auto command completion
-zinit ice wait lucid
+zinit ice wait lucid blockf
 zinit light zsh-users/zsh-completions
 
 # Fish-like auto suggestions on history

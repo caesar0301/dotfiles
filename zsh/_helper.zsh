@@ -7,25 +7,52 @@ function zshld {
   source $HOME/.zshrc
 }
 
-# update zinit self and plugins
+# update zinit, plugins, and fix broken completions
 function zshup {
-  # Self update
+  setopt local_options err_return no_unset
+
+  echo "==> Updating zinit"
   zinit self-update
 
-  # Plugin parallel update
+  echo "==> Updating zinit plugins"
   zinit update --all --parallel 4
 
-  # Update custom plugins
+  echo "==> Updating custom plugins"
+  local old_path plugin
   old_path=$(pwd)
-  if [ -e ${ZSH_PLUGIN_DIR} ]; then
-    for plugin in $(ls -d $ZSH_PLUGIN_DIR/*); do
-      if [ -e ${plugin}/.git ]; then
-        echo -n "Updating plugin ${plugin}..."
-        cd $plugin && git reset --hard HEAD && git pull -q && echo "done" && cd ${old_path}
-      fi
+
+  if [[ -d ${ZSH_PLUGIN_DIR} ]]; then
+    for plugin in ${ZSH_PLUGIN_DIR}/*; do
+      [[ -d ${plugin}/.git ]] || continue
+      echo -n "  - ${plugin:t} ... "
+      (
+        cd "${plugin}" &&
+        git reset --hard HEAD -q &&
+        git pull -q
+      ) && echo "done" || echo "failed"
     done
   fi
+
+  cd "${old_path}"
+
+  # ---- Completion cleanup & rebuild ----
+  echo "==> Cleaning broken zsh completions"
+
+  local compdir="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/completions"
+
+  if [[ -d ${compdir} ]]; then
+    # Remove broken symlinks only
+    find "${compdir}" -xtype l -print -delete 2>/dev/null
+  fi
+
+  echo "==> Rebuilding completion cache"
+  rm -f ~/.zcompdump*
+  autoload -Uz compinit
+  compinit -C
+
+  echo "==> Done. Restart shell if completions behave oddly."
 }
+
 
 bingo() {
   local SESSION_NAME="${1:-bingo}"
