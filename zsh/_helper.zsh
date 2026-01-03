@@ -9,13 +9,13 @@ function zshld {
 
 # update zinit self and plugins
 function zshup {
-  # Self update
+  echo "==> Updating zinit"
   zinit self-update
 
-  # Plugin parallel update
+  echo "==> Updating zinit plugins"
   zinit update --all --parallel 4
 
-  # Update custom plugins
+  echo "==> Updating custom plugins"
   old_path=$(pwd)
   if [ -e ${ZSH_PLUGIN_DIR} ]; then
     for plugin in $(ls -d $ZSH_PLUGIN_DIR/*); do
@@ -25,6 +25,20 @@ function zshup {
       fi
     done
   fi
+
+  echo "==> Cleaning broken zsh completions"
+  local compdir="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/completions"
+  if [[ -d ${compdir} ]]; then
+    # Remove broken symlinks only
+    find "${compdir}" -xtype l -print -delete 2>/dev/null
+  fi
+
+  echo "==> Rebuilding completion cache"
+  rm -f ~/.zcompdump*
+  autoload -Uz compinit
+  compinit -C
+
+  echo "==> Done. Restart shell if completions behave oddly."
 }
 
 bingo() {
