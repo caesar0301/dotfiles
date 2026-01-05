@@ -796,6 +796,23 @@ install_nvm() {
   "$script_dir/install-nvm.sh"
 }
 
+# Install rbenv Ruby version manager with platform detection
+install_rbenv() {
+  if checkcmd rbenv; then
+    info "rbenv already installed" && return
+  fi
+  if checkcmd brew; then
+    brew install rbenv ruby-build && return
+  fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-rbenv.sh"
+}
+
 # Install jdt-language-server
 install_jdt_language_server() {
   local script_dir

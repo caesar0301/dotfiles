@@ -105,7 +105,7 @@ main() {
 
   # Add extra version managers if INSTALL_EXTRA_VENV=1 is set
   if [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]]; then
-    core_deps+=("install_jenv" "install_gvm" "install_nvm")
+    core_deps+=("install_jenv" "install_gvm" "install_nvm" "install_rbenv")
     info "Development environment installation enabled via INSTALL_EXTRA_VENV=1"
   fi
 
