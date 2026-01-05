@@ -23,6 +23,19 @@ _init_pyenv() {
 }
 _init_pyenv
 
+# --- Ruby Environment ---
+# Initialize rbenv if available
+_init_rbenv() {
+  if [ -d "$HOME/.rbenv" ]; then
+    export RBENV_ROOT="$HOME/.rbenv"
+    _prepend_to_path "$RBENV_ROOT/bin"
+    if command -v rbenv &>/dev/null; then
+      eval "$(rbenv init - zsh)"
+    fi
+  fi
+}
+_init_rbenv
+
 # --- Go Environment ---
 _init_go_env() {
   if command -v go &>/dev/null; then
