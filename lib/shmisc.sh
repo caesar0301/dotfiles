@@ -341,23 +341,30 @@ npm_install_lib() {
     "https://registry.yarnpkg.com"
   )
 
-  local options="--prefer-offline --no-audit --progress=true --cache=$cache_dir"
-  local success_flag=0
+  local options="--prefer-offline --no-audit --progress=true --cache=$cache_dir --legacy-peer-deps"
+  local failed_packages=()
 
   info "Installing npm packages: ${packages[*]}"
 
-  for reg in "${registries[@]}"; do
-    info "Trying npm registry: $reg"
-    if npm install $options --registry="$reg" -g "${packages[@]}"; then
-      success "Successfully installed npm packages: ${packages[*]} (via $reg)"
-      success_flag=1
-      break
-    else
-      warn "Failed with registry: $reg, retrying..."
-    fi
+  # Install packages individually to handle failures gracefully
+  for pkg in "${packages[@]}"; do
+    local pkg_success=0
+    for reg in "${registries[@]}"; do
+      if npm install $options --registry="$reg" -g "$pkg" 2>/dev/null; then
+        success "Successfully installed $pkg (via $reg)"
+        pkg_success=1
+        break
+      fi
+    done
+    [[ $pkg_success -eq 0 ]] && failed_packages+=("$pkg")
   done
 
-  [[ $success_flag -eq 1 ]] || error "Failed to install npm packages after trying all registries: ${packages[*]}"
+  # Report results
+  if [[ ${#failed_packages[@]} -eq ${#packages[@]} ]]; then
+    error "Failed to install npm packages after trying all registries: ${packages[*]}"
+  elif [[ ${#failed_packages[@]} -gt 0 ]]; then
+    warn "Some packages failed to install: ${failed_packages[*]}"
+  fi
 }
 
 # Enhanced sudo access management with improved error handling
