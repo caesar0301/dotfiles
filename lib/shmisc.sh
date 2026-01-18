@@ -813,28 +813,6 @@ install_rbenv() {
   "$script_dir/install-rbenv.sh"
 }
 
-# Install jdt-language-server
-install_jdt_language_server() {
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-jdt-language-server.sh"
-}
-
-# Install google-java-format
-install_google_java_format() {
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-google-java-format.sh"
-}
-
 # Install Go
 install_golang() {
   if checkcmd go; then
@@ -850,36 +828,6 @@ install_golang() {
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
   "$script_dir/install-golang.sh" "$@"
-}
-
-# Install Hack Nerd Font
-install_hack_nerd_font() {
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-hack-nerd-font.sh"
-}
-
-# Install shfmt (shell formatter)
-# Arguments:
-#   $1 - shfmt version to install (default: v3.7.0)
-install_shfmt() {
-  if checkcmd shfmt; then
-    info "shfmt already installed" && return
-  fi
-  if checkcmd brew; then
-    brew install shfmt && return
-  fi
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-shfmt.sh" "$@"
 }
 
 # Install fzf (fuzzy finder)
@@ -936,27 +884,6 @@ install_neovim() {
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
   "$script_dir/install-neovim.sh" "$@"
-}
-
-# Install AI code agents
-install_ai_code_agents() {
-  # Check if system supports modern plugins (npm >= 20)
-  if ! SUPPORTS_MODERN_PLUGINS; then
-    warn "npm version 20 or higher is required for AI code agents installation"
-    warn "Current npm version: $(npm --version 2>/dev/null || echo 'not installed')"
-    warn "Please upgrade npm to continue with AI code agents installation"
-    return 1
-  fi
-
-  success "System supports modern plugins (npm >= 20), proceeding with AI code agents installation"
-
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-cargo.sh"
 }
 
 # Install Rust and Cargo with kernel version check

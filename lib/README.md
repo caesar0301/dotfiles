@@ -62,7 +62,6 @@ source lib/shmisc.sh
 # Use the installer functions
 install_neovim
 install_golang 1.25.0
-install_shfmt v3.8.0
 ```
 
 ## Features

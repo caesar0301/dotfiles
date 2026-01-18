@@ -24,6 +24,14 @@ main() {
     exit 0
   fi
 
+  # Try installing via brew first (preferred)
+  if checkcmd brew; then
+    if brew install shfmt 2>/dev/null; then
+      success "Installed shfmt via brew"
+      exit 0
+    fi
+  fi
+
   info "Installing shfmt..."
 
   # Set version and filename based on OS

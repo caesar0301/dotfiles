@@ -75,6 +75,27 @@ install_local_bins() {
   [[ $failed_count -eq 0 ]] || warn "$failed_count scripts failed to install"
 }
 
+# Install AI code agents
+install_ai_code_agents() {
+  # Check if system supports modern plugins (npm >= 20)
+  if ! SUPPORTS_MODERN_PLUGINS; then
+    warn "npm version 20 or higher is required for AI code agents installation"
+    warn "Current npm version: $(npm --version 2>/dev/null || echo 'not installed')"
+    warn "Please upgrade npm to continue with AI code agents installation"
+    return 1
+  fi
+
+  success "System supports modern plugins (npm >= 20), proceeding with AI code agents installation"
+
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-ai-code-agents.sh"
+}
+
 # Process command line options
 while getopts h opt; do
   case $opt in

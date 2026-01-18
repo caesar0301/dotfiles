@@ -25,9 +25,6 @@ source "$THISDIR/../lib/shmisc.sh" || {
   exit 1
 }
 
-readonly FORMATTERS_PIP="pynvim cmake_format"
-readonly LSP_R="languageserver"
-
 function check_dependencies {
   local missing_deps=()
   local kernel_version
@@ -51,129 +48,6 @@ function check_dependencies {
 
   # Check bc for version comparison (install if missing on Linux)
   install_bc
-}
-
-function install_lang_formatters {
-  info "Installing language formatters..."
-
-  # Install pip formatters
-  if ! pip_install_lib ${FORMATTERS_PIP}; then
-    warn "Failed to install some pip formatters"
-  fi
-
-  # Install formatters via brew (preferred) or fallback to npm/go/pip/script
-  local formatter_packages=(
-    "stylua"
-    "js-beautify"
-    "yaml-language-server"
-    "yamlfmt"
-    "shfmt"
-    "google-java-format"
-    "black"
-    "sqlparse"
-  )
-
-  for pkg in "${formatter_packages[@]}"; do
-    if checkcmd "$pkg"; then
-      info "$pkg already installed"
-      continue
-    fi
-
-    if checkcmd brew; then
-      if brew install "$pkg" 2>/dev/null; then
-        success "Installed $pkg via brew"
-        continue
-      fi
-    fi
-
-    # Fallback to npm/go/script for specific packages
-    case "$pkg" in
-    stylua)
-      if ! npm_install_lib @johnnymorganz/stylua-bin; then
-        warn "Failed to install stylua"
-      fi
-      ;;
-    js-beautify | yaml-language-server)
-      if ! npm_install_lib "$pkg"; then
-        warn "Failed to install $pkg"
-      fi
-      ;;
-    yamlfmt)
-      if ! go_install_lib github.com/google/yamlfmt/cmd/yamlfmt@latest; then
-        warn "Failed to install yamlfmt"
-      fi
-      ;;
-    shfmt)
-      if ! install_shfmt; then
-        warn "Failed to install shfmt"
-      fi
-      ;;
-    google-java-format)
-      if ! install_google_java_format; then
-        warn "Failed to install google-java-format"
-      fi
-      ;;
-    black | sqlparse)
-      if ! pip_install_lib "$pkg"; then
-        warn "Failed to install $pkg"
-      fi
-      ;;
-    esac
-  done
-
-  info "Language formatters installation completed"
-}
-
-function install_lsp_deps {
-  info "Installing LSP servers..."
-
-  # Install R LSP server
-  if ! rlang_install_lib ${LSP_R}; then
-    warn "Failed to install R language server"
-  fi
-
-  # Install LSP servers via brew (preferred) or fallback to pip/go
-  local lsp_packages=(
-    "pyright"
-    "cmake-language-server"
-    "gopls"
-    "gotags"
-  )
-
-  for pkg in "${lsp_packages[@]}"; do
-    if checkcmd "$pkg"; then
-      info "$pkg already installed"
-      continue
-    fi
-
-    if checkcmd brew; then
-      if brew install "$pkg" 2>/dev/null; then
-        success "Installed $pkg via brew"
-        continue
-      fi
-    fi
-
-    # Fallback to pip/go for specific packages
-    case "$pkg" in
-    pyright | cmake-language-server)
-      if ! pip_install_lib "$pkg"; then
-        warn "Failed to install $pkg"
-      fi
-      ;;
-    gopls)
-      if ! go_install_lib "golang.org/x/tools/gopls@latest"; then
-        warn "Failed to install gopls"
-      fi
-      ;;
-    gotags)
-      if ! go_install_lib "github.com/jstemmer/gotags@latest"; then
-        warn "Failed to install gotags"
-      fi
-      ;;
-    esac
-  done
-
-  info "LSP servers installation completed"
 }
 
 # Function to handle Neovim installation and configuration
@@ -220,24 +94,27 @@ function main {
     esac
   done
 
-  # Install Neovim and configure
-  install_neovim && handle_neovim
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
 
   # Check required dependencies
   check_dependencies
 
+  # Install Neovim and configure
+  install_neovim && handle_neovim
+
   # Install LSP servers
-  install_lsp_deps
+  "$script_dir/../lib/install-lsp.sh"
 
-  # Install JDTLS if INSTALL_JDTLS=1 is set
-  if [[ "${INSTALL_JDTLS:-0}" == "1" ]]; then
-    info "JDTLS installation enabled via INSTALL_JDTLS=1"
-    install_jdt_language_server
-  fi
+  # Required by nvim-web-devicons
+  "$script_dir/../lib/install-hack-nerd-font.sh"
 
-  # Install fonts and formatters
-  install_hack_nerd_font # Required by nvim-web-devicons
-  install_lang_formatters
+  # Install language formatters
+  "$script_dir/../lib/install-lang-formatters.sh"
 
   # Install additional tools
   install_fzf
