@@ -177,9 +177,6 @@ main() {
     configure_homebrew_mirrors
   fi
 
-  # Post-installation information
-  printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
-
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  • Local utility scripts: %b$LOCAL_BIN_DIR%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • pyenv: Python version manager\n"
@@ -189,11 +186,6 @@ main() {
   [[ "$homebrew_installed" == "true" ]] && printf "  • Homebrew: Package manager\n"
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
-
-  printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
-  printf "  1. Add %b$LOCAL_BIN_DIR%b to your PATH if not already added\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  2. Restart your shell or run: %bexec \$SHELL%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  3. Version managers will be available after shell reload\n"
 
   success "Essential development tools installation completed successfully!"
 }
