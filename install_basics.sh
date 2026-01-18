@@ -27,16 +27,38 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Basic component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"        # Z shell configuration
-  "essentials" # Essential development tools (pyenv, homebrew, etc.)
-  "tmux"       # Terminal multiplexer
-  "nvim"       # Neovim development environment
+  "zsh"  # Z shell configuration
+  "tmux" # Terminal multiplexer
+  "nvim" # Neovim development environment
 )
 
 # Track installation statistics
 INSTALL_SUCCESS=0
 INSTALL_FAILED=0
 INSTALL_SKIPPED=0
+
+# Install essential development tools as a prerequisite
+# For basic installation, use default settings (no optional features)
+install_essentials_prerequisite() {
+  local essentials_script="$THISDIR/lib/install-essentials.sh"
+
+  [[ -f "$essentials_script" ]] || {
+    warn "Essentials installer not found: $essentials_script"
+    return 1
+  }
+
+  info "Installing essential development tools (prerequisite)..."
+
+  # Execute essentials installation
+  if bash "$essentials_script" "$@" 2>&1; then
+    success "Essential development tools installed successfully"
+    return 0
+  else
+    local exit_code=$?
+    error "Essential development tools installation failed (exit code: $exit_code)"
+    return $exit_code
+  fi
+}
 
 # Enhanced component installation with progress tracking
 install_component() {
@@ -106,7 +128,12 @@ show_installation_summary() {
 # Main installation process
 main() {
   info "Starting basic dotfiles installation..."
-  info "Components to install: ${COMPONENTS[*]}"
+  info "Components to install: ${#COMPONENTS[@]}"
+
+  # Install essential development tools as a prerequisite (with default settings)
+  install_essentials_prerequisite "$@" || {
+    warn "Essential development tools installation failed, continuing with components..."
+  }
 
   # Install each component
   for component in "${COMPONENTS[@]}"; do

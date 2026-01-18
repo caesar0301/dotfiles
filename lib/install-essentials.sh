@@ -1,7 +1,9 @@
 #!/bin/bash
 ###################################################
-# Essential Development Tools Installation
+# Essential Development Tools Installer
 # https://github.com/caesar0301/cool-dotfiles
+#
+# Installs essential development tools and utilities for a productive development environment.
 #
 # Features:
 # - Local utility scripts (dotme-xxx series)
@@ -11,33 +13,52 @@
 # - AI code agents support
 # - Enhanced error handling and user feedback
 #
-# Environment Variables:
-# - INSTALL_HOMEBREW=1: Install Homebrew package manager
-# - INSTALL_EXTRA_VENV=1: Install jenv, gvm, nvm version managers
-# - INSTALL_AI_CODE_AGENTS=1: Install AI code agents
+# Usage:
+#   Basic installation (utility scripts + pyenv):
+#     ./lib/install-essentials.sh
 #
-# Author: Xiaming Chen
+#   With optional components:
+#     INSTALL_HOMEBREW=1 ./lib/install-essentials.sh
+#     INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
+#     INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+#
+#     Full installation:
+#     INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+#
+# Environment Variables:
+#   INSTALL_HOMEBREW=1      Install Homebrew package manager
+#   INSTALL_EXTRA_VENV=1    Install jenv, gvm, nvm version managers
+#   INSTALL_AI_CODE_AGENTS=1 Install AI code agents (requires Node.js >= 20)
+#
+# What Gets Installed:
+#   - Local utility scripts: dotme-xxx series tools in ~/.local/bin
+#   - pyenv: Python version manager (always installed)
+#   - fzf: Fuzzy finder (always installed)
+#   - universal-ctags: Code navigation tool (always installed)
+#   - cargo: Rust toolchain (always installed)
+#   - Homebrew: Package manager (if INSTALL_HOMEBREW=1)
+#   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
+#   - AI code agents: AI-powered development tools (if INSTALL_AI_CODE_AGENTS=1)
+#
+# Post-Installation:
+#   After installation, ensure ~/.local/bin is in your PATH:
+#     export PATH="$HOME/.local/bin:$PATH"
+#   Then restart your shell or run: exec $SHELL
+#
+# Copyright (c) 2024, Xiaming Chen
 # License: MIT
 ###################################################
 
-# Enable strict mode for better error handling
-set -euo pipefail
-
-# Resolve script directory
-THISDIR=$(dirname "$(realpath "$0")")
+# Source the shell utility library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/shmisc.sh"
 
 # Configuration constants
 readonly LOCAL_BIN_DIR="$HOME/.local/bin"
 
-# Load common utilities with validation
-source "$THISDIR/../lib/shmisc.sh" || {
-  printf "\033[0;31m✗ Failed to load shmisc.sh\033[0m\n" >&2
-  exit 1
-}
-
 # Install local utility scripts with validation
 install_local_bins() {
-  local bin_source_dir="$THISDIR/../bin"
+  local bin_source_dir="$SCRIPT_DIR/../bin"
 
   [[ -d "$bin_source_dir" ]] || {
     warn "Binary source directory not found: $bin_source_dir"
@@ -51,9 +72,14 @@ install_local_bins() {
   local failed_count=0
 
   # Install each script individually with validation
+  # Find all files except README.md and make them executable
   while IFS= read -r -d '' script_file; do
     local script_name
     script_name=$(basename "$script_file")
+
+    # Skip README.md and other non-script files
+    [[ "$script_name" == "README.md" ]] && continue
+
     local dest_path="$LOCAL_BIN_DIR/$script_name"
 
     if cp "$script_file" "$dest_path" && chmod +x "$dest_path"; then
@@ -63,7 +89,7 @@ install_local_bins() {
       warn "Failed to install script: $script_name"
       ((++failed_count))
     fi
-  done < <(find "$bin_source_dir" -type f -executable -print0 2>/dev/null || true)
+  done < <(find "$bin_source_dir" -type f -print0 2>/dev/null || true)
 
   if [[ $installed_count -gt 0 ]]; then
     success "Installed $installed_count utility scripts"
@@ -96,17 +122,7 @@ install_ai_code_agents() {
   "$script_dir/install-ai-code-agents.sh"
 }
 
-# Process command line options
-while getopts h opt; do
-  case $opt in
-  h | ?)
-    usage_me "install.sh"
-    exit 0
-    ;;
-  esac
-done
-
-# Main installation sequence
+# Main installation function
 main() {
   info "Starting essential development tools installation..."
 
@@ -115,7 +131,10 @@ main() {
 
   # Core dependencies
   local core_deps=(
-    "install_pyenv" # Python version manager
+    "install_pyenv"           # Python version manager
+    "install_fzf"             # Fuzzy finder
+    "install_universal_ctags" # Universal ctags (required by Tagbar)
+    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
   )
 
   # Add homebrew if INSTALL_HOMEBREW=1 is set
@@ -164,6 +183,9 @@ main() {
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  • Local utility scripts: %b$LOCAL_BIN_DIR%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • pyenv: Python version manager\n"
+  printf "  • fzf: Fuzzy finder\n"
+  printf "  • universal-ctags: Code navigation tool\n"
+  printf "  • cargo: Rust toolchain\n"
   [[ "$homebrew_installed" == "true" ]] && printf "  • Homebrew: Package manager\n"
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
@@ -176,5 +198,7 @@ main() {
   success "Essential development tools installation completed successfully!"
 }
 
-# Execute main function
-main
+# Run main function if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi

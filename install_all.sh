@@ -27,21 +27,49 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"        # Z shell configuration
-  "essentials" # Essential development tools (pyenv, homebrew, etc.)
-  "tmux"       # Terminal multiplexer
-  "nvim"       # Neovim development environment
-  "emacs"      # Emacs configuration
-  "vifm"       # Vi file manager
-  "misc"       # Utility scripts and configurations
-  "lisp"       # Common Lisp development environment
-  "alacritty"  # Terminal emulator
+  "zsh"       # Z shell configuration
+  "tmux"      # Terminal multiplexer
+  "nvim"      # Neovim development environment
+  "emacs"     # Emacs configuration
+  "vifm"      # Vi file manager
+  "misc"      # Utility scripts and configurations
+  "lisp"      # Common Lisp development environment
+  "alacritty" # Terminal emulator
 )
 
 # Track installation statistics
 INSTALL_SUCCESS=0
 INSTALL_FAILED=0
 INSTALL_SKIPPED=0
+
+# Install essential development tools as a prerequisite
+# This installs all optional features for full installation
+install_essentials_prerequisite() {
+  local essentials_script="$THISDIR/lib/install-essentials.sh"
+
+  [[ -f "$essentials_script" ]] || {
+    warn "Essentials installer not found: $essentials_script"
+    return 1
+  }
+
+  info "Installing essential development tools (prerequisite)..."
+  info "Enabling all optional features: Homebrew, version managers, and AI code agents"
+
+  # Enable all optional features for full installation
+  export INSTALL_HOMEBREW=1
+  export INSTALL_EXTRA_VENV=1
+  export INSTALL_AI_CODE_AGENTS=1
+
+  # Execute essentials installation
+  if bash "$essentials_script" "$@" 2>&1; then
+    success "Essential development tools installed successfully"
+    return 0
+  else
+    local exit_code=$?
+    error "Essential development tools installation failed (exit code: $exit_code)"
+    return $exit_code
+  fi
+}
 
 # Enhanced component installation with progress tracking
 install_component() {
@@ -112,6 +140,11 @@ show_installation_summary() {
 main() {
   info "Starting dotfiles installation..."
   info "Components to install: ${#COMPONENTS[@]}"
+
+  # Install essential development tools as a prerequisite (with all optional features)
+  install_essentials_prerequisite "$@" || {
+    warn "Essential development tools installation failed, continuing with components..."
+  }
 
   # Install each component
   for component in "${COMPONENTS[@]}"; do

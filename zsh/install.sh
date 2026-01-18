@@ -205,7 +205,6 @@ main() {
   printf "  1. Restart your shell or run: %bexec zsh%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Plugins will be installed automatically on first run\n"
   printf "  3. Configure proxy settings in: %b$PROXY_CONFIG%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  4. Run essentials/install.sh to install development tools (pyenv, homebrew, etc.)\n"
 
   success "Zsh development environment setup completed successfully!"
 }

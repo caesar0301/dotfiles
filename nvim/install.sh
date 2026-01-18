@@ -104,6 +104,9 @@ function main {
   # Check required dependencies
   check_dependencies
 
+  # Install essential development tools as a prerequisite
+  "$script_dir/../lib/install-essentials.sh"
+
   # Install Neovim and configure
   install_neovim && handle_neovim
 
@@ -115,11 +118,6 @@ function main {
 
   # Install language formatters
   "$script_dir/../lib/install-lang-formatters.sh"
-
-  # Install additional tools
-  install_fzf
-  install_universal_ctags # Required by Tagbar
-  install_cargo           # Conditionally based on kernel version
 
   warn "================================================"
   warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
