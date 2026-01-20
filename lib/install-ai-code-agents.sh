@@ -33,7 +33,8 @@ main() {
 
   # Define AI code agents to install
   local agents="@anthropic-ai/claude-code \
-    @musistudio/claude-code-router"
+    @musistudio/claude-code-router \
+    opencode-ai@latest"
 
   # Install agents using npm
   npm_install_lib ${agents}

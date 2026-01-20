@@ -3,7 +3,7 @@
   "LOG_LEVEL": "debug",
   "CLAUDE_PATH": "",
   "HOST": "127.0.0.1",
-  "PORT": 3456,
+  "PORT": 53456,
   "APIKEY": "",
   "API_TIMEOUT_MS": "600000",
   "PROXY_URL": "",
@@ -36,12 +36,6 @@
       }
     },
     {
-      "name": "ollama",
-      "api_base_url": "http://localhost:11434/v1/chat/completions",
-      "api_key": "ollama",
-      "models": ["gemma3:4b", "qwen2.5vl:3b"]
-    },
-    {
       "name": "dashscope",
       "api_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
       "api_key": "$DASHSCOPE_API_KEY",
@@ -56,6 +50,12 @@
           ]
         ]
       }
+    },
+    {
+      "name": "ollama",
+      "api_base_url": "http://localhost:11434/v1/chat/completions",
+      "api_key": "ollama",
+      "models": ["gemma3:4b", "qwen2.5vl:3b"]
     },
     {
       "name": "openrouter",
