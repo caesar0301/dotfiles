@@ -6,6 +6,43 @@
 # This file combines git aliases, functions, and LFS utilities
 # from multiple sources into a single, organized module.
 
+git-reset-identity() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+      echo "Usage: git-reset-identity 'Name' 'email@example.com'"
+      return 1
+  fi
+
+  git config --local user.name "$1"
+  git config --local user.email "$2"
+
+  echo "Local identity updated to: $(git config user.name) <$(git config user.email)>"
+}
+
+git-rewrite-history() {
+  local OLD_EMAIL="$1"
+  local NEW_NAME="$2"
+  local NEW_EMAIL="$3"
+
+  if [ -z "$3" ]; then
+      echo "Usage: git-rewrite-history 'old@email.com' 'New Name' 'new@email.com'"
+      return 1
+  fi
+
+  git filter-branch --env-filter "
+  if [ \"\$GIT_COMMITTER_EMAIL\" = '$OLD_EMAIL' ]
+  then
+      export GIT_COMMITTER_NAME='$NEW_NAME'
+      export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+  fi
+  if [ \"\$GIT_AUTHOR_EMAIL\" = '$OLD_EMAIL' ]
+  then
+      export GIT_AUTHOR_NAME='$NEW_NAME'
+      export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+  fi
+  " --tag-name-filter cat -- --branches --tags
+}
+
+
 # =====================
 # Core Git Aliases
 # =====================
