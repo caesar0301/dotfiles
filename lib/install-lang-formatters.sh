@@ -60,6 +60,8 @@ main() {
     "black"
     "sqlparse"
     "prettier"
+    "prettierd"
+    "taplo"
   )
 
   for pkg in "${formatter_packages[@]}"; do
@@ -85,6 +87,16 @@ main() {
     js-beautify | yaml-language-server | prettier)
       if ! npm_install_lib "$pkg"; then
         warn "Failed to install $pkg"
+      fi
+      ;;
+    prettierd)
+      if ! npm_install_lib @fsouza/prettierd; then
+        warn "Failed to install prettierd"
+      fi
+      ;;
+    taplo)
+      if ! npm_install_lib @taplo/cli; then
+        warn "Failed to install taplo"
       fi
       ;;
     yamlfmt)

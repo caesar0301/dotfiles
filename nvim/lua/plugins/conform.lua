@@ -23,7 +23,7 @@ return {
 				json = { "prettierd", "prettier" },
 				proto = { "buf" },
 				python = { "black" },
-				yaml = { "yamlfmt" },
+				yaml = { "prettier" },
 				latex = { "latexindent" },
 				r = { "styler" },
 				rust = { "rustfmt" },
