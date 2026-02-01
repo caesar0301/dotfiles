@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "model": "iflow/glm-4.6",
+  "small_model": "iflow/glm-4.6",
+
+  "provider": {
+    // ---------------- iflow ----------------
+    "iflow": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "iFlow",
+      "options": {
+        "baseURL": "https://apis.iflow.cn/v1",
+        "apiKey": "{env:IFLOW_API_KEY}"
+      },
+      "models": {
+        "qwen3-coder-plus": { "tools": true },
+        "kimi-k2-0905": { "tools": true },
+        "glm-4.5": { "tools": true },
+        "glm-4.6": { "tools": true },
+        "qwen3-max": { "tools": true },
+        "deepseek-v3.1": {
+          "tools": true,
+          "options": {
+            "maxTokens": 8192
+          }
+        },
+        "qwen3-vl-plus": { "tools": true }
+      }
+    },
+
+    // ---------------- dashscope ----------------
+    "dashscope": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "DashScope",
+      "options": {
+        "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "{env:DASHSCOPE_API_KEY}"
+      },
+      "models": {
+        "qwen3-coder-plus": {
+          "tools": true,
+          "options": {
+            "maxTokens": 65536
+          }
+        }
+      }
+    },
+
+    // ---------------- ollama ----------------
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (Local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1",
+        "apiKey": "ollama"
+      },
+      "models": {
+        "gemma3:4b": {},
+        "qwen2.5vl:3b": {}
+      }
+    },
+
+    // ---------------- openrouter ----------------
+    "openrouter": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenRouter",
+      "options": {
+        "baseURL": "https://openrouter.ai/api/v1",
+        "apiKey": "{env:OPENROUTER_API_KEY}"
+      },
+      "models": {
+        "google/gemini-2.5-flash": { "tools": true },
+        "google/gemini-2.5-pro": { "tools": true },
+        "anthropic/claude-sonnet-4": { "tools": true },
+        "anthropic/claude-3.5-sonnet": { "tools": true },
+        "anthropic/claude-3.7-sonnet:thinking": { "tools": true }
+      }
+    },
+
+    // ---------------- gemini ----------------
+    "gemini": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Gemini",
+      "options": {
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta",
+        "apiKey": "{env:GEMINI_API_KEY}"
+      },
+      "models": {
+        "gemini-2.5-flash": { "tools": true },
+        "gemini-2.5-pro": { "tools": true },
+        "gemini-3-flash-preview": { "tools": true },
+        "gemini-3-pro-preview": { "tools": true }
+      }
+    }
+  }
+}
