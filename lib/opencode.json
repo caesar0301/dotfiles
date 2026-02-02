@@ -9,7 +9,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "DashScope",
       "options": {
-        "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "baseURL": "{env:DASHSCOPE_BASE_URL}",
         "apiKey": "{env:DASHSCOPE_API_KEY}"
       },
       "models": {
