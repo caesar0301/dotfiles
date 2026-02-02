@@ -14,6 +14,7 @@ source "$SCRIPT_DIR/shmisc.sh"
 
 # Install claude-code-router config file
 # Supports soft link or copy based on global LINK_INSTEAD_OF_COPY
+# Only installs if the destination file doesn't exist
 install_claude_code_router_config() {
   local config_src="$SCRIPT_DIR/claude-code-router.json"
   local config_dest="$HOME/.claude-code-router/config.json"
@@ -23,7 +24,34 @@ install_claude_code_router_config() {
     return 0
   }
 
+  # Only install if destination doesn't exist
+  if [[ -e "$config_dest" ]]; then
+    info "claude-code-router config already exists at $config_dest, skipping installation"
+    return 0
+  fi
+
   info "Installing claude-code-router config..."
+  install_file_pair "$config_src" "$config_dest"
+}
+
+# Install opencode config file
+# Only installs if the destination file doesn't exist
+install_opencode_config() {
+  local config_src="$SCRIPT_DIR/opencode.json"
+  local config_dest="$HOME/.config/opencode/opencode.json"
+
+  [[ -e "$config_src" ]] || {
+    warn "opencode.json not found at $config_src, skipping config installation"
+    return 0
+  }
+
+  # Only install if destination doesn't exist
+  if [[ -e "$config_dest" ]]; then
+    info "opencode config already exists at $config_dest, skipping installation"
+    return 0
+  fi
+
+  info "Installing opencode config..."
   install_file_pair "$config_src" "$config_dest"
 }
 
@@ -55,6 +83,9 @@ main() {
   info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:3456"
   info ""
   info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
+
+  # Install opencode config file
+  install_opencode_config
 
   success "AI code agents installation completed"
 }

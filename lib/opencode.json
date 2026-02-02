@@ -5,7 +5,6 @@
   "small_model": "dashscope/qwen3-coder-plus",
 
   "provider": {
-    // ---------------- dashscope ----------------
     "dashscope": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "DashScope",
@@ -22,8 +21,6 @@
         }
       }
     },
-
-    // ---------------- ollama ----------------
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (Local)",
