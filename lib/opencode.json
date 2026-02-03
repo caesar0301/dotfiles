@@ -18,6 +18,12 @@
           "options": {
             "maxTokens": 65536
           }
+        },
+        "qwen3-max-2026-01-23": {
+          "tools": true,
+          "options": {
+            "maxTokens": 65536
+          }
         }
       }
     },
