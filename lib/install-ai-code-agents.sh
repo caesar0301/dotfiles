@@ -37,7 +37,7 @@ install_claude_code_router_config() {
 # Install opencode config file
 # Only installs if the destination file doesn't exist
 install_opencode_config() {
-  local config_src="$SCRIPT_DIR/opencode.json"
+  local config_src="$SCRIPT_DIR/../opencode/opencode.json"
   local config_dest="$HOME/.config/opencode/opencode.json"
 
   [[ -e "$config_src" ]] || {
@@ -53,6 +53,21 @@ install_opencode_config() {
 
   info "Installing opencode config..."
   install_file_pair "$config_src" "$config_dest"
+}
+
+# Install opencode plugin directory
+# Supports soft link or copy based on global LINK_INSTEAD_OF_COPY
+install_opencode_plugin() {
+  local plugin_src="$SCRIPT_DIR/../opencode/plugin"
+  local plugin_dest="$HOME/.config/opencode/plugin"
+
+  [[ -d "$plugin_src" ]] || {
+    warn "opencode plugin directory not found at $plugin_src, skipping plugin installation"
+    return 0
+  }
+
+  info "Installing opencode plugin..."
+  install_file_pair "$plugin_src" "$plugin_dest"
 }
 
 # Main installation function
@@ -84,8 +99,9 @@ main() {
   info ""
   info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
 
-  # Install opencode config file
+  # Install opencode config file and plugin directory
   install_opencode_config
+  install_opencode_plugin
 
   success "AI code agents installation completed"
 }
