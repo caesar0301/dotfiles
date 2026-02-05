@@ -27,46 +27,6 @@
         }
       }
     },
-    "idealab": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "IdeaLab",
-      "options": {
-        "baseURL": "{env:IDEALAB_BASE_URL}",
-        "apiKey": "{env:IDEALAB_API_KEY}"
-      },
-      "models": {
-        "qwen3-coder-plus": {
-          "tools": true,
-          "options": {
-            "maxTokens": 65536
-          }
-        },
-        "qwen3-max-2026-01-23": {
-          "tools": true,
-          "options": {
-            "maxTokens": 65536
-          }
-        },
-        "glm-4.7": {
-          "tools": true,
-          "options": {
-            "maxTokens": 16384
-          }
-        },
-        "kimi-k2.5": {
-          "tools": true,
-          "options": {
-            "maxTokens": 16384
-          }
-        },
-        "gpt-5.2-codex-0114-global": {
-          "tools": true,
-          "options": {
-            "maxTokens": 128000
-          }
-        }
-      }
-    },
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (Local)",
