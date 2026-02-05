@@ -72,16 +72,16 @@ _zinit_ice_plugin() {
 # Load custom extensions
 _zinit_ice_custom_extensions() {
   if [ -e ${ZSH_PLUGIN_DIR} ]; then
-    # subdirectory plugins
-    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type d); do
+    # subdirectory plugins (exclude backup directories)
+    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type d | grep -v "\.backup"); do
       _zinit_ice_plugin $i
     done
-    # softlink subdirectory plugins
-    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type l -exec test -d {} \; -print); do
+    # softlink subdirectory plugins (exclude backup directories)
+    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type l -exec test -d {} \; -print | grep -v "\.backup"); do
       _zinit_ice_plugin $i
     done
-    # plain zsh-file plugins
-    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type f -name "*.zsh"); do
+    # plain zsh-file plugins (exclude backup files)
+    for i in $(find ${ZSH_PLUGIN_DIR} -maxdepth 1 -mindepth 1 -type f -name "*.zsh" | grep -v "\.backup"); do
       _zinit_ice_plugin $i
     done
   fi
