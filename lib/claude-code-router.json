@@ -15,14 +15,7 @@
       "api_key": "${DASHSCOPE_API_KEY}",
       "models": ["qwen3-coder-plus", "qwen3-max-2026-01-23"],
       "transformer": {
-        "use": [
-          [
-            "maxtoken",
-            {
-              "max_tokens": 65536
-            }
-          ]
-        ]
+        "use": [["maxtoken", { "max_tokens": 65536 }]]
       }
     },
     {
@@ -51,22 +44,10 @@
       "name": "iflow",
       "api_base_url": "https://apis.iflow.cn/v1/chat/completions",
       "api_key": "$IFLOW_API_KEY",
-      "models": [
-        "qwen3-coder-plus",
-        "glm-4.6",
-        "qwen3-max",
-        "qwen3-vl-plus"
-      ],
+      "models": ["qwen3-coder-plus", "glm-4.6", "qwen3-max", "qwen3-vl-plus"],
       "transformer": {
         "deepseek-v3.1": {
-          "use": [
-            [
-              "maxtoken",
-              {
-                "max_tokens": 8192
-              }
-            ]
-          ]
+          "use": [["maxtoken", { "max_tokens": 8192 }]]
         }
       }
     },
