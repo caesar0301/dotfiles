@@ -1,25 +1,60 @@
 {
-  "LOG": false,
-  "LOG_LEVEL": "debug",
+  "LOG": true,
+  "LOG_LEVEL": "info",
   "CLAUDE_PATH": "",
   "HOST": "127.0.0.1",
   "PORT": 53456,
-  "APIKEY": "",
+  "APIKEY": "your-api-secret",
   "API_TIMEOUT_MS": "600000",
-  "PROXY_URL": "",
+  "PROXY_URL": "http://127.0.0.1:7890",
   "transformers": [],
   "Providers": [
+    {
+      "name": "dashscope",
+      "api_base_url": "${DASHSCOPE_BASE_URL}/chat/completions",
+      "api_key": "${DASHSCOPE_API_KEY}",
+      "models": ["qwen3-coder-plus", "qwen3-max-2026-01-23"],
+      "transformer": {
+        "use": [
+          [
+            "maxtoken",
+            {
+              "max_tokens": 65536
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "name": "openrouter",
+      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key": "${OPENROUTER_API_KEY}",
+      "models": [
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-haiku-4.5"
+      ],
+      "transformer": {
+        "use": ["openrouter"]
+      }
+    },
+    {
+      "name": "gemini",
+      "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
+      "api_key": "${GEMINI_API_KEY}",
+      "models": ["gemini-2.5-flash", "gemini-2.5-pro"],
+      "transformer": {
+        "use": ["gemini"]
+      }
+    },
     {
       "name": "iflow",
       "api_base_url": "https://apis.iflow.cn/v1/chat/completions",
       "api_key": "$IFLOW_API_KEY",
       "models": [
         "qwen3-coder-plus",
-        "kimi-k2-0905",
-        "glm-4.5",
         "glm-4.6",
         "qwen3-max",
-        "deepseek-v3.1",
         "qwen3-vl-plus"
       ],
       "transformer": {
@@ -36,70 +71,44 @@
       }
     },
     {
-      "name": "dashscope",
-      "api_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-      "api_key": "$DASHSCOPE_API_KEY",
-      "models": ["qwen3-coder-plus"],
-      "transformer": {
-        "use": [
-          [
-            "maxtoken",
-            {
-              "max_tokens": 65536
-            }
-          ]
-        ]
-      }
-    },
-    {
       "name": "ollama",
       "api_base_url": "http://localhost:11434/v1/chat/completions",
       "api_key": "ollama",
       "models": ["gemma3:4b", "qwen2.5vl:3b"]
-    },
-    {
-      "name": "openrouter",
-      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
-      "api_key": "$OPENROUTER_API_KEY",
-      "models": [
-        "google/gemini-2.5-flash",
-        "google/gemini-2.5-pro",
-        "anthropic/claude-sonnet-4",
-        "anthropic/claude-3.5-sonnet",
-        "anthropic/claude-3.7-sonnet:thinking"
-      ],
-      "transformer": {
-        "use": ["openrouter"]
-      }
-    },
-    {
-      "name": "gemini",
-      "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
-      "api_key": "$GEMINI_API_KEY",
-      "models": ["gemini-2.5-flash", "gemini-2.5-pro"],
-      "transformer": {
-        "use": ["gemini"]
-      }
     }
   ],
   "StatusLine": {
-    "enabled": false,
+    "enabled": true,
     "currentStyle": "default",
     "default": {
-      "modules": []
+      "modules": [
+        {
+          "type": "model",
+          "icon": "🤖",
+          "text": "{{model}}",
+          "color": "bright_cyan"
+        },
+        {
+          "type": "usage",
+          "icon": "💸",
+          "text": "In: {{input_tokens}} | Out: {{output_tokens}}",
+          "color": "bright_green"
+        },
+        {
+          "type": "latency",
+          "icon": "⚡",
+          "text": "{{latency}}ms",
+          "color": "bright_yellow"
+        }
+      ]
     },
     "powerline": {
       "modules": []
     }
   },
   "Router": {
-    "default": "iflow,glm-4.6",
-    "background": "iflow,glm-4.6",
-    "think": "iflow,glm-4.6",
-    "longContext": "iflow,glm-4.6",
-    "longContextThreshold": 60000,
-    "webSearch": "gemini,gemini-2.5-flash",
-    "image": "ollama,qwen2.5vl:3b"
+    "default": "dashscope,qwen3-coder-plus",
+    "think": "dashscope,qwen3-coder-plus"
   },
   "CUSTOM_ROUTER_PATH": ""
 }
