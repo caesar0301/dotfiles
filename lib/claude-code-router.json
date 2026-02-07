@@ -35,7 +35,7 @@
         "anthropic/claude-haiku-4.5"
       ],
       "transformer": {
-        "use": ["openrouter"]
+        "use": ["openrouter", ["maxtoken", { "max_tokens": 26397 }]]
       }
     },
     {
