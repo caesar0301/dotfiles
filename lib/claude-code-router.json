@@ -68,18 +68,6 @@
           "icon": "🤖",
           "text": "{{model}}",
           "color": "bright_cyan"
-        },
-        {
-          "type": "usage",
-          "icon": "💸",
-          "text": "In: {{input_tokens}} | Out: {{output_tokens}}",
-          "color": "bright_green"
-        },
-        {
-          "type": "latency",
-          "icon": "⚡",
-          "text": "{{latency}}ms",
-          "color": "bright_yellow"
         }
       ]
     },
