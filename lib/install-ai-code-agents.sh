@@ -74,21 +74,16 @@ install_opencode_plugin() {
 main() {
   info "Installing AI code agents..."
 
-  # Define AI code agents to install
-  local agents="@anthropic-ai/claude-code \
-    @musistudio/claude-code-router \
-    opencode-ai@latest"
+  # Install claude code CLI
+  info "Installing claude code CLI..."
+  if curl -fsSL https://claude.ai/install.sh | bash; then
+    success "Claude code CLI installed successfully"
+  else
+    warn "Failed to install Claude code CLI"
+  fi
 
   # Install agents using npm
-  npm_install_lib ${agents}
-
-  # Install cursor agent CLI
-  info "Installing Cursor agent CLI..."
-  if curl https://cursor.com/install -fsS | bash; then
-    success "Cursor agent CLI installed successfully"
-  else
-    warn "Failed to install Cursor agent CLI"
-  fi
+  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest"
 
   # Install claude-code-router config file
   install_claude_code_router_config
@@ -98,6 +93,14 @@ main() {
   info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:3456"
   info ""
   info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
+
+  # Install cursor agent CLI
+  info "Installing Cursor agent CLI..."
+  if curl https://cursor.com/install -fsS | bash; then
+    success "Cursor agent CLI installed successfully"
+  else
+    warn "Failed to install Cursor agent CLI"
+  fi
 
   # Install opencode config file and plugin directory
   install_opencode_config
