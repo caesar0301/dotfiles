@@ -1,9 +1,7 @@
 payload:
   # https://github.com/v2fly/domain-list-community/blob/master/data/oracle
-
   # All .oracle domains
   - DOMAIN-SUFFIX,oracle
-
   - DOMAIN-SUFFIX,oracle.com
   - DOMAIN-SUFFIX,oraclecloud.com
   - DOMAIN-SUFFIX,oraclefoundation.org
@@ -14,6 +12,5 @@ payload:
   - DOMAIN-SUFFIX,covid19-rx.org
   - DOMAIN-SUFFIX,covid19rx.org
   - DOMAIN-SUFFIX,sun.com
-
   - DOMAIN-KEYWORD,addthis
   - DOMAIN-KEYWORD,java

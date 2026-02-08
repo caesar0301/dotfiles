@@ -11,6 +11,7 @@ import base64
 import copy
 import os
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 from urllib.error import URLError
@@ -19,7 +20,28 @@ import yaml
 from yaml import Loader, safe_load
 
 
-# Global configuration flags
+# -----------------------------------------------------------------------------
+# Constants (hard-coded; change here for easy tuning)
+# -----------------------------------------------------------------------------
+GFWRULES_PATH = "rules/gfwrules.txt"
+RULESET_FILES = ["ai-agents.yaml", "news.yaml", "oracle.yaml"]
+RULESET_DIR = "ruleset"
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69"
+)
+COUNTRY_GROUP_NAMES = {
+    "美国": "AutoUS",
+    "日本": "AutoJP",
+    "台湾": "AutoTW",
+    "香港": "AutoHK",
+}
+DEFAULT_OUTPUT_PATTERN = "config.%Y%m%d"
+TROJAN_SECRET = "canyoukissme"
+URL_TEST_URL = "http://www.gstatic.com/generate_204"
+URL_TEST_INTERVAL = 300
+
+# Global configuration flags (set from CLI; defaults applied in main())
 DEFAULT_MATCH_DIRECT = False
 ADD_COUNTRY_GROUPS = False
 ADD_GFWLIST = False
@@ -63,11 +85,7 @@ def read_remote_config(link: str) -> Optional[Dict[str, Any]]:
 
     try:
         req = urllib.request.Request(link)
-        req.add_header(
-            "User-Agent",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69",
-        )
+        req.add_header("User-Agent", USER_AGENT)
 
         with urllib.request.urlopen(req) as response:
             return yaml.load(response, Loader=Loader)
@@ -82,8 +100,8 @@ def create_proxy_group(
     proxy_configs: List[Dict[str, Any]],
     extra_names: Optional[List[str]] = None,
     group_type: str = "select",
-    url: str = "http://www.gstatic.com/generate_204",
-    interval: int = 300,
+    url: str = URL_TEST_URL,
+    interval: int = URL_TEST_INTERVAL,
 ) -> Dict[str, Any]:
     """
     Create a proxy group configuration.
@@ -138,7 +156,7 @@ def get_gfw_rules() -> List[str]:
     """
     rules = []
     try:
-        local_file = get_resource_path("rules/gfwrules.txt")
+        local_file = get_resource_path(GFWRULES_PATH)
         with open(local_file, encoding="utf-8") as rule_file:
             for line in rule_file:
                 line = line.strip("\r\n ")
@@ -146,44 +164,10 @@ def get_gfw_rules() -> List[str]:
                     rules.append(line)
         print(f"Successfully loaded {len(rules)} GFW rules from local file")
     except FileNotFoundError:
-        print("Warning: rules/gfwrules.txt not found")
+        print(f"Warning: {GFWRULES_PATH} not found")
     except Exception as e:
         print(f"Error reading GFW rules: {e}")
     return rules
-
-
-def read_ruleset_as_providers(result: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Read rule providers from rule_providers.yaml and add them to the result.
-
-    Args:
-        result: Configuration dictionary to modify
-
-    Returns:
-        Modified configuration dictionary
-    """
-    filename = "rule_providers.yaml"
-    ruleset = {}
-
-    try:
-        filepath = get_resource_path(filename)
-        with open(filepath, encoding="utf-8") as rule_file:
-            ruleset = safe_load(rule_file)
-    except FileNotFoundError:
-        print(f"Warning: {filename} not found")
-        return result
-    except yaml.YAMLError as e:
-        print(f"Error parsing {filename}: {e}")
-        return result
-
-    providers = ruleset.get("rule-providers", [])
-    result["rule-providers"] = providers
-    print(f"Loaded {len(providers)} rule providers")
-
-    for provider in providers:
-        result["rules"].append(f"RULE-SET,{provider},Proxy")
-
-    return result
 
 
 def read_ruleset_as_rules(result: Dict[str, Any]) -> Dict[str, Any]:
@@ -196,10 +180,8 @@ def read_ruleset_as_rules(result: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Modified configuration dictionary
     """
-    target_files = ["ChatGPT.yaml", "cdn.yaml", "news.yaml", "oracle.yaml"]
-
-    for filename in target_files:
-        filepath = get_resource_path(f"ruleset/{filename}")
+    for filename in RULESET_FILES:
+        filepath = get_resource_path(f"{RULESET_DIR}/{filename}")
         try:
             with open(filepath, encoding="utf-8") as rule_file:
                 extra_rules = safe_load(rule_file)
@@ -265,7 +247,7 @@ def finalize_rules(config: Dict[str, Any]) -> None:
     else:
         res.append("MATCH,Proxy")
 
-    config["rules"] = [rule for rule in res if all(rule.split(','))]
+    config["rules"] = [rule for rule in res if all(rule.split(","))]
 
 
 def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
@@ -279,10 +261,8 @@ def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
         Modified configuration dictionary
     """
     # Filter selected proxies by country
-    selected_countries = ["美国", "日本"]
     selected_proxies = []
-
-    for country in selected_countries:
+    for country in COUNTRY_GROUP_NAMES:
         country_proxies = [
             proxy for proxy in result["proxies"] if country in proxy["name"]
         ]
@@ -300,8 +280,7 @@ def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
 
     # Create country-specific groups
     if ADD_COUNTRY_GROUPS:
-        country_groups = {"美国": "AutoUS", "日本": "AutoJP"}
-        for country, group_name in country_groups.items():
+        for country, group_name in COUNTRY_GROUP_NAMES.items():
             country_proxies = [
                 proxy for proxy in result["proxies"] if country in proxy["name"]
             ]
@@ -309,7 +288,7 @@ def finalize_groups(result: Dict[str, Any]) -> Dict[str, Any]:
                 name=group_name, proxy_configs=country_proxies, group_type="url-test"
             )
             add_group(result, country_group)
-        group_names.extend(country_groups.values())
+        group_names.extend(COUNTRY_GROUP_NAMES.values())
 
     # Create main proxy group
     merged_group = create_proxy_group(
@@ -333,43 +312,45 @@ def main() -> None:
         "-t", "--trojan", type=str, required=True, help="Trojan registration link"
     )
     parser.add_argument(
-        "-r",
-        "--rulesets",
+        "--no-rulesets",
         action="store_true",
-        help="Add predefined ruleset (default false)",
+        dest="no_rulesets",
+        help="Disable predefined ruleset (default: rulesets enabled)",
     )
     parser.add_argument(
-        "-p",
-        "--providers",
+        "--no-default-direct",
         action="store_true",
-        help="Add predefined ruleset as providers (default false)",
+        dest="no_default_direct",
+        help="Disable default MATCH as DIRECT (default: MATCH is DIRECT)",
     )
     parser.add_argument(
-        "-d",
-        "--default-direct",
+        "--no-groups",
         action="store_true",
-        help="Add default MATCH as DIRECT (default false)",
+        dest="no_groups",
+        help="Disable country-wise groups (default: groups enabled)",
     )
     parser.add_argument(
-        "-g",
-        "--groups",
+        "--no-gfwlist",
         action="store_true",
-        help="Add country wise groups (default false)",
+        dest="no_gfwlist",
+        help="Disable gfwlist rules (default: gfwlist enabled)",
     )
     parser.add_argument(
-        "-w", "--gfwlist", action="store_true", help="Add gfwlist rules (default false)"
-    )
-    parser.add_argument(
-        "-o", "--output", type=str, default="config.latest", help="Output filename (default: config.latest)"
+        "-o",
+        "--output",
+        type=str,
+        default=datetime.now().strftime(DEFAULT_OUTPUT_PATTERN),
+        help="Output filename (default: config.YYYYMMDD)",
     )
 
     args = parser.parse_args()
 
-    # Set global flags
+    # Set global flags (all features on by default; --no-* turns off)
     global ADD_COUNTRY_GROUPS, DEFAULT_MATCH_DIRECT, ADD_GFWLIST
-    ADD_COUNTRY_GROUPS = args.groups
-    DEFAULT_MATCH_DIRECT = args.default_direct
-    ADD_GFWLIST = args.gfwlist
+    ADD_COUNTRY_GROUPS = not args.no_groups
+    DEFAULT_MATCH_DIRECT = not args.no_default_direct
+    ADD_GFWLIST = not args.no_gfwlist
+    add_rulesets = not args.no_rulesets
 
     # Load remote configuration
     trojan = read_remote_config(args.trojan)
@@ -377,13 +358,11 @@ def main() -> None:
         raise RuntimeError("Failed to load remote trojan configuration")
 
     # Initialize configuration
-    trojan["secret"] = "canyoukissme"
+    trojan["secret"] = TROJAN_SECRET
     trojan["proxy-groups"] = []
 
     # Process rulesets
-    if args.providers:
-        read_ruleset_as_providers(trojan)
-    if args.rulesets:
+    if add_rulesets:
         read_ruleset_as_rules(trojan)
 
     # Finalize configuration

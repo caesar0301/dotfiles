@@ -1,0 +1,111 @@
+payload:
+  ############################
+  # Core OpenAI / ChatGPT
+  ############################
+  - DOMAIN-SUFFIX,ai.com
+  - DOMAIN-SUFFIX,openai.com
+  - DOMAIN-SUFFIX,chatgpt.com
+  - DOMAIN-SUFFIX,oaistatic.com
+  - DOMAIN-SUFFIX,oaiusercontent.com
+  - DOMAIN-SUFFIX,openaiapi-site.azureedge.net
+
+  ############################
+  # Auth / Bot / Security (shared infra)
+  ############################
+  - DOMAIN-SUFFIX,auth0.com
+  - DOMAIN-SUFFIX,arkoselabs.com
+  - DOMAIN-SUFFIX,challenges.cloudflare.com
+  - DOMAIN-SUFFIX,hcaptcha.com
+  - DOMAIN-SUFFIX,cloudflare.com
+
+  ############################
+  # Payments (OpenAI + others)
+  ############################
+  - DOMAIN-SUFFIX,stripe.com
+  - DOMAIN-SUFFIX,stripe.network
+
+  ############################
+  # Anthropic (Claude)
+  ############################
+  - DOMAIN-SUFFIX,anthropic.com
+  - DOMAIN-SUFFIX,claude.ai
+  - DOMAIN-SUFFIX,anthropic.ai
+
+  ############################
+  # Google Gemini / Vertex AI
+  ############################
+  - DOMAIN-SUFFIX,googleapis.com
+  - DOMAIN-SUFFIX,google.com
+  - DOMAIN-SUFFIX,gemini.google.com
+  - DOMAIN-SUFFIX,ai.google.dev
+  - DOMAIN-SUFFIX,cloud.google.com
+
+  ############################
+  # xAI / Grok
+  ############################
+  - DOMAIN-SUFFIX,x.ai
+  - DOMAIN-SUFFIX,grok.com
+  - DOMAIN-SUFFIX,twimg.com
+  - DOMAIN-SUFFIX,x.com
+  - DOMAIN-SUFFIX,twitter.com
+
+  ############################
+  # Perplexity
+  ############################
+  - DOMAIN-SUFFIX,perplexity.ai
+  - DOMAIN-SUFFIX,pplx.ai
+
+  ############################
+  # Cursor (AI IDE)
+  ############################
+  - DOMAIN-SUFFIX,cursor.sh
+  - DOMAIN-SUFFIX,cursor.so
+  - DOMAIN-SUFFIX,cursor-cdn.com
+  - DOMAIN-SUFFIX,vsassets.io
+  - DOMAIN-SUFFIX,visualstudio.com
+
+  ############################
+  # GitHub Copilot / Codex
+  ############################
+  - DOMAIN-SUFFIX,github.com
+  - DOMAIN-SUFFIX,githubusercontent.com
+  - DOMAIN-SUFFIX,githubassets.com
+  - DOMAIN-SUFFIX,copilot.github.com
+
+  ############################
+  # HuggingFace
+  ############################
+  - DOMAIN-SUFFIX,huggingface.co
+  - DOMAIN-SUFFIX,hf.co
+
+  ############################
+  # Meta AI / LLaMA
+  ############################
+  - DOMAIN-SUFFIX,meta.ai
+  - DOMAIN-SUFFIX,facebook.com
+  - DOMAIN-SUFFIX,fbcdn.net
+
+  ############################
+  # Mistral
+  ############################
+  - DOMAIN-SUFFIX,mistral.ai
+
+  ############################
+  # Cohere
+  ############################
+  - DOMAIN-SUFFIX,cohere.ai
+
+  ############################
+  # Stability AI
+  ############################
+  - DOMAIN-SUFFIX,stability.ai
+  - DOMAIN-SUFFIX,stablediffusionweb.com
+
+  ############################
+  # Common AI infra / CDNs
+  ############################
+  - DOMAIN-SUFFIX,vercel.app
+  - DOMAIN-SUFFIX,vercel.com
+  - DOMAIN-SUFFIX,netlify.app
+  - DOMAIN-SUFFIX,jsdelivr.net
+  - DOMAIN-SUFFIX,unpkg.com
