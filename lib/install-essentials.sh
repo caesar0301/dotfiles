@@ -129,19 +129,23 @@ main() {
   # Install local utility scripts first
   install_local_bins
 
-  # Core dependencies
+  # Core dependencies - order matters! Homebrew must be installed before tools that depend on it
   local core_deps=(
     "install_pyenv"           # Python version manager
     "install_fzf"             # Fuzzy finder
-    "install_universal_ctags" # Universal ctags (required by Tagbar)
-    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
   )
 
-  # Add homebrew if INSTALL_HOMEBREW=1 is set
+  # Add homebrew EARLY if INSTALL_HOMEBREW=1 is set (before tools that depend on it)
   if [[ "${INSTALL_HOMEBREW:-0}" == "1" ]]; then
     core_deps+=("install_homebrew")
     info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
   fi
+
+  # Add tools that may depend on Homebrew
+  core_deps+=(
+    "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
+    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
+  )
 
   # Add extra version managers if INSTALL_EXTRA_VENV=1 is set
   if [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]]; then
