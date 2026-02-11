@@ -18,15 +18,13 @@
 #     ./lib/install-essentials.sh
 #
 #   With optional components:
-#     INSTALL_HOMEBREW=1 ./lib/install-essentials.sh
 #     INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
 #     INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 #
 #     Full installation:
-#     INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+#     INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 #
 # Environment Variables:
-#   INSTALL_HOMEBREW=1      Install Homebrew package manager
 #   INSTALL_EXTRA_VENV=1    Install jenv, gvm, nvm version managers
 #   INSTALL_AI_CODE_AGENTS=1 Install AI code agents (requires Node.js >= 20)
 #
@@ -36,7 +34,7 @@
 #   - fzf: Fuzzy finder (always installed)
 #   - universal-ctags: Code navigation tool (always installed)
 #   - cargo: Rust toolchain (always installed)
-#   - Homebrew: Package manager (if INSTALL_HOMEBREW=1)
+#   - Homebrew: Package manager (always installed)
 #   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
 #   - AI code agents: AI-powered development tools (if INSTALL_AI_CODE_AGENTS=1)
 #
@@ -133,16 +131,7 @@ main() {
   local core_deps=(
     "install_pyenv"           # Python version manager
     "install_fzf"             # Fuzzy finder
-  )
-
-  # Add homebrew EARLY if INSTALL_HOMEBREW=1 is set (before tools that depend on it)
-  if [[ "${INSTALL_HOMEBREW:-0}" == "1" ]]; then
-    core_deps+=("install_homebrew")
-    info "Homebrew installation enabled via INSTALL_HOMEBREW=1"
-  fi
-
-  # Add tools that may depend on Homebrew
-  core_deps+=(
+    "install_homebrew"        # Homebrew package manager (always installed)
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
     "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
   )
@@ -160,12 +149,7 @@ main() {
   fi
 
   # Install core dependencies
-  local homebrew_installed=false
   for dep_func in "${core_deps[@]}"; do
-    if [[ "$dep_func" == "install_homebrew" ]]; then
-      homebrew_installed=true
-    fi
-
     if declare -f "$dep_func" >/dev/null; then
       info "Installing dependency: ${dep_func#install_}"
       if ! "$dep_func"; then
@@ -176,8 +160,8 @@ main() {
     fi
   done
 
-  # Configure Homebrew mirrors if Homebrew was installed
-  if [[ "$homebrew_installed" == "true" ]] && command -v brew >/dev/null 2>&1; then
+  # Configure Homebrew mirrors if Homebrew was successfully installed
+  if command -v brew >/dev/null 2>&1; then
     configure_homebrew_mirrors
   fi
 
@@ -187,7 +171,7 @@ main() {
   printf "  • fzf: Fuzzy finder\n"
   printf "  • universal-ctags: Code navigation tool\n"
   printf "  • cargo: Rust toolchain\n"
-  [[ "$homebrew_installed" == "true" ]] && printf "  • Homebrew: Package manager\n"
+  printf "  • Homebrew: Package manager\n"
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
 

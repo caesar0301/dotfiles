@@ -26,11 +26,11 @@ This is a personal dotfiles collection (`cool-dotfiles`) for setting up a modern
 The essential tools installer (`lib/install-essentials.sh`) is automatically run as a prerequisite:
 
 ```bash
-# Basic installation (utility scripts + pyenv + fzf + ctags + cargo)
+# Basic installation (utility scripts + pyenv + fzf + ctags + cargo + Homebrew)
 ./lib/install-essentials.sh
 
 # With optional components
-INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 ```
 
 **What Gets Installed (Always):**
@@ -39,9 +39,9 @@ INSTALL_HOMEBREW=1 INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-e
 - fzf: Fuzzy finder
 - universal-ctags: Code navigation tool
 - cargo: Rust toolchain
+- Homebrew: Package manager
 
 **Optional Features (via environment variables):**
-- `INSTALL_HOMEBREW=1`: Homebrew package manager
 - `INSTALL_EXTRA_VENV=1`: jenv (Java), gvm (Go), nvm (Node), rbenv (Ruby) version managers
 - `INSTALL_AI_CODE_AGENTS=1`: AI-powered development tools (requires npm >= 20)
 
@@ -89,7 +89,7 @@ sh misc/install.sh
 
 2. **Shared Library (`lib/`)**
    - `shmisc.sh`: Core shell utility library with logging, path utilities, system detection
-   - `install-essentials.sh`: Orchestrates installation of essential tools (utility scripts, pyenv, fzf, ctags, cargo, and optional Homebrew/version managers/AI tools)
+   - `install-essentials.sh`: Orchestrates installation of essential tools (utility scripts, pyenv, fzf, ctags, cargo, Homebrew, and optional version managers/AI tools)
    - Individual installers: `install-pyenv.sh`, `install-fzf.sh`, `install-universal-ctags.sh`, `install-cargo.sh`, `install-homebrew.sh`, `install-jenv.sh`, `install-gvm.sh`, `install-nvm.sh`, `install-rbenv.sh`, `install-ai-code-agents.sh`
    - Additional tools: `install-bc.sh`, `install-golang.sh`, `install-google-java-format.sh`, `install-hack-nerd-font.sh`, `install-lazyssh.sh`, `install-miniconda.sh`, `install-neovim.sh`, `install-nvim-python.sh`, `install-sdcv.sh`, `install-shfmt.sh`, `install-uv.sh`, `install-lang-formatters.sh`, `install-lsp.sh`
    - `claude-code-router.json`: Configuration for AI code routing

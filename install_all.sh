@@ -53,10 +53,9 @@ install_essentials_prerequisite() {
   }
 
   info "Installing essential development tools (prerequisite)..."
-  info "Enabling all optional features: Homebrew, version managers, and AI code agents"
+  info "Enabling all optional features: version managers and AI code agents"
 
   # Enable all optional features for full installation
-  export INSTALL_HOMEBREW=1
   export INSTALL_EXTRA_VENV=1
   export INSTALL_AI_CODE_AGENTS=1
 
