@@ -16,31 +16,37 @@ abort() {
 # Fail fast with a concise message when not using bash
 # Single brackets are needed here for POSIX compatibility
 # shellcheck disable=SC2292
-if [ -z "${BASH_VERSION:-}" ]; then
+if [ -z "${BASH_VERSION:-}" ]
+then
   abort "Bash is required to interpret this script."
 fi
 
 # Check if script is run with force-interactive mode in CI
-if [[ -n "${CI-}" && -n "${INTERACTIVE-}" ]]; then
+if [[ -n "${CI-}" && -n "${INTERACTIVE-}" ]]
+then
   abort "Cannot run force-interactive mode in CI."
 fi
 
 # Check if both `INTERACTIVE` and `NONINTERACTIVE` are set
 # Always use single-quoted strings with `exp` expressions
 # shellcheck disable=SC2016
-if [[ -n "${INTERACTIVE-}" && -n "${NONINTERACTIVE-}" ]]; then
+if [[ -n "${INTERACTIVE-}" && -n "${NONINTERACTIVE-}" ]]
+then
   abort 'Both `$INTERACTIVE` and `$NONINTERACTIVE` are set. Please unset at least one variable and try again.'
 fi
 
 # Check if script is run in POSIX mode
-if [[ -n "${POSIXLY_CORRECT+1}" ]]; then
+if [[ -n "${POSIXLY_CORRECT+1}" ]]
+then
   abort 'Bash must not run in POSIX mode. Please unset POSIXLY_CORRECT and try again.'
 fi
 
 # Check for file that prevents Homebrew installation
-if [[ -f "/etc/homebrew/brew.no_install" ]]; then
+if [[ -f "/etc/homebrew/brew.no_install" ]]
+then
   BREW_NO_INSTALL="$(cat "/etc/homebrew/brew.no_install" 2>/dev/null)"
-  if [[ -n "${BREW_NO_INSTALL}" ]]; then
+  if [[ -n "${BREW_NO_INSTALL}" ]]
+  then
     abort "Homebrew cannot be installed because ${BREW_NO_INSTALL}."
   else
     abort "Homebrew cannot be installed because /etc/homebrew/brew.no_install exists!"
@@ -48,7 +54,8 @@ if [[ -f "/etc/homebrew/brew.no_install" ]]; then
 fi
 
 # string formatters
-if [[ -t 1 ]]; then
+if [[ -t 1 ]]
+then
   tty_escape() { printf "\033[%sm" "$1"; }
 else
   tty_escape() { :; }
@@ -64,9 +71,9 @@ shell_join() {
   local arg
   printf "%s" "$1"
   shift
-  for arg in "$@"; do
-    printf " "
-    printf "%s" "${arg// /\ }"
+  for arg in "$@"
+  do
+    printf " %s" "${arg// /\ }"
   done
 }
 
@@ -93,13 +100,14 @@ EOS
   exit "${1:-0}"
 }
 
-while [[ $# -gt 0 ]]; do
+while [[ $# -gt 0 ]]
+do
   case "$1" in
-  -h | --help) usage ;;
-  *)
-    warn "Unrecognized option: '$1'"
-    usage 1
-    ;;
+    -h | --help) usage ;;
+    *)
+      warn "Unrecognized option: '$1'"
+      usage 1
+      ;;
   esac
 done
 
@@ -107,12 +115,16 @@ done
 # If it is run non-interactively we should not prompt for passwords.
 # Always use single-quoted strings with `exp` expressions
 # shellcheck disable=SC2016
-if [[ -z "${NONINTERACTIVE-}" ]]; then
-  if [[ -n "${CI-}" ]]; then
+if [[ -z "${NONINTERACTIVE-}" ]]
+then
+  if [[ -n "${CI-}" ]]
+  then
     warn 'Running in non-interactive mode because `$CI` is set.'
     NONINTERACTIVE=1
-  elif [[ ! -t 0 ]]; then
-    if [[ -z "${INTERACTIVE-}" ]]; then
+  elif [[ ! -t 0 ]]
+  then
+    if [[ -z "${INTERACTIVE-}" ]]
+    then
       warn 'Running in non-interactive mode because `stdin` is not a TTY.'
       NONINTERACTIVE=1
     else
@@ -124,16 +136,19 @@ else
 fi
 
 # USER isn't always set so provide a fall back for the installer and subprocesses.
-if [[ -z "${USER-}" ]]; then
+if [[ -z "${USER-}" ]]
+then
   USER="$(chomp "$(id -un)")"
   export USER
 fi
 
 # First check OS.
 OS="$(uname)"
-if [[ "${OS}" == "Linux" ]]; then
+if [[ "${OS}" == "Linux" ]]
+then
   HOMEBREW_ON_LINUX=1
-elif [[ "${OS}" == "Darwin" ]]; then
+elif [[ "${OS}" == "Darwin" ]]
+then
   HOMEBREW_ON_MACOS=1
 else
   abort "Homebrew is only supported on macOS and Linux."
@@ -142,10 +157,12 @@ fi
 # Required installation paths. To install elsewhere (which is unsupported)
 # you can untar https://github.com/Homebrew/brew/tarball/main
 # anywhere you like.
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" ]]
+then
   UNAME_MACHINE="$(/usr/bin/uname -m)"
 
-  if [[ "${UNAME_MACHINE}" == "arm64" ]]; then
+  if [[ "${UNAME_MACHINE}" == "arm64" ]]
+  then
     # On ARM macOS, this script installs to /opt/homebrew only
     HOMEBREW_PREFIX="/opt/homebrew"
     HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
@@ -188,18 +205,20 @@ HOMEBREW_CORE_DEFAULT_GIT_REMOTE="https://github.com/Homebrew/homebrew-core"
 HOMEBREW_BREW_GIT_REMOTE="${HOMEBREW_BREW_GIT_REMOTE:-"${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}"}"
 HOMEBREW_CORE_GIT_REMOTE="${HOMEBREW_CORE_GIT_REMOTE:-"${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}"}"
 # The URLs with and without the '.git' suffix are the same Git remote. Do not prompt.
-if [[ "${HOMEBREW_BREW_GIT_REMOTE}" == "${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}.git" ]]; then
+if [[ "${HOMEBREW_BREW_GIT_REMOTE}" == "${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}.git" ]]
+then
   HOMEBREW_BREW_GIT_REMOTE="${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}"
 fi
-if [[ "${HOMEBREW_CORE_GIT_REMOTE}" == "${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}.git" ]]; then
+if [[ "${HOMEBREW_CORE_GIT_REMOTE}" == "${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}.git" ]]
+then
   HOMEBREW_CORE_GIT_REMOTE="${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}"
 fi
 export HOMEBREW_{BREW,CORE}_GIT_REMOTE
 
 # TODO: bump version when new macOS is released or announced
-MACOS_NEWEST_UNSUPPORTED="16.0"
+MACOS_NEWEST_UNSUPPORTED="27.0"
 # TODO: bump version when new macOS is released
-MACOS_OLDEST_SUPPORTED="13.0"
+MACOS_OLDEST_SUPPORTED="14.0"
 
 # For Homebrew on Linux
 REQUIRED_RUBY_VERSION=3.4    # https://github.com/Homebrew/brew/pull/19779
@@ -215,24 +234,30 @@ unset HAVE_SUDO_ACCESS # unset this from the environment
 
 # create paths.d file for /opt/homebrew installs
 # (/usr/local/bin is already in the PATH)
-if [[ -d "/etc/paths.d" && "${HOMEBREW_PREFIX}" != "/usr/local" && -x "$(command -v tee)" ]]; then
+if [[ -d "/etc/paths.d" && "${HOMEBREW_PREFIX}" != "/usr/local" && -x "$(command -v tee)" ]]
+then
   ADD_PATHS_D=1
 fi
 
 have_sudo_access() {
-  if [[ ! -x "/usr/bin/sudo" ]]; then
+  if [[ ! -x "/usr/bin/sudo" ]]
+  then
     return 1
   fi
 
   local -a SUDO=("/usr/bin/sudo")
-  if [[ -n "${SUDO_ASKPASS-}" ]]; then
+  if [[ -n "${SUDO_ASKPASS-}" ]]
+  then
     SUDO+=("-A")
-  elif [[ -n "${NONINTERACTIVE-}" ]]; then
+  elif [[ -n "${NONINTERACTIVE-}" ]]
+  then
     SUDO+=("-n")
   fi
 
-  if [[ -z "${HAVE_SUDO_ACCESS-}" ]]; then
-    if [[ -n "${NONINTERACTIVE-}" ]]; then
+  if [[ -z "${HAVE_SUDO_ACCESS-}" ]]
+  then
+    if [[ -n "${NONINTERACTIVE-}" ]]
+    then
       "${SUDO[@]}" -l mkdir &>/dev/null
     else
       "${SUDO[@]}" -v && "${SUDO[@]}" -l mkdir &>/dev/null
@@ -240,7 +265,8 @@ have_sudo_access() {
     HAVE_SUDO_ACCESS="$?"
   fi
 
-  if [[ -n "${HOMEBREW_ON_MACOS-}" ]] && [[ "${HAVE_SUDO_ACCESS}" -ne 0 ]]; then
+  if [[ -n "${HOMEBREW_ON_MACOS-}" ]] && [[ "${HAVE_SUDO_ACCESS}" -ne 0 ]]
+  then
     abort "Need sudo access on macOS (e.g. the user ${USER} needs to be an Administrator)!"
   fi
 
@@ -248,7 +274,8 @@ have_sudo_access() {
 }
 
 execute() {
-  if ! "$@"; then
+  if ! "$@"
+  then
     abort "$(printf "Failed during: %s" "$(shell_join "$@")")"
   fi
 }
@@ -256,12 +283,15 @@ execute() {
 retry() {
   local tries="$1" n="$1" pause=2
   shift
-  if ! "$@"; then
-    while [[ $((--n)) -gt 0 ]]; do
+  if ! "$@"
+  then
+    while [[ $((--n)) -gt 0 ]]
+    do
       warn "$(printf "Trying again in %d seconds: %s" "${pause}" "$(shell_join "$@")")"
       sleep "${pause}"
       ((pause *= 2))
-      if "$@"; then
+      if "$@"
+      then
         return
       fi
     done
@@ -271,8 +301,10 @@ retry() {
 
 execute_sudo() {
   local -a args=("$@")
-  if [[ "${EUID:-${UID}}" != "0" ]] && have_sudo_access; then
-    if [[ -n "${SUDO_ASKPASS-}" ]]; then
+  if [[ "${EUID:-${UID}}" != "0" ]] && have_sudo_access
+  then
+    if [[ -n "${SUDO_ASKPASS-}" ]]
+    then
       args=("-A" "${args[@]}")
     fi
     ohai "/usr/bin/sudo" "${args[@]}"
@@ -293,7 +325,8 @@ getc() {
 
 ring_bell() {
   # Use the shell's audible bell.
-  if [[ -t 1 ]]; then
+  if [[ -t 1 ]]
+  then
     printf "\a"
   fi
 }
@@ -304,7 +337,8 @@ wait_for_user() {
   echo "Press ${tty_bold}RETURN${tty_reset}/${tty_bold}ENTER${tty_reset} to continue or any other key to abort:"
   getc c
   # we test for \r and \n because some stuff does \r instead
-  if ! [[ "${c}" == $'\r' || "${c}" == $'\n' ]]; then
+  if ! [[ "${c}" == $'\r' || "${c}" == $'\n' ]]
+  then
     exit 1
   fi
 }
@@ -338,11 +372,13 @@ check_run_command_as_root() {
 }
 
 should_install_command_line_tools() {
-  if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
+  if [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+  then
     return 1
   fi
 
-  if version_gt "${macos_version}" "10.13"; then
+  if version_gt "${macos_version}" "10.13"
+  then
     ! [[ -e "/Library/Developer/CommandLineTools/usr/bin/git" ]]
   else
     ! [[ -e "/Library/Developer/CommandLineTools/usr/bin/git" ]] ||
@@ -380,7 +416,8 @@ file_not_grpowned() {
 
 # Please sync with 'test_ruby()' in 'Library/Homebrew/utils/ruby.sh' from the Homebrew/brew repository.
 test_ruby() {
-  if [[ ! -x "$1" ]]; then
+  if [[ ! -x "$1" ]]
+  then
     return 1
   fi
 
@@ -390,11 +427,13 @@ test_ruby() {
 }
 
 test_curl() {
-  if [[ ! -x "$1" ]]; then
+  if [[ ! -x "$1" ]]
+  then
     return 1
   fi
 
-  if [[ "$1" == "/snap/bin/curl" ]]; then
+  if [[ "$1" == "/snap/bin/curl" ]]
+  then
     warn "Ignoring $1 (curl snap is too restricted)"
     return 1
   fi
@@ -406,13 +445,15 @@ test_curl() {
 }
 
 test_git() {
-  if [[ ! -x "$1" ]]; then
+  if [[ ! -x "$1" ]]
+  then
     return 1
   fi
 
   local git_version_output
   git_version_output="$("$1" --version 2>/dev/null)"
-  if [[ "${git_version_output}" =~ "git version "([^ ]*).* ]]; then
+  if [[ "${git_version_output}" =~ "git version "([^ ]*).* ]]
+  then
     version_ge "$(major_minor "${BASH_REMATCH[1]}")" "$(major_minor "${REQUIRED_GIT_VERSION}")"
   else
     abort "Unexpected Git version: '${git_version_output}'!"
@@ -429,15 +470,19 @@ which() {
 # function which is set above
 # shellcheck disable=SC2230
 find_tool() {
-  if [[ $# -ne 1 ]]; then
+  if [[ $# -ne 1 ]]
+  then
     return 1
   fi
 
   local executable
-  while read -r executable; do
-    if [[ "${executable}" != /* ]]; then
+  while read -r executable
+  do
+    if [[ "${executable}" != /* ]]
+    then
       warn "Ignoring ${executable} (relative paths don't work)"
-    elif "test_$1" "${executable}"; then
+    elif "test_$1" "${executable}"
+    then
       echo "${executable}"
       break
     fi
@@ -454,8 +499,10 @@ outdated_glibc() {
   version_lt "${glibc_version}" "${REQUIRED_GLIBC_VERSION}"
 }
 
-if [[ -n "${HOMEBREW_ON_LINUX-}" ]] && no_usable_ruby; then
-  if outdated_glibc; then
+if [[ -n "${HOMEBREW_ON_LINUX-}" ]] && no_usable_ruby
+then
+  if outdated_glibc
+  then
     abort "$(
       cat <<EOABORT
 Homebrew requires Ruby ${REQUIRED_RUBY_VERSION} which was not found on your system.
@@ -471,7 +518,8 @@ EOABORT
 fi
 
 # Invalidate sudo timestamp before exiting (if it wasn't active before).
-if [[ -x /usr/bin/sudo ]] && ! /usr/bin/sudo -n -v 2>/dev/null; then
+if [[ -x /usr/bin/sudo ]] && ! /usr/bin/sudo -n -v 2>/dev/null
+then
   trap '/usr/bin/sudo -k' EXIT
 fi
 
@@ -484,12 +532,14 @@ cd "/usr" || exit 1
 # shellcheck disable=SC2016
 ohai 'Checking for `sudo` access (which may request your password)...'
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" ]]
+then
   [[ "${EUID:-${UID}}" == "0" ]] || have_sudo_access
 elif ! [[ -w "${HOMEBREW_PREFIX}" ]] &&
-  ! [[ -w "/home/linuxbrew" ]] &&
-  ! [[ -w "/home" ]] &&
-  ! have_sudo_access; then
+     ! [[ -w "/home/linuxbrew" ]] &&
+     ! [[ -w "/home" ]] &&
+     ! have_sudo_access
+then
   abort "$(
     cat <<EOABORT
 Insufficient permissions to install Homebrew to "${HOMEBREW_PREFIX}" (the default prefix).
@@ -506,7 +556,8 @@ HOMEBREW_CORE="${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-core"
 
 check_run_command_as_root
 
-if [[ -d "${HOMEBREW_PREFIX}" && ! -x "${HOMEBREW_PREFIX}" ]]; then
+if [[ -d "${HOMEBREW_PREFIX}" && ! -x "${HOMEBREW_PREFIX}" ]]
+then
   abort "$(
     cat <<EOABORT
 The Homebrew prefix ${tty_underline}${HOMEBREW_PREFIX}${tty_reset} exists but is not searchable.
@@ -517,33 +568,41 @@ EOABORT
   )"
 fi
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" ]]
+then
   # On macOS, support 64-bit Intel and ARM
-  if [[ "${UNAME_MACHINE}" != "arm64" ]] && [[ "${UNAME_MACHINE}" != "x86_64" ]]; then
+  if [[ "${UNAME_MACHINE}" != "arm64" ]] && [[ "${UNAME_MACHINE}" != "x86_64" ]]
+  then
     abort "Homebrew is only supported on Intel and ARM processors!"
   fi
 else
-  if [[ "${UNAME_MACHINE}" != "x86_64" ]] && [[ "${UNAME_MACHINE}" != "aarch64" ]]; then
+  if [[ "${UNAME_MACHINE}" != "x86_64" ]] && [[ "${UNAME_MACHINE}" != "aarch64" ]]
+  then
     abort "Homebrew on Linux is only supported on Intel x86_64 and ARM64 processors!"
   fi
 fi
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" ]]
+then
   macos_version="$(major_minor "$(/usr/bin/sw_vers -productVersion)")"
-  if version_lt "${macos_version}" "10.7"; then
+  if version_lt "${macos_version}" "10.7"
+  then
     abort "$(
       cat <<EOABORT
 Your Mac OS X version is too old. See:
   ${tty_underline}https://github.com/mistydemeo/tigerbrew${tty_reset}
 EOABORT
     )"
-  elif version_lt "${macos_version}" "10.11"; then
+  elif version_lt "${macos_version}" "10.11"
+  then
     abort "Your OS X version is too old."
   elif version_ge "${macos_version}" "${MACOS_NEWEST_UNSUPPORTED}" ||
-    version_lt "${macos_version}" "${MACOS_OLDEST_SUPPORTED}"; then
+       version_lt "${macos_version}" "${MACOS_OLDEST_SUPPORTED}"
+  then
     who="We"
     what=""
-    if version_ge "${macos_version}" "${MACOS_NEWEST_UNSUPPORTED}"; then
+    if version_ge "${macos_version}" "${MACOS_NEWEST_UNSUPPORTED}"
+    then
       what="pre-release version"
     else
       who+=" (and Apple)"
@@ -572,7 +631,8 @@ echo "${HOMEBREW_PREFIX}/share/man/man1/brew.1"
 echo "${HOMEBREW_PREFIX}/share/zsh/site-functions/_brew"
 echo "${HOMEBREW_PREFIX}/etc/bash_completion.d/brew"
 echo "${HOMEBREW_REPOSITORY}"
-if [[ -n "${ADD_PATHS_D-}" ]]; then
+if [[ -n "${ADD_PATHS_D-}" ]]
+then
   echo "/etc/paths.d/homebrew"
 fi
 
@@ -589,8 +649,10 @@ directories=(
   bin/brew
 )
 group_chmods=()
-for dir in "${directories[@]}"; do
-  if exists_but_not_writable "${HOMEBREW_PREFIX}/${dir}"; then
+for dir in "${directories[@]}"
+do
+  if exists_but_not_writable "${HOMEBREW_PREFIX}/${dir}"
+  then
     group_chmods+=("${HOMEBREW_PREFIX}/${dir}")
   fi
 done
@@ -598,7 +660,8 @@ done
 # zsh refuses to read from these directories if group writable
 directories=(share/zsh share/zsh/site-functions)
 zsh_dirs=()
-for dir in "${directories[@]}"; do
+for dir in "${directories[@]}"
+do
   zsh_dirs+=("${HOMEBREW_PREFIX}/${dir}")
 done
 
@@ -609,148 +672,185 @@ directories=(
   Cellar Caskroom Frameworks
 )
 mkdirs=()
-for dir in "${directories[@]}"; do
-  if ! [[ -d "${HOMEBREW_PREFIX}/${dir}" ]]; then
+for dir in "${directories[@]}"
+do
+  if ! [[ -d "${HOMEBREW_PREFIX}/${dir}" ]]
+  then
     mkdirs+=("${HOMEBREW_PREFIX}/${dir}")
   fi
 done
 
 user_chmods=()
 mkdirs_user_only=()
-if [[ "${#zsh_dirs[@]}" -gt 0 ]]; then
-  for dir in "${zsh_dirs[@]}"; do
-    if [[ ! -d "${dir}" ]]; then
+if [[ "${#zsh_dirs[@]}" -gt 0 ]]
+then
+  for dir in "${zsh_dirs[@]}"
+  do
+    if [[ ! -d "${dir}" ]]
+    then
       mkdirs_user_only+=("${dir}")
-    elif user_only_chmod "${dir}"; then
+    elif user_only_chmod "${dir}"
+    then
       user_chmods+=("${dir}")
     fi
   done
 fi
 
 chmods=()
-if [[ "${#group_chmods[@]}" -gt 0 ]]; then
+if [[ "${#group_chmods[@]}" -gt 0 ]]
+then
   chmods+=("${group_chmods[@]}")
 fi
-if [[ "${#user_chmods[@]}" -gt 0 ]]; then
+if [[ "${#user_chmods[@]}" -gt 0 ]]
+then
   chmods+=("${user_chmods[@]}")
 fi
 
 chowns=()
 chgrps=()
-if [[ "${#chmods[@]}" -gt 0 ]]; then
-  for dir in "${chmods[@]}"; do
-    if file_not_owned "${dir}"; then
+if [[ "${#chmods[@]}" -gt 0 ]]
+then
+  for dir in "${chmods[@]}"
+  do
+    if file_not_owned "${dir}"
+    then
       chowns+=("${dir}")
     fi
-    if file_not_grpowned "${dir}"; then
+    if file_not_grpowned "${dir}"
+    then
       chgrps+=("${dir}")
     fi
   done
 fi
 
-if [[ "${#group_chmods[@]}" -gt 0 ]]; then
+if [[ "${#group_chmods[@]}" -gt 0 ]]
+then
   ohai "The following existing directories will be made group writable:"
   printf "%s\n" "${group_chmods[@]}"
 fi
-if [[ "${#user_chmods[@]}" -gt 0 ]]; then
+if [[ "${#user_chmods[@]}" -gt 0 ]]
+then
   ohai "The following existing directories will be made writable by user only:"
   printf "%s\n" "${user_chmods[@]}"
 fi
-if [[ "${#chowns[@]}" -gt 0 ]]; then
+if [[ "${#chowns[@]}" -gt 0 ]]
+then
   ohai "The following existing directories will have their owner set to ${tty_underline}${USER}${tty_reset}:"
   printf "%s\n" "${chowns[@]}"
 fi
-if [[ "${#chgrps[@]}" -gt 0 ]]; then
+if [[ "${#chgrps[@]}" -gt 0 ]]
+then
   ohai "The following existing directories will have their group set to ${tty_underline}${GROUP}${tty_reset}:"
   printf "%s\n" "${chgrps[@]}"
 fi
-if [[ "${#mkdirs[@]}" -gt 0 ]]; then
+if [[ "${#mkdirs[@]}" -gt 0 ]]
+then
   ohai "The following new directories will be created:"
   printf "%s\n" "${mkdirs[@]}"
 fi
 
-if should_install_command_line_tools; then
+if should_install_command_line_tools
+then
   ohai "The Xcode Command Line Tools will be installed."
 fi
 
 non_default_repos=""
 additional_shellenv_commands=()
-if [[ "${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}" != "${HOMEBREW_BREW_GIT_REMOTE}" ]]; then
+if [[ "${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}" != "${HOMEBREW_BREW_GIT_REMOTE}" ]]
+then
   ohai "HOMEBREW_BREW_GIT_REMOTE is set to a non-default URL:"
   echo "${tty_underline}${HOMEBREW_BREW_GIT_REMOTE}${tty_reset} will be used as the Homebrew/brew Git remote."
   non_default_repos="Homebrew/brew"
   additional_shellenv_commands+=("export HOMEBREW_BREW_GIT_REMOTE=\"${HOMEBREW_BREW_GIT_REMOTE}\"")
 fi
 
-if [[ "${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}" != "${HOMEBREW_CORE_GIT_REMOTE}" ]]; then
+if [[ "${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}" != "${HOMEBREW_CORE_GIT_REMOTE}" ]]
+then
   ohai "HOMEBREW_CORE_GIT_REMOTE is set to a non-default URL:"
   echo "${tty_underline}${HOMEBREW_CORE_GIT_REMOTE}${tty_reset} will be used as the Homebrew/homebrew-core Git remote."
   non_default_repos="${non_default_repos:-}${non_default_repos:+ and }Homebrew/homebrew-core"
   additional_shellenv_commands+=("export HOMEBREW_CORE_GIT_REMOTE=\"${HOMEBREW_CORE_GIT_REMOTE}\"")
 fi
 
-if [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" ]]; then
+if [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" ]]
+then
   ohai "HOMEBREW_NO_INSTALL_FROM_API is set."
   echo "Homebrew/homebrew-core will be tapped during this ${tty_bold}install${tty_reset} run."
 fi
 
-if [[ -z "${NONINTERACTIVE-}" ]]; then
+if [[ -z "${NONINTERACTIVE-}" ]]
+then
   ring_bell
   wait_for_user
 fi
 
-if [[ -d "${HOMEBREW_PREFIX}" ]]; then
-  if [[ "${#chmods[@]}" -gt 0 ]]; then
+if [[ -d "${HOMEBREW_PREFIX}" ]]
+then
+  if [[ "${#chmods[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHMOD[@]}" "u+rwx" "${chmods[@]}"
   fi
-  if [[ "${#group_chmods[@]}" -gt 0 ]]; then
+  if [[ "${#group_chmods[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHMOD[@]}" "g+rwx" "${group_chmods[@]}"
   fi
-  if [[ "${#user_chmods[@]}" -gt 0 ]]; then
+  if [[ "${#user_chmods[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHMOD[@]}" "go-w" "${user_chmods[@]}"
   fi
-  if [[ "${#chowns[@]}" -gt 0 ]]; then
+  if [[ "${#chowns[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHOWN[@]}" "${USER}" "${chowns[@]}"
   fi
-  if [[ "${#chgrps[@]}" -gt 0 ]]; then
+  if [[ "${#chgrps[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHGRP[@]}" "${GROUP}" "${chgrps[@]}"
   fi
 else
   execute_sudo "${INSTALL[@]}" "${HOMEBREW_PREFIX}"
 fi
 
-if [[ "${#mkdirs[@]}" -gt 0 ]]; then
+if [[ "${#mkdirs[@]}" -gt 0 ]]
+then
   execute_sudo "${MKDIR[@]}" "${mkdirs[@]}"
   execute_sudo "${CHMOD[@]}" "ug=rwx" "${mkdirs[@]}"
-  if [[ "${#mkdirs_user_only[@]}" -gt 0 ]]; then
+  if [[ "${#mkdirs_user_only[@]}" -gt 0 ]]
+  then
     execute_sudo "${CHMOD[@]}" "go-w" "${mkdirs_user_only[@]}"
   fi
   execute_sudo "${CHOWN[@]}" "${USER}" "${mkdirs[@]}"
   execute_sudo "${CHGRP[@]}" "${GROUP}" "${mkdirs[@]}"
 fi
 
-if ! [[ -d "${HOMEBREW_REPOSITORY}" ]]; then
+if ! [[ -d "${HOMEBREW_REPOSITORY}" ]]
+then
   execute_sudo "${MKDIR[@]}" "${HOMEBREW_REPOSITORY}"
 fi
 execute_sudo "${CHOWN[@]}" "-R" "${USER}:${GROUP}" "${HOMEBREW_REPOSITORY}"
 
-if ! [[ -d "${HOMEBREW_CACHE}" ]]; then
+if ! [[ -d "${HOMEBREW_CACHE}" ]]
+then
   execute "${MKDIR[@]}" "${HOMEBREW_CACHE}"
 fi
-if exists_but_not_writable "${HOMEBREW_CACHE}"; then
+if exists_but_not_writable "${HOMEBREW_CACHE}"
+then
   execute_sudo "${CHMOD[@]}" "g+rwx" "${HOMEBREW_CACHE}"
 fi
-if file_not_owned "${HOMEBREW_CACHE}"; then
+if file_not_owned "${HOMEBREW_CACHE}"
+then
   execute_sudo "${CHOWN[@]}" "-R" "${USER}" "${HOMEBREW_CACHE}"
 fi
-if file_not_grpowned "${HOMEBREW_CACHE}"; then
+if file_not_grpowned "${HOMEBREW_CACHE}"
+then
   execute_sudo "${CHGRP[@]}" "-R" "${GROUP}" "${HOMEBREW_CACHE}"
 fi
-if [[ -d "${HOMEBREW_CACHE}" ]]; then
+if [[ -d "${HOMEBREW_CACHE}" ]]
+then
   execute "${TOUCH[@]}" "${HOMEBREW_CACHE}/.cleaned"
 fi
 
-if should_install_command_line_tools && version_ge "${macos_version}" "10.13"; then
+if should_install_command_line_tools && version_ge "${macos_version}" "10.13"
+then
   ohai "Searching online for the Command Line Tools"
   # This temporary file prompts the 'softwareupdate' utility to list the Command Line Tools
   clt_placeholder="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
@@ -764,7 +864,8 @@ if should_install_command_line_tools && version_ge "${macos_version}" "10.13"; t
                       tail -n1"
   clt_label="$(chomp "$(/bin/bash -c "${clt_label_command}")")"
 
-  if [[ -n "${clt_label}" ]]; then
+  if [[ -n "${clt_label}" ]]
+  then
     ohai "Installing ${clt_label}"
     execute_sudo "/usr/sbin/softwareupdate" "-i" "${clt_label}"
     execute_sudo "/usr/bin/xcode-select" "--switch" "/Library/Developer/CommandLineTools"
@@ -773,7 +874,8 @@ if should_install_command_line_tools && version_ge "${macos_version}" "10.13"; t
 fi
 
 # Headless install may have failed, so fallback to original 'xcode-select' method
-if should_install_command_line_tools && test -t 0; then
+if should_install_command_line_tools && test -t 0
+then
   ohai "Installing the Command Line Tools (expect a GUI popup):"
   execute "/usr/bin/xcode-select" "--install"
   echo "Press any key when the installation has completed."
@@ -781,7 +883,8 @@ if should_install_command_line_tools && test -t 0; then
   execute_sudo "/usr/bin/xcode-select" "--switch" "/Library/Developer/CommandLineTools"
 fi
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]] && ! output="$(/usr/bin/xcrun clang 2>&1)" && [[ "${output}" == *"license"* ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" ]] && ! output="$(/usr/bin/xcrun clang 2>&1)" && [[ "${output}" == *"license"* ]]
+then
   abort "$(
     cat <<EOABORT
 You have not agreed to the Xcode license.
@@ -793,9 +896,11 @@ EOABORT
 fi
 
 USABLE_GIT=/usr/bin/git
-if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
+if [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+then
   USABLE_GIT="$(find_tool git)"
-  if [[ -z "$(command -v git)" ]]; then
+  if [[ -z "$(command -v git)" ]]
+  then
     abort "$(
       cat <<EOABORT
   You must install Git before installing Homebrew. See:
@@ -803,7 +908,8 @@ if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
 EOABORT
     )"
   fi
-  if [[ -z "${USABLE_GIT}" ]]; then
+  if [[ -z "${USABLE_GIT}" ]]
+  then
     abort "$(
       cat <<EOABORT
   The version of Git that was found does not satisfy requirements for Homebrew.
@@ -811,29 +917,34 @@ EOABORT
 EOABORT
     )"
   fi
-  if [[ "${USABLE_GIT}" != /usr/bin/git ]]; then
+  if [[ "${USABLE_GIT}" != /usr/bin/git ]]
+  then
     export HOMEBREW_GIT_PATH="${USABLE_GIT}"
     ohai "Found Git: ${HOMEBREW_GIT_PATH}"
   fi
 fi
 
-if ! command -v curl >/dev/null; then
+if ! command -v curl >/dev/null
+then
   abort "$(
     cat <<EOABORT
 You must install cURL before installing Homebrew. See:
   ${tty_underline}https://docs.brew.sh/Installation${tty_reset}
 EOABORT
   )"
-elif [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
+elif [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+then
   USABLE_CURL="$(find_tool curl)"
-  if [[ -z "${USABLE_CURL}" ]]; then
+  if [[ -z "${USABLE_CURL}" ]]
+  then
     abort "$(
       cat <<EOABORT
 The version of cURL that was found does not satisfy requirements for Homebrew.
 Please install cURL ${REQUIRED_CURL_VERSION} or newer and add it to your PATH.
 EOABORT
     )"
-  elif [[ "${USABLE_CURL}" != /usr/bin/curl ]]; then
+  elif [[ "${USABLE_CURL}" != /usr/bin/curl ]]
+  then
     export HOMEBREW_CURL_PATH="${USABLE_CURL}"
     ohai "Found cURL: ${HOMEBREW_CURL_PATH}"
   fi
@@ -857,7 +968,8 @@ ohai "Downloading and installing Homebrew..."
   # make sure symlinks are saved as-is
   execute "${USABLE_GIT}" "config" "--bool" "core.symlinks" "true"
 
-  if [[ -z "${NONINTERACTIVE-}" ]]; then
+  if [[ -z "${NONINTERACTIVE-}" ]]
+  then
     quiet_progress=("--quiet" "--progress")
   else
     quiet_progress=("--quiet")
@@ -868,20 +980,24 @@ ohai "Downloading and installing Homebrew..."
   execute "${USABLE_GIT}" "remote" "set-head" "origin" "--auto" >/dev/null
 
   LATEST_GIT_TAG="$("${USABLE_GIT}" -c "column.ui=never" tag --list --sort="-version:refname" | head -n1)"
-  if [[ -z "${LATEST_GIT_TAG}" ]]; then
+  if [[ -z "${LATEST_GIT_TAG}" ]]
+  then
     abort "Failed to query latest Homebrew/brew Git tag."
   fi
   execute "${USABLE_GIT}" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
 
-  if [[ "${HOMEBREW_REPOSITORY}" != "${HOMEBREW_PREFIX}" ]]; then
-    if [[ "${HOMEBREW_REPOSITORY}" == "${HOMEBREW_PREFIX}/Homebrew" ]]; then
+  if [[ "${HOMEBREW_REPOSITORY}" != "${HOMEBREW_PREFIX}" ]]
+  then
+    if [[ "${HOMEBREW_REPOSITORY}" == "${HOMEBREW_PREFIX}/Homebrew" ]]
+    then
       execute "ln" "-sf" "../Homebrew/bin/brew" "${HOMEBREW_PREFIX}/bin/brew"
     else
       abort "The Homebrew/brew repository should be placed in the Homebrew prefix directory."
     fi
   fi
 
-  if [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" && ! -d "${HOMEBREW_CORE}" ]]; then
+  if [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" && ! -d "${HOMEBREW_CORE}" ]]
+  then
     # Always use single-quoted strings with `exp` expressions
     # shellcheck disable=SC2016
     ohai 'Tapping homebrew/core because `$HOMEBREW_NO_INSTALL_FROM_API` is set.'
@@ -904,18 +1020,21 @@ ohai "Downloading and installing Homebrew..."
     ) || exit 1
   fi
 
-  if [[ -n "${ADD_PATHS_D-}" ]]; then
+  if [[ -n "${ADD_PATHS_D-}" ]]
+  then
     execute_sudo "${MKDIR[@]}" /etc/paths.d
     echo "${HOMEBREW_PREFIX}/bin" | execute_sudo tee /etc/paths.d/homebrew
     execute_sudo "${CHOWN[@]}" root:wheel /etc/paths.d/homebrew
     execute_sudo "${CHMOD[@]}" "a+r" /etc/paths.d/homebrew
-  elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]; then
+  elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]
+  then
     PATH_WARN=1
   fi
 
   execute "${HOMEBREW_PREFIX}/bin/brew" "update" "--force" "--quiet"
 
-  if [[ -n "${PATH_WARN-}" ]]; then
+  if [[ -n "${PATH_WARN-}" ]]
+  then
     warn "${HOMEBREW_PREFIX}/bin is not in your PATH.
   Instructions on how to configure your shell for Homebrew
   can be found in the 'Next steps' section below."
@@ -954,47 +1073,57 @@ EOS
 
 ohai "Next steps:"
 case "${SHELL}" in
-*/bash*)
-  if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
-    shell_rcfile="${HOME}/.bashrc"
-  else
-    shell_rcfile="${HOME}/.bash_profile"
-  fi
-  ;;
-*/zsh*)
-  if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
-    shell_rcfile="${ZDOTDIR:-"${HOME}"}/.zshrc"
-  else
-    shell_rcfile="${ZDOTDIR:-"${HOME}"}/.zprofile"
-  fi
-  ;;
-*/fish*)
-  shell_rcfile="${HOME}/.config/fish/config.fish"
-  ;;
-*)
-  shell_rcfile="${ENV:-"${HOME}/.profile"}"
-  ;;
+  */bash*)
+    shellenv_suffix=" bash"
+    if [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+    then
+      shell_rcfile="${HOME}/.bashrc"
+    else
+      shell_rcfile="${HOME}/.bash_profile"
+    fi
+    ;;
+  */zsh*)
+    shellenv_suffix=" zsh"
+    if [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+    then
+      shell_rcfile="${ZDOTDIR:-"${HOME}"}/.zshrc"
+    else
+      shell_rcfile="${ZDOTDIR:-"${HOME}"}/.zprofile"
+    fi
+    ;;
+  */fish*)
+    shellenv_suffix=" fish"
+    shell_rcfile="${HOME}/.config/fish/config.fish"
+    ;;
+  *)
+    shellenv_suffix=""
+    shell_rcfile="${ENV:-"${HOME}/.profile"}"
+    ;;
 esac
 
-if grep -qs "eval \"\$(${HOMEBREW_PREFIX}/bin/brew shellenv)\"" "${shell_rcfile}"; then
-  if ! [[ -x "$(command -v brew)" ]]; then
+if grep -qs "eval \"\$(${HOMEBREW_PREFIX}/bin/brew shellenv[^\"]*)\"" "${shell_rcfile}"
+then
+  if ! [[ -x "$(command -v brew)" ]]
+  then
     cat <<EOS
 - Run this command in your terminal to add Homebrew to your ${tty_bold}PATH${tty_reset}:
-    eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv)"
+    eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv${shellenv_suffix})"
 EOS
   fi
 else
   cat <<EOS
 - Run these commands in your terminal to add Homebrew to your ${tty_bold}PATH${tty_reset}:
     echo >> ${shell_rcfile}
-    echo 'eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv)"' >> ${shell_rcfile}
-    eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv)"
+    echo 'eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv${shellenv_suffix})"' >> ${shell_rcfile}
+    eval "\$(${HOMEBREW_PREFIX}/bin/brew shellenv${shellenv_suffix})"
 EOS
 fi
 
-if [[ -n "${non_default_repos}" ]]; then
+if [[ -n "${non_default_repos}" ]]
+then
   plural=""
-  if [[ "${#additional_shellenv_commands[@]}" -gt 1 ]]; then
+  if [[ "${#additional_shellenv_commands[@]}" -gt 1 ]]
+  then
     plural="s"
   fi
   printf -- "- Run these commands in your terminal to add the non-default Git remote%s for %s:\n" "${plural}" "${non_default_repos}"
@@ -1003,18 +1132,24 @@ if [[ -n "${non_default_repos}" ]]; then
   printf "    %s\n" "${additional_shellenv_commands[@]}"
 fi
 
-if [[ -n "${HOMEBREW_ON_LINUX-}" ]]; then
+if [[ -n "${HOMEBREW_ON_LINUX-}" ]]
+then
   echo "- Install Homebrew's dependencies if you have sudo access:"
 
-  if [[ -x "$(command -v apt-get)" ]]; then
+  if [[ -x "$(command -v apt-get)" ]]
+  then
     echo "    sudo apt-get install build-essential"
-  elif [[ -x "$(command -v dnf)" ]]; then
+  elif [[ -x "$(command -v dnf)" ]]
+  then
     echo "    sudo dnf group install development-tools"
-  elif [[ -x "$(command -v yum)" ]]; then
+  elif [[ -x "$(command -v yum)" ]]
+  then
     echo "    sudo yum groupinstall 'Development Tools'"
-  elif [[ -x "$(command -v pacman)" ]]; then
+  elif [[ -x "$(command -v pacman)" ]]
+  then
     echo "    sudo pacman -S base-devel"
-  elif [[ -x "$(command -v apk)" ]]; then
+  elif [[ -x "$(command -v apk)" ]]
+  then
     echo "    sudo apk add build-base"
   fi
 
