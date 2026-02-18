@@ -13,7 +13,7 @@
       "name": "dashscope",
       "api_base_url": "${DASHSCOPE_BASE_URL}/chat/completions",
       "api_key": "${DASHSCOPE_API_KEY}",
-      "models": ["qwen3-coder-plus", "qwen3-max-2026-01-23"],
+      "models": ["qwen3-coder-plus", "qwen3-max-2026-01-23", "qwen3.5-plus"],
       "transformer": {
         "use": [["maxtoken", { "max_tokens": 65536 }]]
       }
@@ -77,7 +77,8 @@
   },
   "Router": {
     "default": "dashscope,qwen3-coder-plus",
-    "think": "dashscope,qwen3-coder-plus"
+    "think": "dashscope,qwen3-coder-plus",
+    "image": "dashscope,qwen3.5-plus"
   },
   "CUSTOM_ROUTER_PATH": ""
 }
