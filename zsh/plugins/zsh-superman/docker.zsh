@@ -38,128 +38,159 @@ docker-colima-reset-all() {
 
 # Diagnose Docker and Colima status
 docker-colima-diagnose() {
-    echo "🔍 Docker & Colima Diagnostics"
-    echo "================================"
-    echo ""
-    
-    # Check if colima is installed
-    echo "📦 Colima Installation:"
-    if command -v colima &> /dev/null; then
-        echo "  ✅ Colima installed: $(which colima)"
-        colima version 2>/dev/null || echo "  ⚠️  Could not get version"
+  echo "🔍 Docker & Colima Diagnostics"
+  echo "================================"
+  echo ""
+
+  # Check if colima is installed
+  echo "📦 Colima Installation:"
+  if command -v colima &>/dev/null; then
+    echo "  ✅ Colima installed: $(which colima)"
+    colima version 2>/dev/null || echo "  ⚠️  Could not get version"
+  else
+    echo "  ❌ Colima not installed"
+    echo "  💡 Install with: brew install colima"
+    return 1
+  fi
+  echo ""
+
+  # Check colima status
+  echo "🚀 Colima Status:"
+  if colima status &>/dev/null; then
+    colima status 2>&1 | sed 's/^/  /'
+    echo "  ✅ Colima is running"
+  else
+    echo "  ❌ Colima is not running"
+    echo "  💡 Start with: colima start"
+  fi
+  echo ""
+
+  # Check colima list
+  echo "📋 Colima Instances:"
+  colima list 2>&1 | sed 's/^/  /'
+  echo ""
+
+  # Check docker installation
+  echo "🐳 Docker Installation:"
+  if command -v docker &>/dev/null; then
+    echo "  ✅ Docker installed: $(which docker)"
+    docker --version 2>/dev/null | sed 's/^/  /'
+  else
+    echo "  ❌ Docker CLI not installed"
+    echo "  💡 Install with: brew install docker"
+    return 1
+  fi
+  echo ""
+
+  # Check environment variables
+  echo "🔧 Environment Variables:"
+  if [ -n "$DOCKER_HOST" ]; then
+    echo "  ⚠️  DOCKER_HOST is set: $DOCKER_HOST"
+    echo "  💡 This may override Colima context. Consider unsetting it."
+  else
+    echo "  ✅ DOCKER_HOST not set (good for Colima)"
+  fi
+
+  if [ -n "$DOCKER_CONTEXT" ]; then
+    echo "  📌 DOCKER_CONTEXT: $DOCKER_CONTEXT"
+  fi
+  echo ""
+
+  # Check docker context
+  echo "🎯 Docker Context:"
+  docker context ls 2>&1 | sed 's/^/  /'
+  echo ""
+  echo "  Current context: $(docker context show 2>/dev/null || echo 'unknown')"
+  echo ""
+
+  # Test docker connection
+  echo "🔌 Docker Connection Test:"
+  if docker info &>/dev/null; then
+    echo "  ✅ Docker daemon is accessible"
+    docker info 2>&1 | grep -E "Server Version|Operating System|OSType|Architecture|CPUs|Total Memory|Docker Root Dir" | sed 's/^/  /'
+  else
+    echo "  ❌ Cannot connect to Docker daemon"
+    echo "  💡 Try: colima restart"
+  fi
+  echo ""
+
+  # Test docker ps
+  echo "🐋 Running Containers:"
+  if docker ps --format "table {{.Names}}\t{{.Status}}" &>/dev/null; then
+    local container_count=$(docker ps -q | wc -l | tr -d ' ')
+    echo "  ✅ Docker ps works ($container_count containers running)"
+    if [ "$container_count" -gt 0 ]; then
+      docker ps --format "table {{.Names}}\t{{.Status}}" 2>&1 | head -6 | sed 's/^/  /'
+      if [ "$container_count" -gt 5 ]; then
+        echo "  ... and $((container_count - 5)) more"
+      fi
+    fi
+  else
+    echo "  ❌ docker ps failed"
+  fi
+  echo ""
+
+  # Check socket files
+  echo "🔗 Docker Socket Status:"
+  local sockets=(
+    "$HOME/.colima/default/docker.sock"
+    "$HOME/.colima/docker.sock"
+    "/var/run/docker.sock"
+  )
+
+  for sock in "${sockets[@]}"; do
+    if [ -S "$sock" ]; then
+      echo "  ✅ $sock (exists)"
     else
-        echo "  ❌ Colima not installed"
-        echo "  💡 Install with: brew install colima"
-        return 1
+      echo "  ❌ $sock (not found)"
     fi
+  done
+  echo ""
+
+  # Overall status and recommendations
+  echo "📊 Overall Status:"
+  if docker ps &>/dev/null && colima status &>/dev/null; then
+    echo "  ✅ Everything looks good!"
+  else
+    echo "  ⚠️  Issues detected. Recommended actions:"
     echo ""
-    
-    # Check colima status
-    echo "🚀 Colima Status:"
-    if colima status &> /dev/null; then
-        colima status 2>&1 | sed 's/^/  /'
-        echo "  ✅ Colima is running"
-    else
-        echo "  ❌ Colima is not running"
-        echo "  💡 Start with: colima start"
-    fi
-    echo ""
-    
-    # Check colima list
-    echo "📋 Colima Instances:"
-    colima list 2>&1 | sed 's/^/  /'
-    echo ""
-    
-    # Check docker installation
-    echo "🐳 Docker Installation:"
-    if command -v docker &> /dev/null; then
-        echo "  ✅ Docker installed: $(which docker)"
-        docker --version 2>/dev/null | sed 's/^/  /'
-    else
-        echo "  ❌ Docker CLI not installed"
-        echo "  💡 Install with: brew install docker"
-        return 1
-    fi
-    echo ""
-    
-    # Check environment variables
-    echo "🔧 Environment Variables:"
-    if [ -n "$DOCKER_HOST" ]; then
-        echo "  ⚠️  DOCKER_HOST is set: $DOCKER_HOST"
-        echo "  💡 This may override Colima context. Consider unsetting it."
-    else
-        echo "  ✅ DOCKER_HOST not set (good for Colima)"
-    fi
-    
-    if [ -n "$DOCKER_CONTEXT" ]; then
-        echo "  📌 DOCKER_CONTEXT: $DOCKER_CONTEXT"
-    fi
-    echo ""
-    
-    # Check docker context
-    echo "🎯 Docker Context:"
-    docker context ls 2>&1 | sed 's/^/  /'
-    echo ""
-    echo "  Current context: $(docker context show 2>/dev/null || echo 'unknown')"
-    echo ""
-    
-    # Test docker connection
-    echo "🔌 Docker Connection Test:"
-    if docker info &> /dev/null; then
-        echo "  ✅ Docker daemon is accessible"
-        docker info 2>&1 | grep -E "Server Version|Operating System|OSType|Architecture|CPUs|Total Memory|Docker Root Dir" | sed 's/^/  /'
-    else
-        echo "  ❌ Cannot connect to Docker daemon"
-        echo "  💡 Try: colima restart"
-    fi
-    echo ""
-    
-    # Test docker ps
-    echo "🐋 Running Containers:"
-    if docker ps --format "table {{.Names}}\t{{.Status}}" &> /dev/null; then
-        local container_count=$(docker ps -q | wc -l | tr -d ' ')
-        echo "  ✅ Docker ps works ($container_count containers running)"
-        if [ "$container_count" -gt 0 ]; then
-            docker ps --format "table {{.Names}}\t{{.Status}}" 2>&1 | head -6 | sed 's/^/  /'
-            if [ "$container_count" -gt 5 ]; then
-                echo "  ... and $((container_count - 5)) more"
-            fi
-        fi
-    else
-        echo "  ❌ docker ps failed"
-    fi
-    echo ""
-    
-    # Check socket files
-    echo "🔗 Docker Socket Status:"
-    local sockets=(
-        "$HOME/.colima/default/docker.sock"
-        "$HOME/.colima/docker.sock"
-        "/var/run/docker.sock"
-    )
-    
-    for sock in "${sockets[@]}"; do
-        if [ -S "$sock" ]; then
-            echo "  ✅ $sock (exists)"
-        else
-            echo "  ❌ $sock (not found)"
-        fi
-    done
-    echo ""
-    
-    # Overall status and recommendations
-    echo "📊 Overall Status:"
-    if docker ps &> /dev/null && colima status &> /dev/null; then
-        echo "  ✅ Everything looks good!"
-    else
-        echo "  ⚠️  Issues detected. Recommended actions:"
-        echo ""
-        echo "  🔧 Quick fixes:"
-        echo "     1. Restart Colima: colima restart"
-        echo "     2. Unset DOCKER_HOST: unset DOCKER_HOST"
-        echo "     3. Use Colima context: docker context use colima"
-        echo "     4. If still broken: colima stop && colima start"
-    fi
-    echo ""
-    echo "================================"
+    echo "  🔧 Quick fixes:"
+    echo "     1. Restart Colima: colima restart"
+    echo "     2. Unset DOCKER_HOST: unset DOCKER_HOST"
+    echo "     3. Use Colima context: docker context use colima"
+    echo "     4. If still broken: colima stop && colima start"
+  fi
+  echo ""
+  echo "================================"
+}
+
+create_buildx() {
+  local NAME=$1
+  local CUSTOM_IMAGE="registry.cn-hangzhou.aliyuncs.com/lacogito/buildkit:buildx-stable-1"
+
+  if [ -z "$NAME" ]; then
+    echo "Error: Please provide a builder name."
+    echo "Usage: create_buildx my-builder"
+    return 1
+  fi
+
+  # 1. Remove existing builder if it exists to avoid conflicts
+  if docker buildx ls | grep -q "$NAME"; then
+    echo "Removing existing builder: $NAME..."
+    docker buildx rm "$NAME"
+  fi
+
+  echo "Creating builder '$NAME' using custom image..."
+
+  # 2. Create the builder with the custom image driver option
+  docker buildx create --name "$NAME" \
+    --driver docker-container \
+    --driver-opt image="$CUSTOM_IMAGE" \
+    --use
+
+  # 3. Bootstrap (start) the builder and show info
+  echo "Bootstrapping $NAME..."
+  docker buildx inspect --bootstrap
+
+  echo "Successfully created and switched to $NAME."
 }
