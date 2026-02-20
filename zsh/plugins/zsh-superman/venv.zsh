@@ -11,26 +11,36 @@ _prepend_to_path() {
 }
 
 # --- Python Environment ---
-# Initialize pyenv if available
+# Initialize pyenv if available (lazy loaded)
 _init_pyenv() {
   if [ -d "$HOME/.pyenv" ]; then
     export PYENV_ROOT="$HOME/.pyenv"
     _prepend_to_path "$PYENV_ROOT/bin"
     if command -v pyenv &>/dev/null; then
-      eval "$(pyenv init -)"
+      # Lazy loading - load pyenv on first use
+      pyenv() {
+        unfunction pyenv
+        eval "$(pyenv init - --no-rehash)"
+        pyenv "$@"
+      }
     fi
   fi
 }
 _init_pyenv
 
 # --- Ruby Environment ---
-# Initialize rbenv if available
+# Initialize rbenv if available (lazy loaded)
 _init_rbenv() {
   if [ -d "$HOME/.rbenv" ]; then
     export RBENV_ROOT="$HOME/.rbenv"
     _prepend_to_path "$RBENV_ROOT/bin"
     if command -v rbenv &>/dev/null; then
-      eval "$(rbenv init - zsh)"
+      # Lazy loading - load rbenv on first use
+      rbenv() {
+        unfunction rbenv
+        eval "$(rbenv init - zsh --no-rehash)"
+        rbenv "$@"
+      }
     fi
   fi
 }
@@ -49,11 +59,17 @@ _init_go_env() {
 _init_go_env
 
 # --- Java Environment ---
+# Initialize jenv if available (lazy loaded)
 _init_jenv() {
   if [ -d "$HOME/.jenv" ]; then
     _prepend_to_path "$HOME/.jenv/bin"
     if command -v jenv &>/dev/null; then
-      eval "$(jenv init -)"
+      # Lazy loading - load jenv on first use
+      jenv() {
+        unfunction jenv
+        eval "$(jenv init -)"
+        jenv "$@"
+      }
     fi
   fi
 }
@@ -97,14 +113,3 @@ _init_lisp_env() {
   fi
 }
 _init_lisp_env
-
-# --- node Environment ---
-# Initialize nvm if available
-_init_node_env() {
-  if [ -d "$HOME/.nvm" ]; then
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  fi
-}
-_init_node_env
