@@ -7,7 +7,7 @@
 # with enhanced error handling and progress tracking.
 #
 # Usage: ./install_all.sh [options]
-# Options: -f (force), -s (symlink), -c (clean)
+# Options: -f (force), -s (symlink), -c (clean), -m (components)
 #
 # Author: Xiaming Chen
 # License: MIT
@@ -32,9 +32,8 @@ readonly COMPONENTS=(
   "nvim"      # Neovim development environment
   "emacs"     # Emacs configuration
   "vifm"      # Vi file manager
-  "misc"      # Utility scripts and configurations
+  "misc"      # Utility scripts and terminal configurations
   "lisp"      # Common Lisp development environment
-  "alacritty" # Terminal emulator
 )
 
 # Track installation statistics
@@ -68,6 +67,51 @@ install_essentials_prerequisite() {
     error "Essential development tools installation failed (exit code: $exit_code)"
     return $exit_code
   fi
+}
+
+
+# Parse component filter (-m zsh,tmux,misc)
+SELECTED_COMPONENTS=()
+while getopts ":m:" opt; do
+  case "$opt" in
+  m)
+    IFS="," read -r -a SELECTED_COMPONENTS <<<"$OPTARG"
+    ;;
+  :)
+    error "Option -$OPTARG requires an argument"
+    ;;
+  esac
+done
+shift $((OPTIND - 1))
+FORWARD_ARGS=("$@")
+
+validate_selected_components() {
+  [[ ${#SELECTED_COMPONENTS[@]} -eq 0 ]] && return 0
+
+  local selected valid
+  for selected in "${SELECTED_COMPONENTS[@]}"; do
+    valid=0
+    for component in "${COMPONENTS[@]}"; do
+      if [[ "$selected" == "$component" ]]; then
+        valid=1
+        break
+      fi
+    done
+    [[ $valid -eq 1 ]] || error "Unknown component in -m: $selected"
+  done
+}
+
+should_install_component() {
+  local component=$1
+
+  [[ ${#SELECTED_COMPONENTS[@]} -eq 0 ]] && return 0
+
+  local selected
+  for selected in "${SELECTED_COMPONENTS[@]}"; do
+    [[ "$selected" == "$component" ]] && return 0
+  done
+
+  return 1
 }
 
 # Enhanced component installation with progress tracking
@@ -137,17 +181,24 @@ show_installation_summary() {
 
 # Main installation process
 main() {
+  validate_selected_components
+
   info "Starting dotfiles installation..."
-  info "Components to install: ${#COMPONENTS[@]}"
+  if [[ ${#SELECTED_COMPONENTS[@]} -gt 0 ]]; then
+    info "Components to install (filtered): ${SELECTED_COMPONENTS[*]}"
+  else
+    info "Components to install: ${#COMPONENTS[@]}"
+  fi
 
   # Install essential development tools as a prerequisite (with all optional features)
-  install_essentials_prerequisite "$@" || {
+  install_essentials_prerequisite "${FORWARD_ARGS[@]}" || {
     warn "Essential development tools installation failed, continuing with components..."
   }
 
   # Install each component
   for component in "${COMPONENTS[@]}"; do
-    install_component "$component" "$@" || {
+    should_install_component "$component" || continue
+    install_component "$component" "${FORWARD_ARGS[@]}" || {
       warn "Continuing with remaining components..."
     }
   done
@@ -156,5 +207,5 @@ main() {
   show_installation_summary
 }
 
-# Execute main function with all arguments
-main "$@"
+# Execute main function
+main
