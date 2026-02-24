@@ -42,6 +42,7 @@ This automatically installs essential development tools with **all optional feat
 | `-s` | Use symlinks (default) |
 | `-f` | Force copy instead of symlinks |
 | `-c` | Clean/remove configurations |
+| `-m` | Install only selected modules/components (see examples below) |
 
 ## Modules
 
@@ -52,7 +53,7 @@ This automatically installs essential development tools with **all optional feat
 | `tmux/` | Tmux terminal multiplexer | [README](tmux/README.md) |
 | `emacs/` | Emacs configuration | [README](emacs/README.md) |
 | `vifm/` | Vi file manager | - |
-| `misc/` | Kitty terminal, SBCL completions | - |
+| `misc/` | Kitty + Alacritty terminal configs, SBCL completions | - |
 
 **Note:** Essential development tools (pyenv, fzf, ctags, cargo, Homebrew, utility scripts) are automatically installed as a prerequisite when running `install_basics.sh` or `install_all.sh`. Run `./lib/install-essentials.sh --help` or check the script header for usage details.
 
@@ -74,6 +75,16 @@ sh tmux/install.sh
 
 # Emacs
 sh emacs/install.sh
+```
+
+### Targeted Installation Examples
+
+```bash
+# Full installer: install only selected components
+./install_all.sh -m zsh,tmux,nvim
+
+# Misc installer: install only selected misc modules
+./misc/install.sh -m kitty,alacritty
 ```
 
 ## Optional Features
@@ -107,6 +118,17 @@ The `dotme-xxx` series of custom tools are installed to `~/.local/bin`:
 | `dotme-run-container` | Docker container runner |
 
 See [bin/README.md](bin/README.md) for detailed documentation.
+
+## Network Proxy Setup (Mihomo in Docker)
+
+A Docker-based Mihomo setup (without TUN mode) is available at `setups/mihomo`:
+
+```bash
+cd setups/mihomo
+./start.sh -c ~/.config/mihomo
+```
+
+See [setups/mihomo/README.md](setups/mihomo/README.md) for details.
 
 ## License
 

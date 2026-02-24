@@ -1,0 +1,11 @@
+mixed-port: 7890
+external-controller: 0.0.0.0:9090
+mode: rule
+log-level: info
+allow-lan: false
+
+# Replace this placeholder with your own nodes/subscriptions/rules.
+proxies: []
+proxy-groups: []
+rules:
+  - MATCH,DIRECT
