@@ -1,6 +1,6 @@
 services:
   mihomo:
-    image: metacubex/mihomo:latest
+    image: registry.cn-hangzhou.aliyuncs.com/lacogito/mihomo:latest
     container_name: mihomo
     restart: always
     volumes:
@@ -8,4 +8,12 @@ services:
     ports:
       - "7890:7890"
       - "7891:7891"
-      - "9090:9090"
+      - "9988:9090"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
