@@ -6,8 +6,8 @@ services:
     volumes:
       - ./config:/root/.config/mihomo
     ports:
-      - "7890:7890"
-      - "7891:7891"
+      - "17890:7890"
+      - "17891:7891"
       - "9988:9090"
     deploy:
       resources:
