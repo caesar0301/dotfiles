@@ -8,7 +8,7 @@ services:
     ports:
       - "17890:7890"
       - "17891:7891"
-      - "9988:9090"
+      - "19090:9090"
     deploy:
       resources:
         limits:
