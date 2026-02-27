@@ -1,13 +1,7 @@
 -- Plugin dependencies and simple plugins without configuration
 return {
 	-- Theme
-	{
-		"tomasiser/vim-code-dark",
-		priority = 1000, -- Load colorscheme early
-		config = function()
-			vim.cmd.colorscheme("codedark")
-		end,
-	},
+	{ "tomasiser/vim-code-dark" },
 
 	-- LSP dependencies
 	{ "nvim-lua/lsp-status.nvim", lazy = true },

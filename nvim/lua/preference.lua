@@ -83,8 +83,7 @@ end
 
 -- Theme
 vim.opt.background = "dark"
--- Colorscheme is already loaded by vim-code-dark plugin with priority = 1000
--- No need to call safe_colorscheme here (avoids double loading)
+utils.safe_colorscheme("codedark", "elflord")
 
 -- Set extra options when running in GUI mode
 if utils.is_gui_running() then
