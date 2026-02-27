@@ -119,7 +119,7 @@ main() {
   install_claude_code_cli
 
   # Install agents using npm
-  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest"
+  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest" "chrome-devtools-mcp@latest"
 
   # Install claude-code-router config file
   install_claude_code_router_config
