@@ -83,7 +83,8 @@ end
 
 -- Theme
 vim.opt.background = "dark"
-utils.safe_colorscheme("codedark", "elflord")
+-- Colorscheme is already loaded by vim-code-dark plugin with priority = 1000
+-- No need to call safe_colorscheme here (avoids double loading)
 
 -- Set extra options when running in GUI mode
 if utils.is_gui_running() then
@@ -230,9 +231,12 @@ local function setup_python3_provider()
 
 	-- 3. Try to find pyenv Python (fallback to system Python handled by Neovim)
 	if not python_path then
-		local pyenv_python = vim.fn.trim(vim.fn.system("pyenv which python3 2>/dev/null"))
-		if pyenv_python ~= "" and vim.fn.executable(pyenv_python) == 1 then
-			python_path = pyenv_python
+		local ok, result = pcall(vim.fn.systemlist, "pyenv which python3 2>/dev/null")
+		if ok and result and #result > 0 and result[1] ~= "" then
+			local pyenv_python = vim.fn.trim(result[1])
+			if vim.fn.executable(pyenv_python) == 1 then
+				python_path = pyenv_python
+			end
 		end
 	end
 
@@ -242,4 +246,5 @@ local function setup_python3_provider()
 	end
 end
 
-setup_python3_provider()
+-- Defer Python provider setup to avoid blocking startup
+vim.defer_fn(setup_python3_provider, 100)

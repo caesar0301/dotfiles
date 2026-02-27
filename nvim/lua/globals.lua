@@ -1,64 +1,29 @@
 local uname = vim.loop.os_uname()
 
--- System detection
+-- System detection - use cached uname data to avoid repeated system calls
 _G.OS = uname.sysname
 _G.IS_MAC = OS == "Darwin"
 _G.IS_LINUX = OS == "Linux"
 _G.IS_WINDOWS = OS:find("Windows") and true or false
+
+-- Cache WSL detection using uname.release (no shell call needed)
 _G.IS_WSL = (function()
-	local output = vim.fn.systemlist("uname -r")
-	local condition1 = IS_LINUX and uname.release:lower():find("microsoft") and true or false
-	local condition2 = not (not string.find(output[1] or "", "WSL"))
-	return condition1 or condition2
+	local release = uname.release or ""
+	return IS_LINUX and (release:lower():find("microsoft") ~= nil or release:find("WSL") ~= nil)
 end)()
 
--- Kernel version detection for compatibility checks
+-- Kernel version detection - use cached uname.release instead of io.popen
 _G.KERNEL_VERSION = (function()
-	if IS_MAC then
-		-- On macOS, get Darwin version using uname -r
-		local handle = io.popen("uname -r 2>/dev/null")
-		if not handle then
-			return "Unknown"
-		end
-
-		local result = handle:read("*a")
-		handle:close()
-
-		if not result or result == "" then
-			return "Unknown"
-		end
-
-		-- Extract major.minor version (e.g., "24.6.0" -> "24.6")
-		local major, minor = result:match("^(%d+)%.(%d+)")
-		if major and minor then
-			return major .. "." .. minor
-		else
-			return result:gsub("%s+", "") -- Return full version if parsing fails
-		end
-	elseif IS_LINUX then
-		-- On Linux, get kernel version
-		local handle = io.popen("uname -r 2>/dev/null")
-		if not handle then
-			return "0.0.0"
-		end
-
-		local result = handle:read("*a")
-		handle:close()
-
-		if not result or result == "" then
-			return "0.0.0"
-		end
-
-		-- Extract major.minor version (e.g., "5.15.0-91-generic" -> "5.15")
-		local major, minor = result:match("^(%d+)%.(%d+)")
-		if major and minor then
-			return major .. "." .. minor
-		else
-			return "0.0.0"
-		end
+	local release = uname.release or ""
+	if release == "" then
+		return IS_MAC and "Unknown" or "0.0.0"
+	end
+	-- Extract major.minor version (e.g., "24.6.0" -> "24.6" or "5.15.0-91-generic" -> "5.15")
+	local major, minor = release:match("^(%d+)%.(%d+)")
+	if major and minor then
+		return major .. "." .. minor
 	else
-		-- On other systems, return appropriate default
-		return "N/A"
+		return release:gsub("%s+", "")
 	end
 end)()
 

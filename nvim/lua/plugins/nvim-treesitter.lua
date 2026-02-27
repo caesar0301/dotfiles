@@ -25,8 +25,9 @@ return {
 			},
 			-- Install languages synchronously (only applies to `ensure_installed`)
 			sync_install = false,
-			-- Automatically install missing parsers when entering buffer
-			auto_install = true,
+			-- Disable auto_install to prevent blocking on new filetypes
+			-- Manually install parsers with :TSInstall <language>
+			auto_install = false,
 			ignore_install = {},
 			highlight = {
 				enable = true,

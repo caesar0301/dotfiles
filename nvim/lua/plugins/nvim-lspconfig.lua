@@ -148,7 +148,8 @@ return {
 
 		-- Golang
 		local lastRootPath = nil
-		local gomodpath = utils.safe_system("go env GOPATH", "") .. "/pkg/mod"
+		-- Cache GOPATH lazily - only compute when needed
+		local gomodpath = nil
 
 		vim.lsp.config("gopls", {
 			on_attach = common_on_attach,
@@ -156,6 +157,10 @@ return {
 			filetypes = { "go", "gomod" },
 			root_dir = function(fname)
 				local fullpath = vim.fn.expand(fname, ":p")
+				-- Lazily compute gomodpath only when gopls is actually used
+				if not gomodpath then
+					gomodpath = utils.safe_system("go env GOPATH", "") .. "/pkg/mod"
+				end
 				if string.find(fullpath, gomodpath) and lastRootPath ~= nil then
 					return lastRootPath
 				end

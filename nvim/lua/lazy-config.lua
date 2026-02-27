@@ -30,9 +30,9 @@ require("lazy").setup("plugins", {
 	},
 
 	checker = {
-		enabled = true, -- automatically check for plugin updates
+		enabled = false, -- Disable automatic update checking for faster startup
 		notify = false, -- get a notification when new updates are found
-		frequency = 3600, -- check for updates every hour
+		-- frequency = 86400, -- check once per day if enabled
 	},
 
 	change_detection = {
