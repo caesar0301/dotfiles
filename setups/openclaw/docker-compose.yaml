@@ -1,0 +1,29 @@
+services:
+  # --- OpenClaw Agent ---
+  openclaw:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw-agent
+    restart: unless-stopped
+    environment:
+      - OPENCLAW_ONBOARDING=true
+    volumes:
+      - ./workspace:/app/workspace
+      - ./config:/home/node/.openclaw
+    networks:
+      - openclaw-net
+    ports:
+      - "18789:18789"
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: unless-stopped
+    command: tunnel run --token ${CF_TUNNEL_TOKEN}
+    networks:
+      - openclaw-net
+    depends_on:
+      - openclaw
+
+networks:
+  openclaw-net:
+    driver: bridge

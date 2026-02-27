@@ -1,0 +1,53 @@
+services:
+  alithia-postgres:
+    image: registry.cn-hangzhou.aliyuncs.com/lacogito/postgres:17.5-alpine3.21
+    container_name: alithia-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-alithia}
+      POSTGRES_USER: ${POSTGRES_USER:-alithia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-alithia}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alithia} -d ${POSTGRES_DB:-alithia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - alithia-net
+
+  alithia:
+    image: registry.cn-hangzhou.aliyuncs.com/lacogito/alithia:latest
+    container_name: alithia-app
+    depends_on:
+      alithia-postgres:
+        condition: service_healthy
+    environment:
+      ALITHIA_CONFIG_PATH: /app/alithia_config.json
+      ALITHIA_POSTGRES_DSN: "postgresql://${POSTGRES_USER:-alithia}:${POSTGRES_PASSWORD:-alithia}@alithia-postgres:5432/${POSTGRES_DB:-alithia}"
+    volumes:
+      - ./alithia_config.json:/app/alithia_config.json:ro
+      - app_data:/app/data
+    expose:
+      - "8080"
+    networks:
+      - alithia-net
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel-alithia
+    restart: unless-stopped
+    command: tunnel run --token ${CF_TUNNEL_TOKEN}
+    networks:
+      - alithia-net
+    depends_on:
+      - alithia
+
+volumes:
+  postgres_data:
+  app_data:
+
+networks:
+  alithia-net:
+    driver: bridge

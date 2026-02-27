@@ -12,3 +12,7 @@ vifm/colors/colors
 vifm/scripts/scripts
 nvim/lazy-lock.json
 nvim/plugin/packer_compiled.lua
+
+.env
+setups/openclaw/config/
+setups/alithia/alithia_config.json
