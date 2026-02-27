@@ -19,14 +19,12 @@
 #
 #   With optional components:
 #     INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
-#     INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 #
-#     Full installation:
-#     INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+#   AI code agents are installed by default (requires Node.js >= 20
+#   and npm >= 20) when supported by the system.
 #
 # Environment Variables:
 #   INSTALL_EXTRA_VENV=1    Install jenv, gvm, nvm version managers
-#   INSTALL_AI_CODE_AGENTS=1 Install AI code agents (requires Node.js >= 20)
 #
 # What Gets Installed:
 #   - Local utility scripts: dotme-xxx series tools in ~/.local/bin
@@ -36,7 +34,8 @@
 #   - cargo: Rust toolchain (always installed)
 #   - Homebrew: Package manager (always installed)
 #   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
-#   - AI code agents: AI-powered development tools (if INSTALL_AI_CODE_AGENTS=1)
+#   - AI code agents: AI-powered development tools (installed by default,
+#     requires npm >= 20)
 #
 # Post-Installation:
 #   After installation, ensure ~/.local/bin is in your PATH:
@@ -142,11 +141,8 @@ main() {
     info "Development environment installation enabled via INSTALL_EXTRA_VENV=1"
   fi
 
-  # Install AI code agents if INSTALL_AI_CODE_AGENTS=1 is set
-  if [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]]; then
-    core_deps+=("install_ai_code_agents")
-    info "AI code agents installation enabled via INSTALL_AI_CODE_AGENTS=1"
-  fi
+  # Always attempt to install AI code agents (best-effort, depends on npm >= 20)
+  core_deps+=("install_ai_code_agents")
 
   # Install core dependencies
   for dep_func in "${core_deps[@]}"; do
@@ -173,7 +169,7 @@ main() {
   printf "  • cargo: Rust toolchain\n"
   printf "  • Homebrew: Package manager\n"
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
-  [[ "${INSTALL_AI_CODE_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
+  printf "  • AI code agents\n"
 
   success "Essential development tools installation completed successfully!"
 }

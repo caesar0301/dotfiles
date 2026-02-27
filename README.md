@@ -33,7 +33,7 @@ Install all modules including Emacs, Vifm, and misc configurations:
 ./install_all.sh
 ```
 
-This automatically installs essential development tools with **all optional features enabled** (version managers, AI code agents) as a prerequisite before installing other components.
+This automatically installs essential development tools with **optional version managers enabled** as a prerequisite before installing other components. AI code agents are always enabled by default (when supported by the system).
 
 ### Installation Flags
 
@@ -94,15 +94,15 @@ Essential development tools support optional features that can be enabled via en
 ```bash
 # Install Java/Go/Node version managers
 INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
-
-# Install AI code agents (requires Node.js >= 20)
-INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
-
-# Full installation with all optional features
-INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 ```
 
-**Note:** `./install_all.sh` automatically enables all optional features when installing essentials as a prerequisite. `./install_basics.sh` uses default settings (no optional features).
+AI code agents are installed by default (when Node.js and npm are recent enough)
+whenever `./lib/install-essentials.sh`, `./install_basics.sh`, or `./install_all.sh`
+is run.
+
+**Note:** `./install_all.sh` automatically enables `INSTALL_EXTRA_VENV=1` when
+installing essentials as a prerequisite. `./install_basics.sh` uses default
+settings (no extra version managers).
 
 ## Utility Scripts
 

@@ -52,11 +52,10 @@ install_essentials_prerequisite() {
   }
 
   info "Installing essential development tools (prerequisite)..."
-  info "Enabling all optional features: version managers and AI code agents"
+  info "Enabling optional version managers (AI code agents are enabled by default)"
 
-  # Enable all optional features for full installation
+  # Enable optional version managers for full installation
   export INSTALL_EXTRA_VENV=1
-  export INSTALL_AI_CODE_AGENTS=1
 
   # Execute essentials installation
   if bash "$essentials_script" "$@" 2>&1; then

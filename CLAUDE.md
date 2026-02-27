@@ -30,7 +30,7 @@ The essential tools installer (`lib/install-essentials.sh`) is automatically run
 ./lib/install-essentials.sh
 
 # With optional components
-INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
+INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
 ```
 
 **What Gets Installed (Always):**
@@ -41,9 +41,10 @@ INSTALL_EXTRA_VENV=1 INSTALL_AI_CODE_AGENTS=1 ./lib/install-essentials.sh
 - cargo: Rust toolchain
 - Homebrew: Package manager
 
+AI code agents are also installed by default (best-effort, requires Node.js and npm >= 20).
+
 **Optional Features (via environment variables):**
 - `INSTALL_EXTRA_VENV=1`: jenv (Java), gvm (Go), nvm (Node), rbenv (Ruby) version managers
-- `INSTALL_AI_CODE_AGENTS=1`: AI-powered development tools (requires npm >= 20)
 
 ### Individual Module Installation
 ```bash
