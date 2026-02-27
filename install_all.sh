@@ -27,13 +27,13 @@ source "$THISDIR/lib/shmisc.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"       # Z shell configuration
-  "tmux"      # Terminal multiplexer
-  "nvim"      # Neovim development environment
-  "emacs"     # Emacs configuration
-  "vifm"      # Vi file manager
-  "misc"      # Utility scripts and terminal configurations
-  "lisp"      # Common Lisp development environment
+  "zsh"   # Z shell configuration
+  "tmux"  # Terminal multiplexer
+  "nvim"  # Neovim development environment
+  "emacs" # Emacs configuration
+  "vifm"  # Vi file manager
+  "misc"  # Utility scripts and terminal configurations
+  "lisp"  # Common Lisp development environment
 )
 
 # Track installation statistics
@@ -68,7 +68,6 @@ install_essentials_prerequisite() {
     return $exit_code
   fi
 }
-
 
 # Parse component filter (-m zsh,tmux,misc)
 SELECTED_COMPONENTS=()

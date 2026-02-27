@@ -26,8 +26,15 @@ while getopts ":c:n:h" opt; do
     usage
     exit 0
     ;;
-  :) echo "Option -$OPTARG requires an argument" >&2; exit 1 ;;
-  \?) echo "Unknown option: -$OPTARG" >&2; usage; exit 1 ;;
+  :)
+    echo "Option -$OPTARG requires an argument" >&2
+    exit 1
+    ;;
+  \?)
+    echo "Unknown option: -$OPTARG" >&2
+    usage
+    exit 1
+    ;;
   esac
 done
 

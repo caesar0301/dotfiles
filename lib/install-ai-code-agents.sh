@@ -32,6 +32,13 @@ install_claude_code_router_config() {
 
   info "Installing claude-code-router config..."
   install_file_pair "$config_src" "$config_dest"
+
+  info "To use claude-code plugin in vscode via ccr, you could set claudeCode.environmentVariables:"
+  info "  - DISABLE_PROMPT_CACHING: 0"
+  info "  - ANTHROPIC_API_KEY: 1234"
+  info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:3456"
+  info ""
+  info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
 }
 
 # Install opencode config file
@@ -70,37 +77,52 @@ install_opencode_plugin() {
   install_file_pair "$plugin_src" "$plugin_dest"
 }
 
-# Main installation function
-main() {
-  info "Installing AI code agents..."
-
-  # Install claude code CLI
-  info "Installing claude code CLI..."
-  if curl -fsSL https://claude.ai/install.sh | bash; then
-    success "Claude code CLI installed successfully"
-  else
-    warn "Failed to install Claude code CLI"
+# Install Cursor agent CLI if not already installed
+install_cursor_agent_cli() {
+  # Check if Cursor agent (or Cursor CLI) is already available
+  if command -v cursor-agent >/dev/null 2>&1; then
+    info "Cursor agent CLI already installed, skipping installation"
+    return 0
   fi
 
-  # Install agents using npm
-  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest"
-
-  # Install claude-code-router config file
-  install_claude_code_router_config
-  info "To use claude-code plugin in vscode via ccr, you could set claudeCode.environmentVariables:"
-  info "  - DISABLE_PROMPT_CACHING: 0"
-  info "  - ANTHROPIC_API_KEY: 1234"
-  info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:3456"
-  info ""
-  info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
-
-  # Install cursor agent CLI
   info "Installing Cursor agent CLI..."
   if curl https://cursor.com/install -fsS | bash; then
     success "Cursor agent CLI installed successfully"
   else
     warn "Failed to install Cursor agent CLI"
   fi
+}
+
+# Install Claude code CLI if not already installed
+install_claude_code_cli() {
+  if command -v claude >/dev/null 2>&1; then
+    info "Claude code CLI already installed, skipping installation"
+    return 0
+  fi
+
+  info "Installing claude code CLI..."
+  if curl -fsSL https://claude.ai/install.sh | bash; then
+    success "Claude code CLI installed successfully"
+  else
+    warn "Failed to install Claude code CLI"
+  fi
+}
+
+# Main installation function
+main() {
+  info "Installing AI code agents..."
+
+  # Install cursor agent CLI
+  install_cursor_agent_cli
+
+  # Install claude code CLI
+  install_claude_code_cli
+
+  # Install agents using npm
+  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest"
+
+  # Install claude-code-router config file
+  install_claude_code_router_config
 
   # Install opencode config file and plugin directory
   install_opencode_config
