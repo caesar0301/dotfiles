@@ -35,8 +35,8 @@ install_claude_code_router_config() {
 
   info "To use claude-code plugin in vscode via ccr, you could set claudeCode.environmentVariables:"
   info "  - DISABLE_PROMPT_CACHING: 0"
-  info "  - ANTHROPIC_API_KEY: 1234"
-  info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:3456"
+  info "  - ANTHROPIC_API_KEY: your-api-secret"
+  info "  - ANTHROPIC_BASE_URL: http://127.0.0.1:53456"
   info ""
   info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
 }
