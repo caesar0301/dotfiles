@@ -6,7 +6,7 @@
   "PORT": 53456,
   "APIKEY": "your-api-secret",
   "API_TIMEOUT_MS": "600000",
-  "PROXY_URL": "http://127.0.0.1:7890",
+  "PROXY_URL": "",
   "transformers": [],
   "Providers": [
     {
