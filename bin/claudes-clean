@@ -1,0 +1,59 @@
+#!/bin/bash
+set -euo pipefail
+
+# claudes-clean - Clean up Claude Code worktrees and sessions
+#
+# Usage: claudes-clean
+#
+# Removes all Claude worktrees, temporary branches, and session configs
+# for the current project. Safe to run multiple times.
+#
+# Requires: git
+
+# Configuration (must match claudes-start)
+CLAUDE_HOME="$HOME/.claude"
+WORKTREE_BASE="$CLAUDE_HOME/worktrees"
+SESSION_BASE="$CLAUDE_HOME/sessions"
+
+# Ensure we're in a git repository
+if ! git rev-parse --show-toplevel &>/dev/null; then
+  echo "❌ Error: Must run inside a Git repository" >&2
+  exit 1
+fi
+
+PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)" | tr '.' '_')
+
+echo "🧹 Cleaning up Claude sessions for project: [$PROJECT_NAME]"
+
+# Find all worktrees for this project
+TARGET_WORKTREES=$(git worktree list --porcelain | grep "worktree $WORKTREE_BASE/$PROJECT_NAME/" | awk '{print $2}')
+
+if [ -z "$TARGET_WORKTREES" ]; then
+  echo "ℹ️  No active Claude worktrees found for this project"
+else
+  for WT in $TARGET_WORKTREES; do
+    ID=$(basename "$WT")
+    BRANCH="tmp_${PROJECT_NAME}_$ID"
+
+    echo "  → Removing worktree and branch: $BRANCH"
+
+    # Force remove worktree and branch
+    git worktree remove --force "$WT" 2>/dev/null || true
+    git branch -D "$BRANCH" 2>/dev/null || true
+
+    # Clean up session config
+    CONF_DIR="$SESSION_BASE/$PROJECT_NAME/$ID"
+    if [ -d "$CONF_DIR" ]; then
+      rm -rf "$CONF_DIR"
+      echo "  ✓ Deleted session history: $ID"
+    fi
+  done
+fi
+
+# Prune git metadata and remove empty project directories
+git worktree prune
+rmdir "$WORKTREE_BASE/$PROJECT_NAME" 2>/dev/null || true
+rmdir "$SESSION_BASE/$PROJECT_NAME" 2>/dev/null || true
+
+echo "✨ Project [$PROJECT_NAME] is now clean"
+

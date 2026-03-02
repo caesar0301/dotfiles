@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/bash
 #############################################################
 # bingo - tmux session orchestrator
 # Creates grid layouts with commands in multiple panes

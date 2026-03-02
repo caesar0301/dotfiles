@@ -1,0 +1,88 @@
+#!/bin/bash
+set -euo pipefail
+
+# claudes-start - Launch multiple Claude Code sessions in isolated worktrees
+#
+# Usage: claudes-start [COUNT]
+#   COUNT - Number of Claude sessions to launch (default: 2)
+#
+# This script creates isolated Claude environments, each with:
+# - A separate git worktree on a temporary branch
+# - An isolated config directory for session history
+# - A tiled tmux window layout
+#
+# Requires: git, tmux
+
+# Configuration
+CLAUDE_HOME="$HOME/.claude"
+WORKTREE_BASE="$CLAUDE_HOME/worktrees"
+SESSION_BASE="$CLAUDE_HOME/sessions"
+
+# Ensure we're in a git repository
+if ! git rev-parse --show-toplevel &>/dev/null; then
+  echo "❌ Error: Must run inside a Git repository" >&2
+  exit 1
+fi
+
+PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)" | tr '.' '_')
+COUNT=${1:-2}
+
+# Validate COUNT is a positive integer
+if ! [[ "$COUNT" =~ ^[1-9][0-9]*$ ]]; then
+  echo "❌ Error: COUNT must be a positive integer" >&2
+  exit 1
+fi
+
+echo "🚀 Launching $COUNT Claude sessions for project: [$PROJECT_NAME]"
+
+# Create tmux session
+TMUX_SESSION="claude-${PROJECT_NAME}-$(date +%s)"
+tmux new-session -d -s "$TMUX_SESSION" -n "claudes"
+
+for i in $(seq 1 "$COUNT"); do
+  ID="s${i}"
+  WORK_DIR="$WORKTREE_BASE/$PROJECT_NAME/$ID"
+  CONF_DIR="$SESSION_BASE/$PROJECT_NAME/$ID"
+  BRANCH="tmp_${PROJECT_NAME}_$ID"
+
+  echo "  → Setting up session $i/$COUNT ($ID)"
+
+  # Create isolated config directory
+  mkdir -p "$CONF_DIR"
+
+  # Pre-configure Claude to bypass onboarding prompts
+  cat >"$CONF_DIR/claude.json" <<EOF
+{
+  "theme": "dark",
+  "hasCompletedOnboarding": true,
+  "hasTrustDialogAccepted": true,
+  "hasTrustDialogHooksAccepted": true,
+  "trustedDirectories": ["$WORK_DIR"]
+}
+EOF
+
+  # Copy login credentials if available
+  if [ -f "$CLAUDE_HOME/config.json" ]; then
+    cp "$CLAUDE_HOME/config.json" "$CONF_DIR/"
+  fi
+
+  # Clean up any existing worktree/branch and create new one
+  git worktree remove --force "$WORK_DIR" 2>/dev/null || true
+  git branch -D "$BRANCH" 2>/dev/null || true
+  git worktree add -b "$BRANCH" "$WORK_DIR" main
+
+  # Launch Claude in tmux pane
+  CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' claude"
+
+  if [ "$i" -eq 1 ]; then
+    tmux send-keys -t "$TMUX_SESSION:0.0" "$CMD" C-m
+  else
+    tmux split-window -t "$TMUX_SESSION:0" "$CMD"
+    tmux select-layout -t "$TMUX_SESSION:0" tiled
+  fi
+done
+
+echo "✅ Sessions launched in tmux session: $TMUX_SESSION"
+echo "💡 Attach with: tmux attach -t $TMUX_SESSION"
+
+tmux attach-session -t "$TMUX_SESSION"
