@@ -281,16 +281,16 @@ This document lists all custom keymaps and frequently used plugin shortcuts conf
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>ac` | n | Toggle Claude terminal |
-| `<leader>af` | n | Focus Claude terminal |
-| `<leader>ar` | n | Resume Claude session |
-| `<leader>aC` | n | Continue Claude session |
-| `<leader>am` | n | Select Claude model |
-| `<leader>ab` | n | Add current buffer to Claude context |
-| `<leader>as` | v | Send visual selection to Claude |
-| `<leader>as` | n | Add file (in file tree) |
-| `<leader>aa` | n | Accept diff |
-| `<leader>ad` | n | Deny diff |
+| `<leader>cc` | n | Toggle Claude |
+| `<leader>ccf` | n | Focus Claude |
+| `<leader>ccr` | n | Resume Claude |
+| `<leader>cC` | n | Continue Claude |
+| `<leader>ccm` | n | Select Claude model |
+| `<leader>cca` | n | Add current buffer |
+| `<leader>ccs` | v | Send visual selection to Claude |
+| `<leader>cct` | n | Add file from file tree (file tree buffers only) |
+| `<leader>ccd` | n | Accept diff |
+| `<leader>ccn` | n | Deny diff |
 
 ### Telescope Internal Mappings
 

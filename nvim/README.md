@@ -71,7 +71,7 @@ sh nvim/install.sh
 - **Code Structure:** `tagbar` (requires `universal-ctags`/`gotags`)
 - **Fuzzy Finder:** `nvim-telescope`
 - **Git Integration:** `vim-gitgutter`
-- **AI Coding Assistant:** `claudecode.nvim` (requires Claude Code CLI)
+- **AI Coding Assistant:** `claudecode.nvim` - Claude Code integration with diff management
 
 ---
 
