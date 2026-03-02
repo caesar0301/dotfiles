@@ -448,6 +448,7 @@ unbind -T prefix i
 bind -r i select-pane -Z -l \;
 
 # reset pane base to make claude teammate works
+set -g base-index 0
 setw -g pane-base-index 0
 
 # session and windows preview, Meta + s/w
