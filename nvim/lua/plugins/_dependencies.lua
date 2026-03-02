@@ -45,7 +45,6 @@ return {
 	-- Simple plugins without config
 	{ "wellle/context.vim", event = "BufReadPost" },
 	{ "plasticboy/vim-markdown", ft = "markdown" },
-	{ "MeanderingProgrammer/render-markdown.nvim", ft = "markdown" },
 	{ "editorconfig/editorconfig-vim", event = { "BufReadPre", "BufNewFile" } },
 	{ "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
 	{ "neovimhaskell/haskell-vim", ft = "haskell" },
@@ -53,7 +52,10 @@ return {
 	{ "vim-ruby/vim-ruby", ft = "ruby" },
 	{ "chrisbra/csv.vim", ft = "csv" },
 	{ "godlygeek/tabular", cmd = "Tabularize" },
-	{ "tpope/vim-commentary", keys = { { "gc", mode = { "n", "v" } }, { "gcc", mode = "n" }, { "gcap", mode = "n" } } },
+	{
+		"tpope/vim-commentary",
+		keys = { { "gc", mode = { "n", "v" } }, { "gcc", mode = "n" }, { "gcap", mode = "n" } },
+	},
 	{
 		"mfussenegger/nvim-dap",
 		cmd = { "DapToggleBreakpoint", "DapContinue" },

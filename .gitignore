@@ -16,3 +16,7 @@ nvim/plugin/packer_compiled.lua
 .env
 setups/openclaw/config/
 setups/alithia/alithia_config.json
+
+.claude
+.qoder
+.agents

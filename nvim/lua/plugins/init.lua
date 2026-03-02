@@ -7,7 +7,7 @@ return {
 
 	-- Import major plugins (alphabetically organized)
 	{ import = "plugins.barbar" },
-	{ import = "plugins.codecompanion" },
+	{ import = "plugins.ai-coding" },
 	{ import = "plugins.conform" },
 	{ import = "plugins.fzf-lua" },
 	{ import = "plugins.gitignore" },

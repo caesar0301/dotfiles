@@ -277,12 +277,20 @@ This document lists all custom keymaps and frequently used plugin shortcuts conf
 | `<leader>tt` | n | Toggle tagbar |
 | `<F9>` | n | Toggle tagbar |
 
-### AI Assistant (CodeCompanion)
+### AI Coding Assistant (Claude Code)
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>ai` | n | Open AI chat |
-| `<leader>aa` | n | Open AI actions menu |
+| `<leader>ac` | n | Toggle Claude terminal |
+| `<leader>af` | n | Focus Claude terminal |
+| `<leader>ar` | n | Resume Claude session |
+| `<leader>aC` | n | Continue Claude session |
+| `<leader>am` | n | Select Claude model |
+| `<leader>ab` | n | Add current buffer to Claude context |
+| `<leader>as` | v | Send visual selection to Claude |
+| `<leader>as` | n | Add file (in file tree) |
+| `<leader>aa` | n | Accept diff |
+| `<leader>ad` | n | Deny diff |
 
 ### Telescope Internal Mappings
 
