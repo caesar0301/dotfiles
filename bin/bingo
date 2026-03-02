@@ -24,7 +24,6 @@ Examples:
   bingo restore                              # Restore the default 'bingo' session
   bingo restore claude-bingo                 # Restore specific session
   bingo claude 4                             # Create 4 panes, each running 'claude'
-  bingo claude --dangerously-skip-permissions 4  # 4 panes with flags
   bingo htop 2                               # Create 2 panes running 'htop'
   bingo -l                                   # List all bingo sessions
   bingo -k claude-bingo                      # Kill the claude-bingo session
