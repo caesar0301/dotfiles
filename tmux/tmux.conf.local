@@ -447,6 +447,9 @@ bind -r o select-pane -Z -t .+1 \;
 unbind -T prefix i
 bind -r i select-pane -Z -l \;
 
+# reset pane base to make claude teammate works
+setw -g pane-base-index 0
+
 # session and windows preview, Meta + s/w
 bind-key s choose-tree -Zs
 bind-key w choose-tree -Zw

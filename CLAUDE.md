@@ -4,135 +4,96 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a personal dotfiles collection (`cool-dotfiles`) for setting up a modern development environment. It includes configurations for Zsh, Neovim, Tmux, Emacs, and various development tools with automated installation scripts.
+Personal dotfiles collection (`cool-dotfiles`) for setting up a modern development environment with Zsh, Neovim, Tmux, Emacs, and various development tools. Features automated installation scripts following XDG Base Directory specification.
 
-## Key Installation Commands
+## Quick Reference
 
-### Basic Installation
 ```bash
-# Install essential components (Zsh, Tmux, Neovim) with prerequisites
+# Basic installation (Zsh, Tmux, Neovim)
 ./install_basics.sh
 
-# Install all modules including Emacs, Vifm, and misc configurations
+# Full installation (all components)
 ./install_all.sh
-```
 
-### Installation Options
-- `-s`: Use symlinks (default)
-- `-f`: Force copy instead of symlinks
-- `-c`: Clean/remove configurations
+# Selective module installation
+./install_all.sh -m zsh,tmux,nvim
+./misc/install.sh -m kitty,alacritty
 
-### Essential Development Tools
-The essential tools installer (`lib/install-essentials.sh`) is automatically run as a prerequisite:
+# Code formatting
+./format.sh                    # Format shell scripts and Lua files
 
-```bash
-# Basic installation (utility scripts + pyenv + fzf + ctags + cargo + Homebrew)
-./lib/install-essentials.sh
-
-# With optional components
-INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
-```
-
-**What Gets Installed (Always):**
-- Local utility scripts (dotme-xxx series) to `~/.local/bin`
-- pyenv: Python version manager
-- fzf: Fuzzy finder
-- universal-ctags: Code navigation tool
-- cargo: Rust toolchain
-- Homebrew: Package manager
-
-AI code agents are also installed by default (best-effort, requires Node.js and npm >= 20).
-
-**Optional Features (via environment variables):**
-- `INSTALL_EXTRA_VENV=1`: jenv (Java), gvm (Go), nvm (Node), rbenv (Ruby) version managers
-
-### Individual Module Installation
-```bash
-# Zsh configuration
-sh zsh/install.sh
-
-# Neovim (includes LSP support)
-sh nvim/install.sh
-
-# Tmux
-sh tmux/install.sh
-
-# Emacs
-sh emacs/install.sh
-
-# Vifm file manager
-sh vifm/install.sh
-
-# Lisp development environment
-sh lisp/install.sh
-
-# Alacritty terminal emulator
-sh alacritty/install.sh
-
-# Misc configurations (includes Kitty terminal)
-sh misc/install.sh
-```
-
-### Code Formatting
-```bash
-# Format shell scripts (excluding zsh-specific files)
-./format.sh
+# Installation flags
+-s    Use symlinks (default)
+-f    Force copy instead of symlinks
+-c    Clean/remove configurations
+-m    Install only selected modules
 ```
 
 ## Architecture
 
-### Core Components
+### Installation Hierarchy
 
-1. **Installation Orchestrators**
-   - `install_all.sh`: Full installation with all optional features (Zsh, Tmux, Neovim, Emacs, Vifm, Misc, Lisp, Alacritty)
-   - `install_basics.sh`: Minimal installation with core components (Zsh, Tmux, Neovim)
-   - Both use `lib/install-essentials.sh` as prerequisite
+**Master Orchestrators:**
+- `install_all.sh` → Full installation with all optional features (COMPONENTS: zsh, tmux, nvim, emacs, vifm, misc, lisp, alacritty)
+- `install_basics.sh` → Core components only (COMPONENTS: zsh, tmux, nvim)
+- Both automatically run `lib/install-essentials.sh` as prerequisite
 
-2. **Shared Library (`lib/`)**
-   - `shmisc.sh`: Core shell utility library with logging, path utilities, system detection
-   - `install-essentials.sh`: Orchestrates installation of essential tools (utility scripts, pyenv, fzf, ctags, cargo, Homebrew, and optional version managers/AI tools)
-   - Individual installers: `install-pyenv.sh`, `install-fzf.sh`, `install-universal-ctags.sh`, `install-cargo.sh`, `install-homebrew.sh`, `install-jenv.sh`, `install-gvm.sh`, `install-nvm.sh`, `install-rbenv.sh`, `install-ai-code-agents.sh`
-   - Additional tools: `install-bc.sh`, `install-golang.sh`, `install-google-java-format.sh`, `install-hack-nerd-font.sh`, `install-lazyssh.sh`, `install-miniconda.sh`, `install-neovim.sh`, `install-nvim-python.sh`, `install-sdcv.sh`, `install-shfmt.sh`, `install-uv.sh`, `install-lang-formatters.sh`, `install-lsp.sh`
-   - `claude-code-router.json`: Configuration for AI code routing
+**Prerequisites (`lib/install-essentials.sh`):**
+- Always installs: utility scripts (bin/), pyenv, fzf, universal-ctags, cargo, Homebrew, AI code agents
+- Optional: `INSTALL_EXTRA_VENV=1` enables jenv, gvm, nvm, rbenv version managers
+- `install_all.sh` enables all optional features by default
+- `install_basics.sh` uses default settings (no optional version managers)
 
-3. **Module Structure**
-   - Each module (zsh/, nvim/, tmux/, emacs/, vifm/, misc/, lisp/, alacritty/) has its own `install.sh` script
-   - Modules follow XDG Base Directory specification
-   - All modules load `lib/shmisc.sh` for common utilities
+### Module Structure
 
-4. **Custom Tools (`bin/`)**
-   - `dotme-xxx` series of personalized development tools
-   - Enhanced wrappers for common utilities (Google Java Format, GPG, etc.)
-   - Tools are installed to `~/.local/bin`
-   - Includes: `dotme-decrypt-zshenv`, `dotme-google-java-format`, `dotme-gpg`, `dotme-install-python`, `dotme-rsync-parallel`, `dotme-run-container`, `ccr_wrapper.sh`
+Each module (zsh/, nvim/, tmux/, emacs/, vifm/, misc/, lisp/, alacritty/) follows this pattern:
+- Has `install.sh` script with `-s`, `-f`, `-c` flags
+- Sources `lib/shmisc.sh` for utilities
+- Follows XDG Base Directory specification (XDG_DATA_HOME, XDG_CONFIG_HOME, XDG_CACHE_HOME)
+- Uses `set -euo pipefail` strict mode
 
-5. **Additional Directories**
-   - `kitty/`: Kitty terminal emulator configuration (not in default install_all.sh)
-   - `setups/`: Additional setup scripts
-   - `termux/`: Termux-specific configurations for Android
-   - `assets/`: Project assets including screenshots
+### Core Library (`lib/`)
 
-### Key Design Principles
+**Essential Utilities:**
+- `shmisc.sh` → Core library with logging, path utilities, system detection, installation helpers
+- `install-essentials.sh` → Orchestrates all prerequisite tools
 
-- **XDG Compliance**: Configurations follow XDG Base Directory specification
-- **Modular Installation**: Each component can be installed independently
-- **Prerequisite Management**: Essential tools are auto-installed before components
-- **Enhanced Error Handling**: All scripts use strict mode (`set -euo pipefail`)
-- **Cross-Platform Support**: Works on macOS and Linux with platform-specific adjustments
+**Individual Installers:** Modular scripts for each tool (pyenv, fzf, ctags, cargo, Homebrew, neovim, language formatters, version managers, etc.). Can be used independently.
 
-### Development Environment Features
+### Custom Tools (`bin/`)
 
-- **Zsh**: Modern configuration with Zinit plugin manager, proxy support
-- **Neovim**: Lazy.nvim plugin manager, LSP support, language formatters
-- **Tmux**: Terminal multiplexer with optimized configurations
-- **Emacs**: Configuration with plugins and Lisp development environment
-- **Vifm**: Vi file manager with custom configurations
-- **Alacritty**: GPU-accelerated terminal emulator (included in full installation)
-- **Lisp**: Common Lisp development environment with SBCL completions
-- **Kitty**: Modern terminal emulator (available but not in default install_all.sh)
-- **AI Code Agents**: Optional integration with AI development tools (requires Node.js >= 20)
-- **Version Managers**: Support for pyenv, jenv (Java), gvm (Go), nvm (Node), rbenv (Ruby)
-- **Language Tools**: Formatters, LSP support, ctags, and various development utilities
+`dotme-xxx` series of personalized development tools installed to `~/.local/bin`:
+- `dotme-google-java-format` → Enhanced Google Java Format wrapper
+- `dotme-gpg` → GPG helper with key alias support
+- `dotme-decrypt-zshenv` → Decrypt local environment files
+- `dotme-install-python`, `dotme-rsync-parallel`, `dotme-run-container`, `ccr_wrapper.sh`
+
+See `bin/README.md` for detailed documentation.
+
+### Key Design Patterns
+
+**All installation scripts:**
+1. Use `set -euo pipefail` for strict error handling
+2. Source `lib/shmisc.sh` for common utilities
+3. Use XDG environment variables with fallbacks
+4. Support installation flags (-s, -f, -c, -m where applicable)
+5. Use logging functions: `info()`, `warn()`, `error()`, `success()`
+
+**Module install scripts pattern:**
+```bash
+# Resolve script directory
+THISDIR=$(dirname "$(realpath "$0")")
+
+# Load utilities with validation
+source "$THISDIR/../lib/shmisc.sh" || { printf "✗ Failed to load shmisc.sh\n" >&2; exit 1; }
+
+# Define XDG paths
+readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
+readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
+
+# Install configuration files
+install_file_pair "$source_file" "$dest_file"
+```
 
 ## Testing Changes
 
@@ -207,3 +168,37 @@ The `lib/` directory contains modular installation scripts that can be used inde
 
 **Core Library:**
 - `shmisc.sh`: Core shell utility library (logging, path utilities, system detection)
+
+## Important Notes
+
+### XDG Compliance
+- All configurations follow XDG Base Directory specification
+- XDG_DATA_HOME defaults to `~/.local/share`
+- XDG_CONFIG_HOME defaults to `~/.config`
+- XDG_CACHE_HOME defaults to `~/.cache`
+
+### Cross-Platform Compatibility
+- Scripts detect OS using `is_linux` and `is_macos` functions from shmisc.sh
+- Platform-specific adjustments are handled automatically
+- Neovim checks kernel version on Linux to disable incompatible plugins
+
+### Path Management
+- Utility scripts in `bin/` are added to PATH via `zsh/init.zsh`
+- Restart shell after installation: `exec $SHELL`
+- Tools are installed to `~/.local/bin` for compatibility
+
+### Format Script (`format.sh`)
+- Formats shell scripts with shfmt (excluding zsh-specific files that use unsupported syntax)
+- Formats Lua files in nvim/ with stylua
+- Zsh files excluded due to glob qualifiers and zsh parameter expansion
+
+## Development Environment Components
+
+- **Zsh**: Zinit plugin manager, proxy support, custom plugins in `zsh/plugins/`
+- **Neovim**: Lazy.nvim plugin manager, LSP support, kernel version compatibility checks, language formatters
+- **Tmux**: Terminal multiplexer with optimized configurations
+- **Emacs**: Configuration with plugins and Lisp development environment
+- **Vifm**: Vi file manager
+- **Misc**: Kitty and Alacritty terminals, SBCL completions (supports selective installation via `-m`)
+- **Lisp**: Common Lisp development with SBCL
+- **AI Code Agents**: Requires Node.js >= 20 and npm >= 20
