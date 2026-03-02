@@ -6,7 +6,6 @@
 # Installs essential development tools and utilities for a productive development environment.
 #
 # Features:
-# - Local utility scripts (dotme-xxx series)
 # - Python version management (pyenv)
 # - Homebrew package manager (optional)
 # - Development environment version managers
@@ -27,7 +26,6 @@
 #   INSTALL_EXTRA_VENV=1    Install jenv, gvm, nvm version managers
 #
 # What Gets Installed:
-#   - Local utility scripts: dotme-xxx series tools in ~/.local/bin
 #   - pyenv: Python version manager (always installed)
 #   - fzf: Fuzzy finder (always installed)
 #   - universal-ctags: Code navigation tool (always installed)
@@ -38,9 +36,8 @@
 #     requires npm >= 20)
 #
 # Post-Installation:
-#   After installation, ensure ~/.local/bin is in your PATH:
-#     export PATH="$HOME/.local/bin:$PATH"
-#   Then restart your shell or run: exec $SHELL
+#   Utility scripts in ~/.dotfiles/bin are automatically added to PATH
+#   via zsh/init.zsh. Restart your shell or run: exec $SHELL
 #
 # Copyright (c) 2024, Xiaming Chen
 # License: MIT
@@ -51,51 +48,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/shmisc.sh"
 
 # Configuration constants
-readonly LOCAL_BIN_DIR="$HOME/.local/bin"
+readonly LOCAL_BIN_DIR="$HOME/.local/bin" # kept for compatibility
 
-# Install local utility scripts with validation
-install_local_bins() {
-  local bin_source_dir="$SCRIPT_DIR/../bin"
+# Verify bin directory exists and is accessible
+verify_bin_path() {
+  local bin_dir="$SCRIPT_DIR/../bin"
 
-  [[ -d "$bin_source_dir" ]] || {
-    warn "Binary source directory not found: $bin_source_dir"
-    return 0
-  }
-
-  info "Installing local utility scripts..."
-  create_dir "$LOCAL_BIN_DIR"
-
-  local installed_count=0
-  local failed_count=0
-
-  # Install each script individually with validation
-  # Find all files except README.md and make them executable
-  while IFS= read -r -d '' script_file; do
-    local script_name
-    script_name=$(basename "$script_file")
-
-    # Skip README.md and other non-script files
-    [[ "$script_name" == "README.md" ]] && continue
-
-    local dest_path="$LOCAL_BIN_DIR/$script_name"
-
-    if cp "$script_file" "$dest_path" && chmod +x "$dest_path"; then
-      info "Installed script: $script_name"
-      ((++installed_count))
-    else
-      warn "Failed to install script: $script_name"
-      ((++failed_count))
-    fi
-  done < <(find "$bin_source_dir" -type f -print0 2>/dev/null || true)
-
-  if [[ $installed_count -gt 0 ]]; then
-    success "Installed $installed_count utility scripts"
-    info "Scripts location: $LOCAL_BIN_DIR"
+  if [[ -d "$bin_dir" ]]; then
+    info "Utility scripts directory: $bin_dir"
+    local script_count
+    script_count=$(find "$bin_dir" -type f ! -name "README.md" | wc -l | tr -d ' ')
+    success "Found $script_count utility scripts (accessible via PATH after shell restart)"
   else
-    warn "No utility scripts found to install"
+    warn "Utility scripts directory not found: $bin_dir"
   fi
-
-  [[ $failed_count -eq 0 ]] || warn "$failed_count scripts failed to install"
 }
 
 # Install AI code agents
@@ -123,8 +89,8 @@ install_ai_code_agents() {
 main() {
   info "Starting essential development tools installation..."
 
-  # Install local utility scripts first
-  install_local_bins
+  # Verify utility scripts directory
+  verify_bin_path
 
   # Core dependencies - order matters! Homebrew must be installed before tools that depend on it
   local core_deps=(
@@ -162,7 +128,7 @@ main() {
   fi
 
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
-  printf "  • Local utility scripts: %b$LOCAL_BIN_DIR%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  • Utility scripts: %b~/.dotfiles/bin%b (in PATH)\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • pyenv: Python version manager\n"
   printf "  • fzf: Fuzzy finder\n"
   printf "  • universal-ctags: Code navigation tool\n"

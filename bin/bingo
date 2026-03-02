@@ -1,0 +1,197 @@
+#!/usr/bin/env zsh
+#############################################################
+# bingo - tmux session orchestrator
+# Creates grid layouts with commands in multiple panes
+#############################################################
+
+setopt localoptions errexit pipefail
+
+# ---------- Help ----------
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  cat <<'EOF'
+Usage: bingo [OPTIONS] [COMMAND [ARGS...]] [PANE_COUNT]
+
+A tmux session orchestrator that creates grid layouts with commands.
+
+Options:
+  -h, --help          Show this help message
+  -l, --list          List all bingo-managed sessions
+  -k, --kill [NAME]   Kill a bingo session (default: 'bingo')
+  restore [NAME]      Explicitly restore a session (default: 'bingo')
+  prune               Kill ALL bingo-managed sessions
+
+Examples:
+  bingo restore                              # Restore the default 'bingo' session
+  bingo restore claude-bingo                 # Restore specific session
+  bingo claude 4                             # Create 4 panes, each running 'claude'
+  bingo claude --dangerously-skip-permissions 4  # 4 panes with flags
+  bingo htop 2                               # Create 2 panes running 'htop'
+  bingo -l                                   # List all bingo sessions
+  bingo -k claude-bingo                      # Kill the claude-bingo session
+
+Session Naming:
+  - Session is named after the first word of the command: '<cmd>-bingo'
+  - e.g. 'bingo claude --flag 4'  →  session: 'claude-bingo'
+EOF
+  exit 0
+fi
+
+# ---------- Preflight ----------
+command -v tmux >/dev/null 2>&1 || {
+  echo "❌ tmux is not installed."
+  exit 1
+}
+
+# ---------- List Mode ----------
+if [[ "$1" == "-l" || "$1" == "--list" ]]; then
+  echo "📋 Bingo-managed sessions:"
+  local sessions panes
+  sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -E "bingo$|^bingo$" || true)
+  if [[ -z "$sessions" ]]; then
+    echo "   (none)"
+  else
+    while read -r s; do
+      panes=$(tmux list-panes -t "$s" 2>/dev/null | wc -l | tr -d ' ')
+      echo "   • $s ($panes panes)"
+    done <<< "$sessions"
+  fi
+  exit 0
+fi
+
+# ---------- Kill Mode ----------
+if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
+  local KILL_NAME="${2:-bingo}"
+  if tmux has-session -t "$KILL_NAME" 2>/dev/null; then
+    tmux kill-session -t "$KILL_NAME"
+    echo "✅ Killed session '$KILL_NAME'"
+  else
+    echo "⚠️  Session '$KILL_NAME' does not exist."
+  fi
+  exit 0
+fi
+
+# ---------- Prune Mode ----------
+if [[ "$1" == "prune" ]]; then
+  local sessions
+  sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -E "bingo$|^bingo$" || true)
+  if [[ -z "$sessions" ]]; then
+    echo "✅ No bingo sessions to prune."
+  else
+    while read -r s; do
+      tmux kill-session -t "$s"
+      echo "🗑  Killed '$s'"
+    done <<< "$sessions"
+    echo "✅ All bingo sessions pruned."
+  fi
+  exit 0
+fi
+
+# ---------- Explicit Restore Mode ----------
+if [[ "$1" == "restore" ]]; then
+  local RESTORE_NAME="${2:-bingo}"
+  if tmux has-session -t "$RESTORE_NAME" 2>/dev/null; then
+    unset TMUX
+    echo "🔄 Restoring session '$RESTORE_NAME'..."
+    tmux attach-session -d -t "$RESTORE_NAME"
+  else
+    echo "❌ Session '$RESTORE_NAME' does not exist."
+    echo "   Use 'bingo -l' to list available sessions."
+    exit 1
+  fi
+  exit 0
+fi
+
+# ---------- Bare 'bingo' Prevention ----------
+if [[ -z "$1" ]]; then
+  echo "⚠️  Bare 'bingo' is ambiguous and disabled to prevent accidental restores."
+  echo ""
+  echo "Did you mean:"
+  echo "   bingo restore        # Restore default 'bingo' session"
+  echo "   bingo <cmd> <n>      # Create new session with command"
+  echo "   bingo -l             # List existing sessions"
+  echo "   bingo prune          # Kill ALL bingo-managed sessions"
+  echo "   bingo --help         # Show full help"
+  exit 1
+fi
+
+# ---------- Parse Arguments ----------
+# If the last argument is a number, treat it as PANE_COUNT; everything before is CMD
+local PANE_COUNT=1
+local CMD
+if [[ "${@[-1]}" =~ ^[0-9]+$ ]] && [[ $# -gt 1 ]]; then
+  PANE_COUNT="${@[-1]}"
+  CMD="${@[1,-2]}"
+else
+  CMD="$*"
+fi
+
+# Validate pane count
+if ! [[ "$PANE_COUNT" =~ ^[0-9]+$ ]] || [[ "$PANE_COUNT" -lt 1 ]]; then
+  echo "❌ Pane count must be a positive integer."
+  exit 1
+fi
+
+# ---------- Safe Session Naming ----------
+# Use only the first word of CMD (the binary name) as the session prefix
+local CMD_BASE SESSION_NAME
+CMD_BASE="${CMD%% *}"
+SESSION_NAME=$(echo "${CMD_BASE}-bingo" | tr -cd '[:alnum:]-')
+
+# ---------- Cold-Start Guard ----------
+# If the tmux server isn't running, boot it now so tmux-continuum can
+# restore historic sessions BEFORE we check/kill our target session.
+# Without this, has-session returns false (server down), we skip the kill,
+# then new-session starts the server and continuum restores stale sessions.
+if ! tmux info >/dev/null 2>&1; then
+  tmux new-session -d -s "_bingo_init_" 2>/dev/null || true
+  sleep 0.8
+  tmux kill-session -t "_bingo_init_" 2>/dev/null || true
+fi
+
+# ---------- Always Nuke for Fresh Start ----------
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+  tmux kill-session -t "$SESSION_NAME"
+  echo "🔄 Killed existing session '$SESSION_NAME'"
+fi
+
+# ---------- Create New Session ----------
+echo "🚀 Creating session '$SESSION_NAME' with $PANE_COUNT pane(s)..."
+local W_ID
+W_ID=$(tmux new-session -d -s "$SESSION_NAME" -P -F "#{window_id}")
+sleep 0.1
+
+# ---------- Pane Grid Builder ----------
+if [[ "$PANE_COUNT" -gt 1 ]]; then
+  if [[ "$PANE_COUNT" -eq 4 ]]; then
+    # Optimized 2x2 grid using absolute pane IDs
+    # First split creates top/bottom
+    tmux split-window -v -t "$W_ID"
+    sleep 0.05
+    # Get the two pane IDs
+    local pane_list
+    pane_list=($(tmux list-panes -t "$W_ID" -F "#{pane_id}"))
+    # Split each horizontally to create 2x2
+    tmux split-window -h -t "${pane_list[1]}"
+    tmux split-window -h -t "${pane_list[2]}"
+  else
+    # Linear split for other counts
+    local i=1
+    while [[ "$i" -lt "$PANE_COUNT" ]]; do
+      tmux split-window -v -t "$W_ID"
+      ((i++))
+    done
+  fi
+  tmux select-layout -t "$W_ID" tiled
+  sleep 0.1
+fi
+
+# ---------- Execute Command in All Panes ----------
+local pane_ids
+pane_ids=$(tmux list-panes -t "$W_ID" -F "#{pane_id}")
+while read -r p; do
+  tmux send-keys -t "$p" "$CMD" C-m
+done <<< "$pane_ids"
+
+# ---------- Attach Cleanly ----------
+unset TMUX
+tmux attach-session -d -t "$SESSION_NAME"
