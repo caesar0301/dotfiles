@@ -11,8 +11,9 @@ set -euo pipefail
 # - An isolated config directory for session history
 # - A tiled tmux window layout
 #
-# Note: Each new worktree requires a one-time trust confirmation when Claude starts.
-# This is a security feature and cannot be bypassed programmatically.
+# IMPORTANT: Each new worktree requires a one-time "Yes, I trust this folder"
+# confirmation. This is a security feature with no bypass. See:
+# https://github.com/anthropics/claude-code/issues/9113
 #
 # Requires: git, tmux
 
@@ -66,8 +67,7 @@ for i in $(seq 1 "$COUNT"); do
     cp "$CLAUDE_HOME/settings.json" "$CONF_DIR/"
   fi
 
-  # Pre-create .claude.json to bypass onboarding/theme selection
-  # Note: Trust dialog for new worktrees cannot be bypassed programmatically
+  # Pre-create .claude.json to skip onboarding/theme selection prompts
   if [ ! -f "$CONF_DIR/.claude.json" ]; then
     cat >"$CONF_DIR/.claude.json" <<EOF
 {
