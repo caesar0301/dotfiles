@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+# claude-teammate - Launch Claude Code in teammate mode
+#
+# Usage: claude-teammate
+#
+# Starts Claude with experimental agent teams enabled, using tmux for
+# multi-agent coordination. Each agent runs in a separate tmux pane.
+#
+# Requires: claude, tmux
+
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+exec claude --teammate-mode tmux "$@"
