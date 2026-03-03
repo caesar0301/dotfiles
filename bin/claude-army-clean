@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# claudes-clean - Clean up Claude Code worktrees and sessions
+# claude-army-clean - Clean up Claude Code worktrees and sessions
 #
-# Usage: claudes-clean
+# Usage: claude-army-clean
 #
 # Removes all Claude worktrees, temporary branches, and session configs
 # for the current project. Safe to run multiple times.

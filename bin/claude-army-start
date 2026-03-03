@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# claudes-start - Launch multiple Claude Code sessions in isolated worktrees
+# claude-army-start - Launch multiple Claude Code sessions in isolated worktrees
 #
-# Usage: claudes-start [COUNT]
+# Usage: claude-army-start [COUNT]
 #   COUNT - Number of Claude sessions to launch (default: 2)
 #
 # This script creates isolated Claude environments, each with:
