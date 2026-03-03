@@ -11,4 +11,4 @@ set -euo pipefail
 # Requires: claude, tmux
 
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-exec claude --teammate-mode tmux "$@"
+exec claude --dangerously-skip-permissions --teammate-mode tmux "$@"

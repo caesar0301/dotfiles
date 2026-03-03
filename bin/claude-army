@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# claude-army-start - Launch multiple Claude Code sessions in isolated worktrees
+# claude-army - Launch multiple Claude Code sessions in isolated worktrees
 #
-# Usage: claude-army-start [COUNT]
+# Usage: claude-army [COUNT]
 #   COUNT - Number of Claude sessions to launch (default: 2)
 #
 # This script creates isolated Claude environments, each with:
@@ -11,12 +11,16 @@ set -euo pipefail
 # - An isolated config directory for session history
 # - A tiled tmux window layout
 #
+# Note: Each new worktree requires a one-time trust confirmation when Claude starts.
+# This is a security feature and cannot be bypassed programmatically.
+#
 # Requires: git, tmux
 
 # Configuration
 CLAUDE_HOME="$HOME/.claude"
 WORKTREE_BASE="$CLAUDE_HOME/worktrees"
 SESSION_BASE="$CLAUDE_HOME/sessions"
+COUNT=${1:-2}
 
 # Ensure we're in a git repository
 if ! git rev-parse --show-toplevel &>/dev/null; then
@@ -25,7 +29,6 @@ if ! git rev-parse --show-toplevel &>/dev/null; then
 fi
 
 PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)" | tr '.' '_')
-COUNT=${1:-2}
 
 # Validate COUNT is a positive integer
 if ! [[ "$COUNT" =~ ^[1-9][0-9]*$ ]]; then
@@ -34,6 +37,14 @@ if ! [[ "$COUNT" =~ ^[1-9][0-9]*$ ]]; then
 fi
 
 echo "🚀 Launching $COUNT Claude sessions for project: [$PROJECT_NAME]"
+
+# Resolve claude binary path (tmux may not inherit full PATH)
+CLAUDE_BIN="$(command -v claude 2>/dev/null || which claude 2>/dev/null || echo '')"
+if [ -z "$CLAUDE_BIN" ]; then
+  echo "❌ Error: claude command not found in PATH" >&2
+  exit 1
+fi
+echo "📍 Using claude at: $CLAUDE_BIN"
 
 # Create tmux session
 TMUX_SESSION="claude-${PROJECT_NAME}-$(date +%s)"
@@ -50,18 +61,30 @@ for i in $(seq 1 "$COUNT"); do
   # Create isolated config directory
   mkdir -p "$CONF_DIR"
 
-  # Pre-configure Claude to bypass onboarding prompts
-  cat >"$CONF_DIR/claude.json" <<EOF
+  # Copy existing settings to inherit preferences
+  if [ -f "$CLAUDE_HOME/settings.json" ]; then
+    cp "$CLAUDE_HOME/settings.json" "$CONF_DIR/"
+  fi
+
+  # Pre-create .claude.json to bypass onboarding/theme selection
+  # Note: Trust dialog for new worktrees cannot be bypassed programmatically
+  if [ ! -f "$CONF_DIR/.claude.json" ]; then
+    cat >"$CONF_DIR/.claude.json" <<EOF
 {
-  "theme": "dark",
+  "firstStartTime": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
   "hasCompletedOnboarding": true,
   "hasTrustDialogAccepted": true,
   "hasTrustDialogHooksAccepted": true,
-  "trustedDirectories": ["$WORK_DIR"]
+  "selectedTheme": "dark",
+  "sonnet45MigrationComplete": true,
+  "opus45MigrationComplete": true,
+  "opusProMigrationComplete": true,
+  "thinkingMigrationComplete": true
 }
 EOF
+  fi
 
-  # Copy login credentials if available
+  # Copy login credentials if available (legacy location)
   if [ -f "$CLAUDE_HOME/config.json" ]; then
     cp "$CLAUDE_HOME/config.json" "$CONF_DIR/"
   fi
@@ -72,7 +95,7 @@ EOF
   git worktree add -b "$BRANCH" "$WORK_DIR" main
 
   # Launch Claude in tmux pane
-  CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' claude"
+  CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' '$CLAUDE_BIN'"
 
   if [ "$i" -eq 1 ]; then
     tmux send-keys -t "$TMUX_SESSION:0.0" "$CMD" C-m
