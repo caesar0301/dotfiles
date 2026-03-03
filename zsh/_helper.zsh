@@ -41,6 +41,24 @@ function zshup {
   echo "==> Done. Restart shell if completions behave oddly."
 }
 
+bingo() {
+  local SESSION_NAME="${1:-bingo}"
+
+  # Check if tmux server is already running by listing sessions
+  if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    echo "Attaching to existing tmux session: $SESSION_NAME"
+  else
+    echo "Creating new tmux session: $SESSION_NAME"
+    tmux new-session -d -s "$SESSION_NAME"
+  fi
+
+  # Unset TMUX to allow clean attach
+  unset TMUX
+
+  # Attach to the session
+  tmux attach -t "$SESSION_NAME"
+}
+
 # Load custom extensions under $ZSH_PLUGIN_DIR
 _zinit_ice_plugin() {
   plugin_path=$1
