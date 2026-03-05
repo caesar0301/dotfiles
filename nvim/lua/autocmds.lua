@@ -72,3 +72,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		end
 	end,
 })
+
+-- Create an autocommand that triggers whenever a terminal buffer opens
+-- Fix claude code CLI digital junk lines
+vim.api.nvim_create_autocmd("TermOpen", {
+	group = vim.api.nvim_create_augroup("custom-term-config", { clear = true }),
+	callback = function()
+		vim.opt_local.wrap = false
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		vim.opt_local.signcolumn = "no"
+		vim.cmd("startinsert")
+	end,
+})
