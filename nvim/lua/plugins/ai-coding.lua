@@ -2,7 +2,12 @@
 return {
 	"coder/claudecode.nvim",
 	dependencies = { "folke/snacks.nvim" },
-	config = true,
+	opts = {
+		command = "claude",
+		args = {
+			"--dangerously-skip-permissions",
+		},
+	},
 	keys = {
 		{ "<leader>cc", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
 		{ "<leader>ccf", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
