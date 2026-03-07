@@ -77,34 +77,35 @@ install_opencode_plugin() {
   install_file_pair "$plugin_src" "$plugin_dest"
 }
 
-# Install Cursor agent CLI if not already installed
+# Install Cursor agent CLI (always installs latest version)
 install_cursor_agent_cli() {
-  # Check if Cursor agent (or Cursor CLI) is already available
+  # Check if Cursor agent is already installed
   if command -v cursor-agent >/dev/null 2>&1; then
-    info "Cursor agent CLI already installed, skipping installation"
-    return 0
+    info "Cursor agent CLI already installed, updating to latest version..."
+  else
+    info "Installing Cursor agent CLI..."
   fi
 
-  info "Installing Cursor agent CLI..."
   if curl https://cursor.com/install -fsS | bash; then
-    success "Cursor agent CLI installed successfully"
+    success "Cursor agent CLI installed/updated successfully"
   else
-    warn "Failed to install Cursor agent CLI"
+    warn "Failed to install/update Cursor agent CLI"
   fi
 }
 
-# Install Claude code CLI if not already installed
+# Install Claude code CLI (always installs latest version)
 install_claude_code_cli() {
+  # Check if Claude code CLI is already installed
   if command -v claude >/dev/null 2>&1; then
-    info "Claude code CLI already installed, skipping installation"
-    return 0
+    info "Claude code CLI already installed, updating to latest version..."
+  else
+    info "Installing claude code CLI..."
   fi
 
-  info "Installing claude code CLI..."
   if curl -fsSL https://claude.ai/install.sh | bash; then
-    success "Claude code CLI installed successfully"
+    success "Claude code CLI installed/updated successfully"
   else
-    warn "Failed to install Claude code CLI"
+    warn "Failed to install/update Claude code CLI"
   fi
 }
 
