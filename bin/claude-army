@@ -4,7 +4,11 @@ set -euo pipefail
 # claude-army - Launch multiple Claude Code sessions in isolated worktrees
 #
 # Usage: claude-army [COUNT]
-#   COUNT - Number of Claude sessions to launch (default: 2)
+#   COUNT - Number of Claude sessions to launch (default: 1)
+#
+# Worktrees are created from the current HEAD (current branch). Set
+# CLAUDE_ARMY_SOURCE_REF to use another ref (e.g. origin/main). Uncommitted
+# changes are not included; commit or stash them first if needed.
 #
 # This script creates isolated Claude environments, each with:
 # - A separate git worktree on a temporary branch
@@ -21,11 +25,20 @@ set -euo pipefail
 CLAUDE_HOME="$HOME/.claude"
 WORKTREE_BASE="$CLAUDE_HOME/worktrees"
 SESSION_BASE="$CLAUDE_HOME/sessions"
-COUNT=${1:-2}
+COUNT=${1:-1}
 
 # Ensure we're in a git repository
 if ! git rev-parse --show-toplevel &>/dev/null; then
   echo "❌ Error: Must run inside a Git repository" >&2
+  exit 1
+fi
+
+# Source ref for new worktrees: use current HEAD (current branch) so worktrees
+# reflect "latest" repo state. Uncommitted changes are not included; commit or
+# stash them first if you need them in the worktree.
+SOURCE_REF="${CLAUDE_ARMY_SOURCE_REF:-HEAD}"
+if ! git rev-parse --verify "$SOURCE_REF" &>/dev/null; then
+  echo "❌ Error: Invalid source ref: $SOURCE_REF" >&2
   exit 1
 fi
 
@@ -92,7 +105,7 @@ EOF
   # Clean up any existing worktree/branch and create new one
   git worktree remove --force "$WORK_DIR" 2>/dev/null || true
   git branch -D "$BRANCH" 2>/dev/null || true
-  git worktree add -b "$BRANCH" "$WORK_DIR" main
+  git worktree add -b "$BRANCH" "$WORK_DIR" "$SOURCE_REF"
 
   # Launch Claude in tmux pane
   CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' '$CLAUDE_BIN' --dangerously-skip-permissions"
