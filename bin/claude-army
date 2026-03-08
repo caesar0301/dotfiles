@@ -95,7 +95,7 @@ EOF
   git worktree add -b "$BRANCH" "$WORK_DIR" main
 
   # Launch Claude in tmux pane
-  CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' '$CLAUDE_BIN'"
+  CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' '$CLAUDE_BIN' --dangerously-skip-permissions"
 
   if [ "$i" -eq 1 ]; then
     tmux send-keys -t "$TMUX_SESSION:0.0" "$CMD" C-m
