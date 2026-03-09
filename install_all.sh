@@ -129,13 +129,27 @@ install_component() {
   # Execute component installation with timeout and error handling
   local start_time=$(date +%s)
 
-  # Use gtimeout on macOS, timeout on Linux
-  local timeout_cmd="timeout"
+  # Use gtimeout on macOS, timeout on Linux, or skip timeout if not available
+  local timeout_cmd=""
   if [[ "$OSTYPE" == "darwin"* ]] && command -v gtimeout >/dev/null 2>&1; then
     timeout_cmd="gtimeout"
+  elif command -v timeout >/dev/null 2>&1; then
+    timeout_cmd="timeout"
   fi
 
-  if $timeout_cmd 300 bash "$component_script" "$@" 2>&1; then
+  local install_success=false
+  if [[ -n "$timeout_cmd" ]]; then
+    if $timeout_cmd 300 bash "$component_script" "$@" 2>&1; then
+      install_success=true
+    fi
+  else
+    # Fallback without timeout if command not available
+    if bash "$component_script" "$@" 2>&1; then
+      install_success=true
+    fi
+  fi
+
+  if $install_success; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     success "Component '$component' installed successfully (${duration}s)"
