@@ -1,5 +1,4 @@
 services:
-  # --- OpenClaw Agent ---
   openclaw:
     image: ghcr.io/openclaw/openclaw:latest
     container_name: openclaw-agent
@@ -11,8 +10,7 @@ services:
       - ./config:/home/node/.openclaw
     networks:
       - openclaw-net
-    ports:
-      - "18789:18789"
+    # No ports needed here if you only want access via the Tunnel
 
   tunnel:
     image: cloudflare/cloudflared:latest
