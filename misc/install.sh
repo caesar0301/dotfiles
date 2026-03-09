@@ -30,8 +30,8 @@ readonly ALACRITTY_CONFIG_FILE="$ALACRITTY_CONFIG_HOME/alacritty.toml"
 readonly SBCL_COMPLETIONS="$HOME/.sbcl_completions"
 
 # Load common utilities with validation
-source "$THISDIR/../lib/shmisc.sh" || {
-  printf "\033[0;31m✗ Failed to load shmisc.sh\033[0m\n" >&2
+source "$THISDIR/../lib/shlib.sh" || {
+  printf "\033[0;31m✗ Failed to load shlib.sh\033[0m\n" >&2
   exit 1
 }
 

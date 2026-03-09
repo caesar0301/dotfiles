@@ -11,7 +11,7 @@
 
 # Source the shell utility library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/shmisc.sh"
+source "$SCRIPT_DIR/shlib.sh"
 
 # Define pip formatters to install
 readonly FORMATTERS_PIP="pynvim cmake_format"

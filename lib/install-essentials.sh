@@ -51,7 +51,7 @@
 
 # Source the shell utility library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/shmisc.sh"
+source "$SCRIPT_DIR/shlib.sh"
 
 # Configuration constants
 readonly LOCAL_BIN_DIR="$HOME/.local/bin" # kept for compatibility

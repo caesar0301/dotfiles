@@ -20,8 +20,8 @@ THISDIR=$(dirname "$(realpath "$0")")
 LAZY_HOME="$HOME/.local/share/nvim/lazy/lazy.nvim"
 
 # Load common utilities
-source "$THISDIR/../lib/shmisc.sh" || {
-  echo "Error: Failed to load shmisc.sh"
+source "$THISDIR/../lib/shlib.sh" || {
+  echo "Error: Failed to load shlib.sh"
   exit 1
 }
 

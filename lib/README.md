@@ -1,6 +1,6 @@
 # Development Environment Installer Scripts
 
-This directory contains standalone installer scripts for various development tools and environments. These scripts are designed to be used both independently and through the `shmisc.sh` library functions.
+This directory contains standalone installer scripts for various development tools and environments. These scripts are designed to be used both independently and through the `shlib.sh` library functions.
 
 ## Available Installers
 
@@ -51,13 +51,13 @@ Each script can be run independently:
 ./install-shfmt.sh v3.8.0
 ```
 
-### Through shmisc.sh Library
+### Through shlib.sh Library
 
-The scripts are also accessible through the `shmisc.sh` library functions, maintaining backward compatibility:
+The scripts are also accessible through the `shlib.sh` library functions, maintaining backward compatibility:
 
 ```bash
 # Source the library
-source lib/shmisc.sh
+source lib/shlib.sh
 
 # Use the installer functions
 install_neovim
@@ -76,7 +76,7 @@ install_golang 1.25.0
 
 ## Requirements
 
-All scripts require the `shmisc.sh` library to be available in the same directory. The library provides:
+All scripts require the `shlib.sh` library to be available in the same directory. The library provides:
 
 - Logging and messaging functions
 - Path and file utilities
@@ -88,7 +88,7 @@ All scripts require the `shmisc.sh` library to be available in the same director
 Each installer script follows a consistent pattern:
 
 1. **Header**: Script description and copyright information
-2. **Library Import**: Sources the `shmisc.sh` library
+2. **Library Import**: Sources the `shlib.sh` library
 3. **Main Function**: Contains the installation logic
 4. **Direct Execution**: Runs main function if script is executed directly
 5. **Error Handling**: Comprehensive error checking and user feedback
@@ -98,7 +98,7 @@ Each installer script follows a consistent pattern:
 - **Modularity**: Each tool has its own dedicated installer
 - **Maintainability**: Easier to update and maintain individual tools
 - **Reusability**: Scripts can be used independently or as part of larger workflows
-- **Compatibility**: Maintains backward compatibility with existing `shmisc.sh` functions
+- **Compatibility**: Maintains backward compatibility with existing `shlib.sh` functions
 - **Testing**: Individual installers can be tested in isolation
 
 ## Contributing
@@ -107,9 +107,9 @@ When adding new installer scripts:
 
 1. Follow the existing naming convention: `install-{tool-name}.sh`
 2. Include comprehensive header documentation
-3. Source the `shmisc.sh` library
+3. Source the `shlib.sh` library
 4. Implement proper error handling
-5. Add the corresponding function to `shmisc.sh` for compatibility
+5. Add the corresponding function to `shlib.sh` for compatibility
 6. Make the script executable with `chmod +x`
 7. Test both standalone and library function usage
 

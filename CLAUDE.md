@@ -48,14 +48,14 @@ Personal dotfiles collection (`cool-dotfiles`) for setting up a modern developme
 
 Each module (zsh/, nvim/, tmux/, emacs/, vifm/, misc/, lisp/, alacritty/) follows this pattern:
 - Has `install.sh` script with `-s`, `-f`, `-c` flags
-- Sources `lib/shmisc.sh` for utilities
+- Sources `lib/shlib.sh` for utilities
 - Follows XDG Base Directory specification (XDG_DATA_HOME, XDG_CONFIG_HOME, XDG_CACHE_HOME)
 - Uses `set -euo pipefail` strict mode
 
 ### Core Library (`lib/`)
 
 **Essential Utilities:**
-- `shmisc.sh` → Core library with logging, path utilities, system detection, installation helpers
+- `shlib.sh` → Core library with logging, path utilities, system detection, installation helpers
 - `install-essentials.sh` → Orchestrates all prerequisite tools
 
 **Individual Installers:** Modular scripts for each tool (pyenv, fzf, ctags, cargo, Homebrew, neovim, language formatters, version managers, etc.). Can be used independently.
@@ -74,7 +74,7 @@ See `bin/README.md` for detailed documentation.
 
 **All installation scripts:**
 1. Use `set -euo pipefail` for strict error handling
-2. Source `lib/shmisc.sh` for common utilities
+2. Source `lib/shlib.sh` for common utilities
 3. Use XDG environment variables with fallbacks
 4. Support installation flags (-s, -f, -c, -m where applicable)
 5. Use logging functions: `info()`, `warn()`, `error()`, `success()`
@@ -85,7 +85,7 @@ See `bin/README.md` for detailed documentation.
 THISDIR=$(dirname "$(realpath "$0")")
 
 # Load utilities with validation
-source "$THISDIR/../lib/shmisc.sh" || { printf "✗ Failed to load shmisc.sh\n" >&2; exit 1; }
+source "$THISDIR/../lib/shlib.sh" || { printf "✗ Failed to load shlib.sh\n" >&2; exit 1; }
 
 # Define XDG paths
 readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
@@ -109,7 +109,7 @@ When making changes to installation scripts:
 
 ### Adding New Modules
 1. Create module directory with `install.sh` script
-2. Source `lib/shmisc.sh` for utilities
+2. Source `lib/shlib.sh` for utilities
 3. Follow existing patterns for XDG compliance
 4. Add module to `COMPONENTS` array in `install_all.sh` if needed
 5. Current modules in install_all.sh: zsh, tmux, nvim, emacs, vifm, misc, lisp, alacritty
@@ -167,7 +167,7 @@ The `lib/` directory contains modular installation scripts that can be used inde
 - `claude-code-router.json`: AI code routing configuration
 
 **Core Library:**
-- `shmisc.sh`: Core shell utility library (logging, path utilities, system detection)
+- `shlib.sh`: Core shell utility library (logging, path utilities, system detection)
 
 ## Important Notes
 
@@ -178,7 +178,7 @@ The `lib/` directory contains modular installation scripts that can be used inde
 - XDG_CACHE_HOME defaults to `~/.cache`
 
 ### Cross-Platform Compatibility
-- Scripts detect OS using `is_linux` and `is_macos` functions from shmisc.sh
+- Scripts detect OS using `is_linux` and `is_macos` functions from shlib.sh
 - Platform-specific adjustments are handled automatically
 - Neovim checks kernel version on Linux to disable incompatible plugins
 

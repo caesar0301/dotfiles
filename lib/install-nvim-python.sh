@@ -20,8 +20,8 @@ set -euo pipefail
 THISDIR=$(dirname "$(realpath "$0")")
 
 # Load common utilities
-source "$THISDIR/shmisc.sh" || {
-  echo "Error: Failed to load shmisc.sh"
+source "$THISDIR/shlib.sh" || {
+  echo "Error: Failed to load shlib.sh"
   exit 1
 }
 
