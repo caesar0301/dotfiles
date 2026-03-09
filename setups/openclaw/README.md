@@ -14,7 +14,16 @@
 
 1. Configure gateway to listen on lan: Edit `config/openclaw.json` and add gateway subfield:
 ```
-"bind": "lan"
+{
+  "gateway": {
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "https://your.domain.name"
+      ]
+    }
+  }
+}
 ```
 
 2. Generate gateway token and approve device:
