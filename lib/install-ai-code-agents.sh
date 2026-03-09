@@ -172,6 +172,74 @@ setup_ccr_autostart() {
   info "To restart ccr: pm2 restart ccr"
 }
 
+# Setup pm2 autostart for opencode-web
+# This configures opencode web server to start automatically on system boot
+setup_opencode_autostart() {
+  # Check if pm2 is available
+  if ! command -v pm2 >/dev/null 2>&1; then
+    info "Installing pm2 globally..."
+    if npm install -g pm2; then
+      success "pm2 installed successfully"
+    else
+      warn "Failed to install pm2, skipping opencode autostart setup"
+      return 0
+    fi
+  fi
+
+  # Check if opencode is available
+  if ! command -v opencode >/dev/null 2>&1; then
+    warn "opencode command not found, skipping autostart setup"
+    return 0
+  fi
+
+  # Check if opencode-web is already managed by pm2
+  if pm2 describe opencode-web >/dev/null 2>&1; then
+    info "opencode-web is already managed by pm2, checking status..."
+    pm2 status
+    info "To restart: pm2 restart opencode-web"
+    info "To delete: pm2 delete opencode-web"
+    return 0
+  fi
+
+  info "Setting up pm2 autostart for opencode-web..."
+
+  # Start opencode-web with pm2
+  if pm2 start "opencode web --hostname 0.0.0.0 --port 14096" --name "opencode-web"; then
+    success "opencode-web started with pm2"
+    pm2 status
+  else
+    warn "Failed to start opencode-web with pm2"
+    return 0
+  fi
+
+  # Save the pm2 process list
+  if pm2 save; then
+    success "pm2 process list saved"
+  else
+    warn "Failed to save pm2 process list"
+    return 0
+  fi
+
+  # Set up startup script for current platform
+  info "Configuring pm2 startup for your platform..."
+  local startup_command
+  startup_command=$(pm2 startup 2>&1 | grep -E "^sudo|^pm2 startup" | head -n1)
+
+  if [[ -n "$startup_command" ]]; then
+    info "Run the following command to complete startup configuration:"
+    info "  $startup_command"
+  else
+    # If no sudo required or already configured
+    pm2 startup
+    success "pm2 startup configured"
+  fi
+
+  info "To check opencode-web status: pm2 status"
+  info "To view opencode-web logs: pm2 logs opencode-web"
+  info "To restart opencode-web: pm2 restart opencode-web"
+  info "To delete opencode-web: pm2 delete opencode-web"
+}
+
 # Main installation function
 main() {
   info "Installing AI code agents..."
@@ -194,6 +262,9 @@ main() {
 
   # Setup pm2 autostart for ccr
   setup_ccr_autostart
+
+  # Setup pm2 autostart for opencode-web
+  setup_opencode_autostart
 
   success "AI code agents installation completed"
 }

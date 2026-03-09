@@ -101,13 +101,13 @@ main() {
   # Core dependencies - order matters! Homebrew must be installed before tools that depend on it
   local core_deps=(
     "install_pyenv"           # Python version manager
-    "install_fzf"             # Fuzzy finder
     "install_homebrew"        # Homebrew package manager (always installed)
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
-    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
+    "install_fzf"             # Fuzzy finder
     "install_lsp"             # Language Server Protocol (LSP) servers
     "install_hack_nerd_font"  # Hack Nerd Font (required by nvim-web-devicons)
     "install_lang_formatters" # Language formatters and linters
+    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
   )
 
   # Add extra version managers if INSTALL_EXTRA_VENV=1 is set
