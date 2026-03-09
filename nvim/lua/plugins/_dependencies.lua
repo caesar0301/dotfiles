@@ -20,9 +20,6 @@ return {
 	},
 	-- lspkind-nvim (will be configured inline below)
 
-	-- Treesitter dependencies
-	{ "nvim-treesitter/nvim-treesitter-refactor", lazy = true },
-
 	-- Telescope dependencies
 	{ "nvim-lua/plenary.nvim", lazy = true },
 	{ "BurntSushi/ripgrep", lazy = true },

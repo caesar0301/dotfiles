@@ -1,70 +1,62 @@
 -- Nvim interface to configure tree-sitter and syntax highlighting
+-- Uses modern nvim-treesitter API (main branch, incompatible rewrite)
+-- NOTE: nvim-treesitter-refactor is deprecated and incompatible with modern nvim-treesitter
 return {
 	"nvim-treesitter/nvim-treesitter",
-	event = { "BufReadPost", "BufNewFile" },
+	lazy = false, -- Load immediately - core functionality
 	build = ":TSUpdate",
-	dependencies = {
-		"nvim-treesitter/nvim-treesitter-refactor",
-	},
 	config = function()
-		require("nvim-treesitter.configs").setup({
-			ensure_installed = {
+		-- Install parsers asynchronously
+		require("nvim-treesitter").install({
+			"lua",
+			"luadoc",
+			"vim",
+			"vimdoc",
+			"python",
+			"go",
+			"java",
+			"markdown",
+			"markdown_inline",
+			"yaml",
+			"bash", -- Includes sh and zsh support
+		})
+
+		-- Enable treesitter highlighting for all filetypes (except shell scripts)
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = "*",
+			callback = function()
+				local ft = vim.bo.filetype
+
+				-- Disable treesitter for shell scripts due to performance issues
+				if ft == "bash" or ft == "sh" or ft == "zsh" then
+					return
+				end
+
+				-- Safely start treesitter with error handling
+				pcall(vim.treesitter.start)
+			end,
+		})
+
+		-- Enable treesitter-based folding for supported filetypes
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = {
 				"lua",
-				"luadoc",
 				"vim",
-				"vimdoc",
 				"python",
 				"go",
 				"java",
 				"markdown",
-				"markdown_inline",
-				"yaml",
+				"json",
+				"c",
+				"cpp",
+				"rust",
+				"javascript",
+				"typescript",
 			},
-			autotag = {
-				enable = true,
-			},
-			-- Install languages synchronously (only applies to `ensure_installed`)
-			sync_install = false,
-			-- Disable auto_install to prevent blocking on new filetypes
-			-- Manually install parsers with :TSInstall <language>
-			auto_install = false,
-			ignore_install = {},
-			highlight = {
-				enable = true,
-				disable = { "bash" },
-				-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-				-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-				-- Using this option may slow down your editor, and you may see some duplicate highlights.
-				-- Instead of true it can also be a list of languages
-				additional_vim_regex_highlighting = false,
-			},
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "gnn",
-					scope_incremental = "grc",
-					node_incremental = "+",
-					node_decremental = "_",
-				},
-			},
-			-- requires nvim-treesitter-refactor
-			refactor = {
-				highlight_definitions = {
-					enable = true,
-					-- Set to false if you have an `updatetime` of ~100.
-					clear_on_cursor_move = true,
-				},
-				highlight_current_scope = {
-					enable = false,
-				},
-				smart_rename = {
-					enable = true,
-					-- Assign keymaps to false to disable them, e.g. `smart_rename = false`.
-					keymaps = {
-						smart_rename = "grr",
-					},
-				},
-			},
+			callback = function()
+				vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				vim.wo[0][0].foldmethod = "expr"
+			end,
 		})
 	end,
 }
