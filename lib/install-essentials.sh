@@ -9,6 +9,9 @@
 # - Python version management (pyenv)
 # - Homebrew package manager (optional)
 # - Development environment version managers
+# - Language Server Protocol (LSP) support
+# - Language formatters and linters
+# - Hack Nerd Font for development icons
 # - AI code agents support
 # - Enhanced error handling and user feedback
 #
@@ -31,6 +34,9 @@
 #   - universal-ctags: Code navigation tool (always installed)
 #   - cargo: Rust toolchain (always installed)
 #   - Homebrew: Package manager (always installed)
+#   - LSP servers: Language Server Protocol support (always installed)
+#   - Hack Nerd Font: Icon font for development (always installed)
+#   - Language formatters: Code formatting tools (always installed)
 #   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
 #   - AI code agents: AI-powered development tools (installed by default,
 #     requires npm >= 20)
@@ -99,6 +105,9 @@ main() {
     "install_homebrew"        # Homebrew package manager (always installed)
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
     "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
+    "install_lsp"             # Language Server Protocol (LSP) servers
+    "install_hack_nerd_font"  # Hack Nerd Font (required by nvim-web-devicons)
+    "install_lang_formatters" # Language formatters and linters
   )
 
   # Add extra version managers if INSTALL_EXTRA_VENV=1 is set
@@ -129,11 +138,15 @@ main() {
 
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  • Utility scripts: %b~/.dotfiles/bin%b (in PATH)\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  • Homebrew: Package manager\n"
   printf "  • pyenv: Python version manager\n"
   printf "  • fzf: Fuzzy finder\n"
   printf "  • universal-ctags: Code navigation tool\n"
+  printf "  • LSP servers: Language Server Protocol support\n"
+  printf "  • Language formatters: Code formatting tools\n"
   printf "  • cargo: Rust toolchain\n"
-  printf "  • Homebrew: Package manager\n"
+  printf "  • Hack Nerd Font: Icon font for development\n"
+
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   printf "  • AI code agents\n"
 

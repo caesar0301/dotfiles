@@ -110,15 +110,6 @@ function main {
   # Install Neovim and configure
   install_neovim && handle_neovim
 
-  # Install LSP servers
-  "$script_dir/../lib/install-lsp.sh"
-
-  # Required by nvim-web-devicons
-  "$script_dir/../lib/install-hack-nerd-font.sh"
-
-  # Install language formatters
-  "$script_dir/../lib/install-lang-formatters.sh"
-
   warn "================================================"
   warn "Plugins will auto-install on first Neovim startup with Lazy.nvim:"
   warn "Run :checkhealth to validate overall health"

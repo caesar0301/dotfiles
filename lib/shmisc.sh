@@ -923,6 +923,39 @@ install_nvim_python() {
   "$script_dir/install-nvim-python.sh"
 }
 
+# Install Language Server Protocol (LSP) servers
+install_lsp() {
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-lsp.sh"
+}
+
+# Install Hack Nerd Font (required by nvim-web-devicons)
+install_hack_nerd_font() {
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-hack-nerd-font.sh"
+}
+
+# Install language formatters and linters
+install_lang_formatters() {
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-lang-formatters.sh"
+}
+
 # Install Zinit plugin manager for Zsh
 install_zinit() {
   info "Installing Zinit plugin manager..."
