@@ -1,5 +1,9 @@
 # Configure openclaw
 
+## Cloudflare
+
+1. Create new tunnel with your domain name, with target service `http://openclaw:18789` (openclaw is docker service name in docker-compose.yml)
+
 ## Workspace
 
 1. Copy ~/.dotfiles/setups/openclaw to ~/openclaw_workspace
@@ -8,7 +12,12 @@
 
 ## Configure
 
-1. Generate gateway token and approve device:
+1. Configure gateway to listen on lan: Edit `config/openclaw.json` and add gateway subfield:
+```
+"bind": "lan"
+```
+
+2. Generate gateway token and approve device:
 ```
 docker exec openclaw-agent sh -lc 'node openclaw.mjs dashboard --no-open'
 docker exec openclaw-agent sh -lc 'node openclaw.mjs devices list'
