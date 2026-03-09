@@ -104,9 +104,6 @@ function main {
   # Check required dependencies
   check_dependencies
 
-  # Install essential development tools as a prerequisite
-  "$script_dir/../lib/install-essentials.sh"
-
   # Install Neovim and configure
   install_neovim && handle_neovim
 
