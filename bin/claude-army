@@ -13,7 +13,7 @@ set -euo pipefail
 # This script creates isolated Claude environments, each with:
 # - A separate git worktree on a temporary branch
 # - An isolated config directory for session history
-# - A tiled tmux window layout
+# - A dedicated tmux window
 #
 # IMPORTANT: Each new worktree requires a one-time "Yes, I trust this folder"
 # confirmation. This is a security feature with no bypass. See:
@@ -60,9 +60,9 @@ if [ -z "$CLAUDE_BIN" ]; then
 fi
 echo "📍 Using claude at: $CLAUDE_BIN"
 
-# Create tmux session
+# Create tmux session (first window will be replaced)
 TMUX_SESSION="claude-${PROJECT_NAME}-$(date +%s)"
-tmux new-session -d -s "$TMUX_SESSION" -n "claudes"
+tmux new-session -d -s "$TMUX_SESSION"
 
 for i in $(seq 1 "$COUNT"); do
   ID="s${i}"
@@ -107,14 +107,17 @@ EOF
   git branch -D "$BRANCH" 2>/dev/null || true
   git worktree add -b "$BRANCH" "$WORK_DIR" "$SOURCE_REF"
 
-  # Launch Claude in tmux pane
+  # Launch Claude in tmux window
   CMD="cd '$WORK_DIR' && CLAUDE_CONFIG_DIR='$CONF_DIR' '$CLAUDE_BIN' --dangerously-skip-permissions"
+  WINDOW_NAME="claude-$i"
 
   if [ "$i" -eq 1 ]; then
-    tmux send-keys -t "$TMUX_SESSION:0.0" "$CMD" C-m
+    # Rename the default window created with the session
+    tmux rename-window -t "$TMUX_SESSION:0" "$WINDOW_NAME"
+    tmux send-keys -t "$TMUX_SESSION:0" "$CMD" C-m
   else
-    tmux split-window -t "$TMUX_SESSION:0" "$CMD"
-    tmux select-layout -t "$TMUX_SESSION:0" tiled
+    # Create new window
+    tmux new-window -t "$TMUX_SESSION" -n "$WINDOW_NAME" "$CMD"
   fi
 done
 
