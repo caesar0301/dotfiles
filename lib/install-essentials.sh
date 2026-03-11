@@ -88,7 +88,7 @@ install_ai_code_agents() {
   else
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-  "$script_dir/install-ai-code-agents.sh"
+  "$script_dir/install-ai-code-agents.sh --all --autostart"
 }
 
 # Main installation function

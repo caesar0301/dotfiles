@@ -8,6 +8,31 @@
 # License: MIT
 ###################################################
 
+usage() {
+  cat <<EOF
+AI Code Agents Installer
+
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+  --claude       Install Claude Code and claude-code-router
+  --opencode     Install opencode
+  --cursor       Install Cursor agent
+  --all          Install all agents (default if no options specified)
+  --autostart    Enable pm2 autostart for ccr and opencode-web (independent of --all)
+  -h, --help     Show this help message and exit
+
+Examples:
+  $(basename "$0")                      # Install all agents (no autostart)
+  $(basename "$0") --all                # Install all agents (no autostart)
+  $(basename "$0") --claude             # Install only Claude Code and router
+  $(basename "$0") --all --autostart    # Install all agents with autostart
+  $(basename "$0") --claude --opencode  # Install Claude and opencode only
+
+Note: --autostart is not included in --all and must be specified separately
+EOF
+}
+
 # Source the shell utility library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/shlib.sh"
@@ -102,10 +127,19 @@ install_claude_code_cli() {
     info "Installing claude code CLI..."
   fi
 
+  # Try primary installation method (curl)
   if curl -fsSL https://claude.ai/install.sh | bash; then
-    success "Claude code CLI installed/updated successfully"
+    success "Claude code CLI installed/updated successfully via curl"
+    return 0
+  fi
+
+  # Fallback to npm installation if curl fails
+  warn "Curl installation failed, trying npm installation as fallback..."
+  if npm install -g @anthropic-ai/claude-code; then
+    success "Claude code CLI installed/updated successfully via npm"
   else
-    warn "Failed to install/update Claude code CLI"
+    error "Failed to install/update Claude code CLI via both curl and npm"
+    return 1
   fi
 }
 
@@ -242,29 +276,105 @@ setup_opencode_autostart() {
 
 # Main installation function
 main() {
+  local install_claude=false
+  local install_opencode=false
+  local install_cursor=false
+  local enable_autostart=false
+  local any_agent_specified=false
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    --claude)
+      install_claude=true
+      any_agent_specified=true
+      shift
+      ;;
+    --opencode)
+      install_opencode=true
+      any_agent_specified=true
+      shift
+      ;;
+    --cursor)
+      install_cursor=true
+      any_agent_specified=true
+      shift
+      ;;
+    --all)
+      install_claude=true
+      install_opencode=true
+      install_cursor=true
+      any_agent_specified=true
+      shift
+      ;;
+    --autostart)
+      enable_autostart=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      error "Unknown argument: $1"
+      usage
+      exit 1
+      ;;
+    esac
+  done
+
+  # If no agent specified, default to installing all agents
+  if [[ "$any_agent_specified" == "false" ]]; then
+    info "No specific agents specified, installing all agents by default..."
+    install_claude=true
+    install_opencode=true
+    install_cursor=true
+  fi
+
   info "Installing AI code agents..."
 
   # Install cursor agent CLI
-  install_cursor_agent_cli
+  if [[ "$install_cursor" == "true" ]]; then
+    install_cursor_agent_cli
+  fi
 
-  # Install claude code CLI
-  install_claude_code_cli
+  # Install claude code CLI and router
+  if [[ "$install_claude" == "true" ]]; then
+    install_claude_code_cli
 
-  # Install agents using npm
-  npm_install_lib "@musistudio/claude-code-router" "opencode-ai@latest" "chrome-devtools-mcp@latest"
+    # Install claude-code-router via npm
+    npm_install_lib "@musistudio/claude-code-router"
 
-  # Install claude-code-router config file
-  install_claude_code_router_config
+    # Install claude-code-router config file
+    install_claude_code_router_config
+  fi
 
-  # Install opencode config file and plugin directory
-  install_opencode_config
-  install_opencode_plugin
+  # Install opencode
+  if [[ "$install_opencode" == "true" ]]; then
+    # Install opencode via npm
+    npm_install_lib "opencode-ai@latest" "chrome-devtools-mcp@latest"
 
-  # Setup pm2 autostart for ccr
-  setup_ccr_autostart
+    # Install opencode config file and plugin directory
+    install_opencode_config
+    install_opencode_plugin
+  fi
 
-  # Setup pm2 autostart for opencode-web
-  setup_opencode_autostart
+  # Setup pm2 autostart if enabled
+  if [[ "$enable_autostart" == "true" ]]; then
+    info "Enabling pm2 autostart for services..."
+
+    # Setup pm2 autostart for ccr (only if claude is installed)
+    if [[ "$install_claude" == "true" ]]; then
+      setup_ccr_autostart
+    fi
+
+    # Setup pm2 autostart for opencode-web (only if opencode is installed)
+    if [[ "$install_opencode" == "true" ]]; then
+      setup_opencode_autostart
+    fi
+  else
+    info "Skipping pm2 autostart setup (use --autostart to enable)"
+  fi
 
   success "AI code agents installation completed"
 }

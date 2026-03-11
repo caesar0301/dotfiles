@@ -64,6 +64,9 @@ echo "📍 Using claude at: $CLAUDE_BIN"
 TMUX_SESSION="claude-${PROJECT_NAME}-$(date +%s)"
 tmux new-session -d -s "$TMUX_SESSION"
 
+# Store original repository path for merge window
+ORIGINAL_REPO=$(git rev-parse --show-toplevel)
+
 for i in $(seq 1 "$COUNT"); do
   ID="s${i}"
   WORK_DIR="$WORKTREE_BASE/$PROJECT_NAME/$ID"
@@ -121,7 +124,14 @@ EOF
   fi
 done
 
+# Create merge window in original worktree
+echo "  → Setting up merge window (original worktree)"
+MERGE_CMD="cd '$ORIGINAL_REPO' && echo '📍 Original worktree - ready for merge operations'"
+tmux new-window -t "$TMUX_SESSION" -n "merge" "$MERGE_CMD"
+
 echo "✅ Sessions launched in tmux session: $TMUX_SESSION"
+echo "   - $COUNT Claude worktree windows (claude-1 through claude-$COUNT)"
+echo "   - 1 merge window in original worktree"
 echo "💡 Attach with: tmux attach -t $TMUX_SESSION"
 
 tmux attach-session -t "$TMUX_SESSION"

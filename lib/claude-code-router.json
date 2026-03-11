@@ -19,7 +19,8 @@
         "MiniMax-M2.5",
         "glm-5",
         "glm-4.7",
-        "qwen3-coder-next"
+        "qwen3-coder-next",
+        "deepseek-v3.2"
       ],
       "transformer": {
         "use": [["maxtoken", { "max_tokens": 65536 }]]
@@ -59,8 +60,8 @@
     }
   },
   "Router": {
-    "default": "dashscope,qwen3.5-plus",
-    "think": "dashscope,qwen3.5-plus",
+    "default": "dashscope,glm-5",
+    "think": "dashscope,glm-5",
     "image": "dashscope,qwen3.5-plus"
   },
   "CUSTOM_ROUTER_PATH": ""
