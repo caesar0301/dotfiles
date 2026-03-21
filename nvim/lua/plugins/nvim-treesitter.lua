@@ -6,8 +6,8 @@ return {
 	lazy = false, -- Load immediately - core functionality
 	build = ":TSUpdate",
 	config = function()
-		-- Install parsers asynchronously
-		require("nvim-treesitter").install({
+		-- Install parsers asynchronously using the modern API
+		require("nvim-treesitter.install").ensure_installed({
 			"lua",
 			"luadoc",
 			"vim",
