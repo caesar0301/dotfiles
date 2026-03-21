@@ -42,6 +42,7 @@ git-rewrite-history() {
   " --tag-name-filter cat -- --branches --tags
 }
 
+alias git-smart-commit='claude --dangerously-skip-permissions -p "create a new git commit without push"'
 
 # =====================
 # Core Git Aliases

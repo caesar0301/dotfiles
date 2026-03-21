@@ -6,20 +6,27 @@ return {
 	lazy = false, -- Load immediately - core functionality
 	build = ":TSUpdate",
 	config = function()
-		-- Install parsers asynchronously using the modern API
-		require("nvim-treesitter.install").ensure_installed({
-			"lua",
-			"luadoc",
-			"vim",
-			"vimdoc",
-			"python",
-			"go",
-			"java",
-			"markdown",
-			"markdown_inline",
-			"yaml",
-			"bash", -- Includes sh and zsh support
-		})
+		-- Install parsers using vim.schedule to avoid blocking
+		vim.schedule(function()
+			local parser_list = {
+				"lua",
+				"luadoc",
+				"vim",
+				"vimdoc",
+				"python",
+				"go",
+				"java",
+				"markdown",
+				"markdown_inline",
+				"yaml",
+				"bash", -- Includes sh and zsh support
+			}
+
+			-- Use pcall to safely install parsers
+			for _, parser in ipairs(parser_list) do
+				pcall(vim.treesitter.language.add, parser)
+			end
+		end)
 
 		-- Enable treesitter highlighting for all filetypes (except shell scripts)
 		vim.api.nvim_create_autocmd("FileType", {

@@ -1,6 +1,7 @@
 -- Code completion for Nvim LSP
 return {
 	"hrsh7th/nvim-cmp",
+	tag = "v0.0.2",
 	event = "InsertEnter",
 	dependencies = {
 		"neovim/nvim-lspconfig",

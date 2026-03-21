@@ -1,6 +1,7 @@
 -- Quickstart configs for Nvim LSP
 return {
 	"neovim/nvim-lspconfig",
+	tag = "v2.7.0",
 	event = { "BufReadPre", "BufNewFile" },
 	dependencies = {
 		"nvim-lua/lsp-status.nvim",

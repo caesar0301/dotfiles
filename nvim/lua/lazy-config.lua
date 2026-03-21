@@ -21,7 +21,7 @@ require("lazy").setup("plugins", {
 	-- Lazy.nvim configuration options
 	defaults = {
 		lazy = true, -- Enable lazy loading by default for better performance
-		version = false, -- Try installing the latest stable version for plugins that support semver
+		version = "*", -- Try installing the latest stable version for plugins that support semver
 	},
 
 	install = {

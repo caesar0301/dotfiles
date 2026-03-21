@@ -1,6 +1,7 @@
 -- Code style formatter
 return {
 	"stevearc/conform.nvim",
+	tag = "v9.1.0",
 	event = "VimEnter",
 	keys = {
 		{ "<leader>af", "<cmd>Format<cr>", desc = "Format code" },

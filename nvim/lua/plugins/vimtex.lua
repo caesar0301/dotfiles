@@ -1,6 +1,7 @@
 -- LaTeX syntax highlighting
 return {
 	"lervag/vimtex",
+	tag = "v2.17",
 	ft = { "tex", "latex" },
 	config = function()
 		-- Vimtex settings

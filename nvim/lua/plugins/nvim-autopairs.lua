@@ -1,6 +1,7 @@
 -- Autopairs supporting multiple characters
 return {
 	"windwp/nvim-autopairs",
+	tag = "0.10.0",
 	event = "InsertEnter",
 	config = function()
 		require("nvim-autopairs").setup({})

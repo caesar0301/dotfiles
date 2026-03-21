@@ -1,6 +1,7 @@
 -- Folder and file tree view
 return {
 	"nvim-tree/nvim-tree.lua",
+	tag = "nvim-tree-v1.16.0",
 	cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile" },
 	keys = {
 		{ "<F8>", "<cmd>NvimTreeFindFileToggle!<cr>", desc = "[nvim-tree] Toggle find file" },

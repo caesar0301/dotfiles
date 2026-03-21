@@ -1,4 +1,5 @@
 -- Plugin dependencies and simple plugins without configuration
+-- These are managed by Lazy.nvim with version = "*" from lazy-config.lua
 return {
 	-- Theme
 	{ "tomasiser/vim-code-dark" },

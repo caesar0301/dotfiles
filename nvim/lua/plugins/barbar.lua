@@ -1,6 +1,7 @@
 -- Tabline with auto-sizing, clickable tabs, icons, highlighting etc.
 return {
 	"romgrk/barbar.nvim",
+	tag = "v1.9.1",
 	event = "VeryLazy",
 	keys = {
 		-- Buffer navigation (Alt key - may require terminal configuration)

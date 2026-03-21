@@ -1,6 +1,7 @@
 -- Git signs for better git integration
 return {
 	"lewis6991/gitsigns.nvim",
+	tag = "v2.0.0",
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		require("gitsigns").setup({
