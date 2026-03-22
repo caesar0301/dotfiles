@@ -14,12 +14,23 @@
       "api_base_url": "${DASHSCOPE_BASE_URL}/chat/completions",
       "api_key": "${DASHSCOPE_API_KEY}",
       "models": [
+        "qwen3.5-flash",
+        "qwen3.5-plus",
+        "text-embedding-v4"
+      ],
+      "transformer": {
+        "use": [["maxtoken", { "max_tokens": 65536 }]]
+      }
+    },
+    {
+      "name": "coding-plan",
+      "api_base_url": "${DASHSCOPE_CP_BASE_URL}/chat/completions",
+      "api_key": "${DASHSCOPE_CP_API_KEY}",
+      "models": [
+        "glm-5",
         "qwen3.5-plus",
         "kimi-k2.5",
         "MiniMax-M2.5",
-        "glm-5",
-        "glm-4.7",
-        "qwen3-coder-next",
         "deepseek-v3.2"
       ],
       "transformer": {
@@ -60,9 +71,9 @@
     }
   },
   "Router": {
-    "default": "dashscope,glm-5",
-    "think": "dashscope,glm-5",
-    "image": "dashscope,qwen3.5-plus"
+    "default": "coding-plan,glm-5",
+    "think": "coding-plan,glm-5",
+    "image": "coding-plan,qwen3.5-plus"
   },
   "CUSTOM_ROUTER_PATH": ""
 }
