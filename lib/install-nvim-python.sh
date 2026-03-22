@@ -79,6 +79,28 @@ check_pyenv() {
   return 0
 }
 
+# Function to check and install pyenv-virtualenv plugin
+check_pyenv_virtualenv_plugin() {
+  local pyenv_root
+  pyenv_root=$(get_pyenv_root)
+
+  local plugin_dir="$pyenv_root/plugins/pyenv-virtualenv"
+
+  if [[ ! -d "$plugin_dir" ]]; then
+    info "pyenv-virtualenv plugin not found. Installing..."
+    if git clone https://github.com/pyenv/pyenv-virtualenv.git "$plugin_dir"; then
+      success "Successfully installed pyenv-virtualenv plugin"
+      return 0
+    else
+      error "Failed to install pyenv-virtualenv plugin"
+      info "You can install it manually with: git clone https://github.com/pyenv/pyenv-virtualenv.git \$(pyenv root)/plugins/pyenv-virtualenv"
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
 # Function to get pyenv root
 get_pyenv_root() {
   local pyenv_root
@@ -230,9 +252,20 @@ setup_nvim_python() {
     return 1
   fi
 
-  # Initialize pyenv (if not already in PATH)
+  # Check and install pyenv-virtualenv plugin if needed
+  if ! check_pyenv_virtualenv_plugin; then
+    return 1
+  fi
+
+  # Initialize pyenv and pyenv-virtualenv (if not already in PATH)
   if ! command -v pyenv &>/dev/null; then
     eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+  else
+    # Even if pyenv is in PATH, ensure virtualenv-init is loaded
+    if ! pyenv virtualenv --help &>/dev/null; then
+      eval "$(pyenv virtualenv-init -)"
+    fi
   fi
 
   # Install Python version if needed

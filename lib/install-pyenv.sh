@@ -25,10 +25,33 @@ colorize() {
 
 # Checks for `.pyenv` file, and suggests to remove it for installing
 if [ -d "${PYENV_ROOT}" ]; then
+  # Check if pyenv-virtualenv plugin is missing
+  if [ ! -d "${PYENV_ROOT}/plugins/pyenv-virtualenv" ]; then
+    {
+      echo
+      colorize 3 "NOTICE"
+      echo ": pyenv is already installed but pyenv-virtualenv plugin is missing."
+      echo "Installing pyenv-virtualenv plugin..."
+      echo
+    } >&2
+
+    # Install the missing plugin
+    checkout "${GITHUB}pyenv/pyenv-virtualenv.git" "${PYENV_ROOT}/plugins/pyenv-virtualenv" "master"
+
+    {
+      echo
+      colorize 2 "SUCCESS"
+      echo ": pyenv-virtualenv plugin installed successfully."
+      echo
+    } >&2
+    exit 0
+  fi
+
   {
     echo
     colorize 1 "WARNING"
-    echo ": Can not proceed with installation. Kindly remove the '${PYENV_ROOT}' directory first."
+    echo ": pyenv and pyenv-virtualenv are already installed at '${PYENV_ROOT}'."
+    echo "To reinstall, remove the directory first: rm -rf ${PYENV_ROOT}"
     echo
   } >&2
   exit 1
