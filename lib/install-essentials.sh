@@ -37,6 +37,8 @@
 #   - LSP servers: Language Server Protocol support (always installed)
 #   - Hack Nerd Font: Icon font for development (always installed)
 #   - Language formatters: Code formatting tools (always installed)
+#   - yazi: Terminal file manager (always installed)
+#   - lazygit: Terminal Git UI (always installed)
 #   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
 #   - AI code agents: AI-powered development tools (installed by default,
 #     requires npm >= 20)
@@ -108,6 +110,8 @@ main() {
     "install_hack_nerd_font"  # Hack Nerd Font (required by nvim-web-devicons)
     "install_lang_formatters" # Language formatters and linters
     "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
+    "install_yazi"            # Terminal file manager
+    "install_lazygit"         # Terminal Git UI
   )
 
   # Add extra version managers if INSTALL_EXTRA_VENV=1 is set
@@ -146,6 +150,8 @@ main() {
   printf "  • Language formatters: Code formatting tools\n"
   printf "  • cargo: Rust toolchain\n"
   printf "  • Hack Nerd Font: Icon font for development\n"
+  printf "  • yazi: Terminal file manager\n"
+  printf "  • lazygit: Terminal Git UI\n"
 
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
   printf "  • AI code agents\n"

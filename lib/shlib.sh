@@ -1069,6 +1069,30 @@ change_shell_to_zsh() {
   fi
 }
 
+# Install yazi terminal file manager
+install_yazi() {
+  if checkcmd yazi; then
+    info "yazi already installed" && return
+  fi
+  if checkcmd brew; then
+    brew install yazi && return
+  fi
+  warn "yazi requires Homebrew for installation"
+  return 1
+}
+
+# Install lazygit terminal Git UI
+install_lazygit() {
+  if checkcmd lazygit; then
+    info "lazygit already installed" && return
+  fi
+  if checkcmd brew; then
+    brew install lazygit && return
+  fi
+  warn "lazygit requires Homebrew for installation"
+  return 1
+}
+
 # Configure Homebrew to use custom repositories (Aliyun mirrors)
 configure_homebrew_mirrors() {
   # Check if brew is available
