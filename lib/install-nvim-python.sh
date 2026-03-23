@@ -30,16 +30,12 @@ readonly NVIM_VENV_NAME="neovim"
 readonly DEFAULT_PYTHON_VERSION="3.11"
 readonly PYNVIM_PACKAGE="pynvim"
 
-# Function to detect available Python version
+# Detect Python version from pyenv or fallback to default
 detect_python_version() {
   local pyenv_root detected_version
 
-  # Try to get pyenv root
-  if [[ -n "${PYENV_ROOT:-}" ]]; then
-    pyenv_root="$PYENV_ROOT"
-  else
-    pyenv_root="$HOME/.pyenv"
-  fi
+  # Get pyenv root using the shared function
+  pyenv_root=$(get_pyenv_root 2>/dev/null) || pyenv_root="$HOME/.pyenv"
 
   # Check if pyenv is available and initialized
   if command -v pyenv &>/dev/null; then
@@ -79,7 +75,7 @@ check_pyenv() {
   return 0
 }
 
-# Function to check and install pyenv-virtualenv plugin
+# Ensure pyenv-virtualenv plugin is available for creating virtualenvs
 check_pyenv_virtualenv_plugin() {
   local pyenv_root
   pyenv_root=$(get_pyenv_root)
@@ -101,7 +97,7 @@ check_pyenv_virtualenv_plugin() {
   return 0
 }
 
-# Function to get pyenv root
+# Get pyenv root directory from PYENV_ROOT or default
 get_pyenv_root() {
   local pyenv_root
   if [[ -n "${PYENV_ROOT:-}" ]]; then
