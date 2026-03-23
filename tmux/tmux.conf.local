@@ -455,6 +455,10 @@ unbind p
 bind -r p previous-window # select previous window
 bind -r n next-window     # select next window
 
+# PageUp/PageDown to enter copy mode automatically
+bind -n PageUp copy-mode -e
+bind -n PageDown if-shell -F "#{pane_in_mode}" "send -X page-down" "copy-mode -e \; send -X page-down"
+
 # -- tpm -----------------------------------------------------------------------
 
 # while I don't use tpm myself, many people requested official support so here
