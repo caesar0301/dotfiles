@@ -65,14 +65,6 @@ If you already have a `~/.zshrc`, the installer will skip it. Add this line to y
 |----------|-------------|
 | `SHELLPROXY_URL` | Proxy address for `shell-proxy` plugin |
 
-### Installation Options
-
-**Custom Development Plugins:**
-```bash
-# Install zsh-caesardev plugin
-INSTALL_CAESARDEV=1 sh zsh/install.sh
-```
-
 ## Options
 
 | Flag | Description |

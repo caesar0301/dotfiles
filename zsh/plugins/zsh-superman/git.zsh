@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # =====================
-# Git Utilities for zsh-caesardev
+# Git Utilities
 # =====================
 # This file combines git aliases, functions, and LFS utilities
 # from multiple sources into a single, organized module.
