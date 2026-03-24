@@ -37,22 +37,6 @@ EOF
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/shlib.sh"
 
-# Install Cursor agent CLI (always installs latest version)
-install_cursor_agent_cli() {
-  # Check if Cursor agent is already installed
-  if command -v cursor-agent >/dev/null 2>&1; then
-    info "Cursor agent CLI already installed, updating to latest version..."
-  else
-    info "Installing Cursor agent CLI..."
-  fi
-
-  if curl https://cursor.com/install -fsS | bash; then
-    success "Cursor agent CLI installed/updated successfully"
-  else
-    warn "Failed to install/update Cursor agent CLI"
-  fi
-}
-
 # Main installation function
 main() {
   local install_claude=false
@@ -114,7 +98,13 @@ main() {
 
   # Install cursor agent CLI
   if [[ "$install_cursor" == "true" ]]; then
-    install_cursor_agent_cli
+    info "Calling install-ai-agent-cursor.sh..."
+    if "$SCRIPT_DIR/install-ai-agent-cursor.sh"; then
+      success "Cursor agent installation completed"
+    else
+      error "Cursor agent installation failed"
+      return 1
+    fi
   fi
 
   # Install claude code CLI and router
