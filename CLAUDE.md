@@ -163,7 +163,7 @@ The `lib/` directory contains modular installation scripts that can be used inde
 - `install-uv.sh`: Python package installer
 
 **AI Integration:**
-- `install-ai-code-agents.sh`: AI-powered development tools
+- `install-ai-agents.sh`: AI-powered development tools
 - `claude-code-router.json`: AI code routing configuration
 
 **Core Library:**

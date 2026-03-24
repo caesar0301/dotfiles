@@ -32,7 +32,7 @@ This directory contains standalone installer scripts for various development too
 - **`install-hack-nerd-font.sh`** - Installs Hack Nerd Font
 
 ### AI Development
-- **`install-ai-code-agents.sh`** - Installs various AI code agents
+- **`install-ai-agents.sh`** - Installs various AI code agents
 
 ## Usage
 
