@@ -390,7 +390,7 @@ set -g default-terminal "xterm-256color" #!important
 #set -g history-limit 10000
 
 # start with mouse mode enabled
-#set -g mouse on
+set -g mouse off #!important
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
