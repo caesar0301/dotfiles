@@ -384,7 +384,7 @@ tmux_conf_urlscan_options="--compact --dedupe"
 
 # use xterm-256color instead of tmux-256color for better SSH compatibility
 # fixes display issues when using tmux over SSH connections
-set -g default-terminal "xterm-256color"
+set -g default-terminal "xterm-256color" #!important
 
 # increase history size
 #set -g history-limit 10000
