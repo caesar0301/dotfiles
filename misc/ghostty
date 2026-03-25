@@ -1,0 +1,9 @@
+# Ghostty Terminal Configuration
+# https://ghostty.org
+
+# Use xterm-256color for better SSH compatibility
+# This ensures terminfo is available on remote servers
+term = xterm-256color
+
+# Additional Ghostty settings can be added here
+# See: https://ghostty.org/docs/config

@@ -7,6 +7,7 @@
 # - SBCL completion configuration
 # - Kitty terminal configuration
 # - Alacritty terminal configuration + themes
+# - Ghostty terminal configuration
 # - Module-aware installation via -m
 # - Enhanced error handling and validation
 #
@@ -27,6 +28,8 @@ readonly KITTY_CONFIG_HOME="$XDG_CONFIG_HOME/kitty"
 readonly ALACRITTY_CONFIG_HOME="$XDG_CONFIG_HOME/alacritty"
 readonly ALACRITTY_THEMES_DIR="$ALACRITTY_CONFIG_HOME/themes"
 readonly ALACRITTY_CONFIG_FILE="$ALACRITTY_CONFIG_HOME/alacritty.toml"
+readonly GHOSTTY_CONFIG_HOME="$XDG_CONFIG_HOME/ghostty"
+readonly GHOSTTY_CONFIG_FILE="$GHOSTTY_CONFIG_HOME/config"
 readonly SBCL_COMPLETIONS="$HOME/.sbcl_completions"
 
 # Load common utilities with validation
@@ -155,6 +158,32 @@ handle_alacritty_config() {
   success "Alacritty configuration installed"
 }
 
+# Install Ghostty terminal configuration
+handle_ghostty_config() {
+  local config_source="$THISDIR/ghostty"
+
+  [[ -f "$config_source" ]] || {
+    warn "Ghostty configuration file not found: $config_source"
+    return 0
+  }
+
+  info "Installing Ghostty terminal configuration..."
+  create_dir "$GHOSTTY_CONFIG_HOME"
+
+  install_file_pair "$config_source" "$GHOSTTY_CONFIG_FILE"
+  success "Ghostty configuration installed"
+
+  # Check if Ghostty is available
+  if ! checkcmd ghostty; then
+    warn "Ghostty terminal not found in PATH"
+    warn "Configuration will still be installed for future use"
+  else
+    local ghostty_version
+    ghostty_version=$(ghostty --version 2>/dev/null | head -1 || echo "unknown")
+    info "Found Ghostty: $ghostty_version"
+  fi
+}
+
 # Remove Kitty configuration
 cleanse_kitty() {
   local kitty_config="$KITTY_CONFIG_HOME/kitty.conf"
@@ -185,6 +214,16 @@ cleanse_alacritty() {
   return 0
 }
 
+cleanse_ghostty() {
+  if [[ -f "$GHOSTTY_CONFIG_FILE" || -L "$GHOSTTY_CONFIG_FILE" ]]; then
+    rm -f "$GHOSTTY_CONFIG_FILE"
+    info "Removed Ghostty configuration"
+  fi
+
+  [[ -d "$GHOSTTY_CONFIG_HOME" ]] && rmdir "$GHOSTTY_CONFIG_HOME" 2>/dev/null || true
+  return 0
+}
+
 is_module_enabled() {
   local module="$1"
 
@@ -203,12 +242,14 @@ is_module_enabled() {
 }
 
 validate_modules() {
+  [[ ${#SELECTED_MODULES[@]} -eq 0 ]] && return 0
+
   local module
   for module in "${SELECTED_MODULES[@]}"; do
     case "$module" in
-    sbcl | kitty | alacritty) ;;
+    sbcl | kitty | alacritty | ghostty) ;;
     *)
-      error "Unsupported module: $module (supported: sbcl, kitty, alacritty)"
+      error "Unsupported module: $module (supported: sbcl, kitty, alacritty, ghostty)"
       ;;
     esac
   done
@@ -235,6 +276,10 @@ cleanse_all() {
   cleanse_alacritty && true
   [[ -f "$ALACRITTY_CONFIG_FILE" && -d "$ALACRITTY_THEMES_DIR" ]] || ((removed_count++))
 
+  # Remove Ghostty configuration
+  cleanse_ghostty && true
+  [[ -f "$GHOSTTY_CONFIG_FILE" ]] || ((removed_count++))
+
   if [[ $removed_count -gt 0 ]]; then
     success "Miscellaneous configurations cleansed ($removed_count items removed)"
   else
@@ -258,11 +303,12 @@ while getopts fsechm: opt; do
 Usage: install.sh [-s|-f] [-c] [-m modules]
 
 Modules (comma-separated for -m):
-  sbcl,kitty,alacritty
+  sbcl,kitty,alacritty,ghostty
 
 Examples:
   ./install.sh -m kitty
   ./install.sh -m kitty,alacritty
+  ./install.sh -m ghostty
 EOF
     exit 0
     ;;
@@ -284,16 +330,19 @@ main() {
   is_module_enabled sbcl && handle_rlwrap_completions
   is_module_enabled kitty && handle_kitty_config
   is_module_enabled alacritty && handle_alacritty_config
+  is_module_enabled ghostty && handle_ghostty_config
 
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "SBCL completions: $SBCL_COMPLETIONS"
   info "Kitty configuration: $KITTY_CONFIG_HOME"
   info "Alacritty configuration: $ALACRITTY_CONFIG_HOME"
+  info "Ghostty configuration: $GHOSTTY_CONFIG_HOME"
 
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Use rlwrap with SBCL: %brlwrap sbcl%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Launch Kitty to use the new configuration\n"
+  printf "  3. Launch Ghostty to use the new configuration\n"
 
   success "Miscellaneous tools installation completed successfully!"
 }

@@ -199,6 +199,6 @@ The `lib/` directory contains modular installation scripts that can be used inde
 - **Tmux**: Terminal multiplexer with optimized configurations
 - **Emacs**: Configuration with plugins and Lisp development environment
 - **Vifm**: Vi file manager
-- **Misc**: Kitty and Alacritty terminals, SBCL completions (supports selective installation via `-m`)
+- **Misc**: Kitty, Alacritty, and Ghostty terminals, SBCL completions (supports selective installation via `-m`)
 - **Lisp**: Common Lisp development with SBCL
 - **AI Code Agents**: Requires Node.js >= 20 and npm >= 20
