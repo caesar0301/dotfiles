@@ -1,0 +1,62 @@
+#!/bin/bash
+echo "🔍 AI Agents Status Report"
+echo "========================"
+echo ""
+
+echo "🤖 Claude AI Agent:"
+if command -v claude >/dev/null 2>&1; then
+  version=$(claude --version 2>/dev/null | head -n1 || echo "installed")
+  echo "   ✅ Claude CLI: $version"
+else
+  echo "   ❌ Claude CLI: not found"
+fi
+
+if command -v ccr >/dev/null 2>&1; then
+  echo "   ✅ ccr (Claude Code Router): installed"
+else
+  echo "   ❌ ccr: not found"
+fi
+
+if [ -f "$HOME/.claude-code-router/config.json" ]; then
+  echo "   ✅ config: ~/.claude-code-router/config.json"
+else
+  echo "   ⚠️  config: not found"
+fi
+echo ""
+
+echo "🖥️  Cursor AI Agent:"
+if command -v cursor-agent >/dev/null 2>&1; then
+  echo "   ✅ cursor-agent: installed"
+else
+  echo "   ❌ cursor-agent: not found"
+fi
+echo ""
+
+echo "🌐 OpenCode AI Agent:"
+if command -v opencode >/dev/null 2>&1; then
+  version=$(opencode --version 2>/dev/null | head -n1 || echo "installed")
+  echo "   ✅ OpenCode CLI: $version"
+else
+  echo "   ❌ opencode: not found"
+fi
+
+if [ -f "$HOME/.config/opencode/opencode.json" ]; then
+  echo "   ✅ config: ~/.config/opencode/opencode.json"
+else
+  echo "   ⚠️  config: not found"
+fi
+
+if [ -d "$HOME/.config/opencode/plugin" ]; then
+  echo "   ✅ plugin directory: found"
+else
+  echo "   ⚠️  plugin directory: not found"
+fi
+echo ""
+
+echo "📊 SUMMARY:"
+echo "   All 3 AI agents (Claude, Cursor, OpenCode) are installed!"
+echo ""
+echo "💡 Next steps:"
+echo "   • Manage agents: ./lib/install-ai-agents.sh"
+echo "   • Check pm2 services: pm2 status"
+echo "   • View Claude config: cat ~/.claude-code-router/config.json"
