@@ -189,6 +189,25 @@ main() {
   fi
 
   success "Claude AI agent installation completed"
+  echo ""
+  info "Post-installation steps:"
+  echo ""
+  info "1. Add the following to your bashrc or zshrc:"
+  echo "   eval \"\$(ccr activate)\""
+  echo ""
+  info "2. Set essential environment variables for claude-code-router:"
+  echo "   export DASHSCOPE_BASE_URL=\"your-dashscope-base-url\""
+  echo "   export DASHSCOPE_API_KEY=\"your-dashscope-api-key\""
+  echo "   export DASHSCOPE_CP_BASE_URL=\"your-coding-plan-base-url\""
+  echo "   export DASHSCOPE_CP_API_KEY=\"your-coding-plan-api-key\""
+  echo "   export GEMINI_API_KEY=\"your-gemini-api-key\""
+  echo ""
+  info "3. Restart ccr to apply the installed configuration:"
+  echo "   ccr restart"
+  echo ""
+  info "4. Verify ccr is running:"
+  echo "   ccr status"
+  echo ""
 }
 
 # Run main function if script is executed directly
