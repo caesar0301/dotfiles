@@ -86,20 +86,30 @@ usage() {
 Homebrew Installer
 Usage: [NONINTERACTIVE=1] [CI=1] install.sh [options]
     -h, --help       Display this message.
+    --prefix=DIR     Install to a custom prefix (e.g. ~/.local/homebrew).
+                     Useful when sudo is not available.
     NONINTERACTIVE   Install without prompting for user input
     CI               Install in CI mode (e.g. do not prompt for user input)
 EOS
   exit "${1:-0}"
 }
 
+HOMEBREW_CUSTOM_PREFIX=""
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
   -h | --help) usage ;;
+  --prefix=*) HOMEBREW_CUSTOM_PREFIX="${1#*=}" ;;
+  --prefix)
+    shift
+    HOMEBREW_CUSTOM_PREFIX="$1"
+    ;;
   *)
     warn "Unrecognized option: '$1'"
     usage 1
     ;;
   esac
+  shift
 done
 
 # Check if script is run non-interactively (e.g. CI)
@@ -183,6 +193,20 @@ MKDIR=("/bin/mkdir" "-p")
 HOMEBREW_BREW_DEFAULT_GIT_REMOTE="https://github.com/Homebrew/brew"
 HOMEBREW_CORE_DEFAULT_GIT_REMOTE="https://github.com/Homebrew/homebrew-core"
 
+# Override prefix for sudo-free installation
+if [[ -n "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
+  # Expand ~ to home directory
+  case "${HOMEBREW_CUSTOM_PREFIX}" in
+    ~*) HOMEBREW_CUSTOM_PREFIX="${HOMEBREW_CUSTOM_PREFIX/#~/$HOME}" ;;
+  esac
+  HOMEBREW_PREFIX="${HOMEBREW_CUSTOM_PREFIX}"
+  HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
+  GROUP="$(id -gn)"
+  INSTALL=("/usr/bin/install" -d -o "${USER}" -g "${GROUP}" -m "0755")
+  ADD_PATHS_D=""
+  ohai "Installing Homebrew to custom prefix: ${HOMEBREW_PREFIX} (no sudo required)"
+fi
+
 # Use remote URLs of Homebrew repositories from environment if set.
 HOMEBREW_BREW_GIT_REMOTE="${HOMEBREW_BREW_GIT_REMOTE:-"${HOMEBREW_BREW_DEFAULT_GIT_REMOTE}"}"
 HOMEBREW_CORE_GIT_REMOTE="${HOMEBREW_CORE_GIT_REMOTE:-"${HOMEBREW_CORE_DEFAULT_GIT_REMOTE}"}"
@@ -214,7 +238,7 @@ unset HAVE_SUDO_ACCESS # unset this from the environment
 
 # create paths.d file for /opt/homebrew installs
 # (/usr/local/bin is already in the PATH)
-if [[ -d "/etc/paths.d" && "${HOMEBREW_PREFIX}" != "/usr/local" && -x "$(command -v tee)" ]]; then
+if [[ -z "${HOMEBREW_CUSTOM_PREFIX}" && -d "/etc/paths.d" && "${HOMEBREW_PREFIX}" != "/usr/local" && -x "$(command -v tee)" ]]; then
   ADD_PATHS_D=1
 fi
 
@@ -476,14 +500,23 @@ fi
 
 # Things can fail later if `pwd` doesn't exist.
 # Also sudo prints a warning message for no good reason
-cd "/usr" || exit 1
+if [[ -z "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
+  cd "/usr" || exit 1
+else
+  cd "${HOME}" || exit 1
+fi
 
 ####################################################################### script
 
 # shellcheck disable=SC2016
-ohai 'Checking for `sudo` access (which may request your password)...'
+if [[ -n "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
+  ohai "Custom prefix specified: ${HOMEBREW_PREFIX} — skipping sudo check"
+  HAVE_SUDO_ACCESS=0  # prevent execute_sudo from attempting sudo
+else
+  ohai 'Checking for `sudo` access (which may request your password)...'
+fi
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
+if [[ -n "${HOMEBREW_ON_MACOS-}" && -z "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
   [[ "${EUID:-${UID}}" == "0" ]] || have_sudo_access
 elif ! [[ -w "${HOMEBREW_PREFIX}" ]] &&
   ! [[ -w "/home/linuxbrew" ]] &&
