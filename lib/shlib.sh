@@ -395,7 +395,7 @@ get_os_name() {
   local os_name
   os_name=$(uname -s 2>/dev/null) || error "Failed to detect operating system"
 
-  case "${os_name,,}" in
+  case "$(printf '%s' "$os_name" | tr '[:upper:]' '[:lower:]')" in
   linux*) printf "linux" ;;
   darwin*) printf "darwin" ;;
   *) error "Unsupported operating system: $os_name" ;;
@@ -407,7 +407,7 @@ get_arch_name() {
   local arch_name
   arch_name=$(uname -m 2>/dev/null) || error "Failed to detect CPU architecture"
 
-  case "${arch_name,,}" in
+  case "$(printf '%s' "$arch_name" | tr '[:upper:]' '[:lower:]')" in
   x86_64* | amd64*) printf "amd64" ;;
   aarch64* | arm64*) printf "arm64" ;;
   armv7*) printf "armv7" ;;
@@ -486,7 +486,7 @@ extract_tar() {
   info "Extracting: $(basename "$archive")"
 
   # Auto-detect compression and extract
-  case "${archive,,}" in
+  case "$(printf '%s' "$archive" | tr '[:upper:]' '[:lower:]')" in
   *.tar.gz | *.tgz) tar -xzf "$archive" -C "$output" ;;
   *.tar.bz2 | *.tbz2) tar -xjf "$archive" -C "$output" ;;
   *.tar.xz | *.txz) tar -xJf "$archive" -C "$output" ;;
