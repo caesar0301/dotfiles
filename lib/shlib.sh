@@ -171,6 +171,14 @@ get_temp_dir() {
   printf "%s" "$temp_dir"
 }
 
+# Create temporary directory WITHOUT cleanup trap
+# Caller is responsible for cleanup; use for build directories
+get_temp_dir_no_cleanup() {
+  local temp_dir
+  temp_dir=$(mktemp -d 2>/dev/null) || error "Failed to create temporary directory"
+  printf "%s" "$temp_dir"
+}
+
 # Check command existence with improved validation
 checkcmd() {
   [[ $# -ne 1 ]] && error "checkcmd: requires exactly one command name"
@@ -723,6 +731,15 @@ install_homebrew() {
   fi
   local homebrew_prefix="${HOMEBREW_INSTALL_PREFIX:-"$HOME/.local/homebrew"}"
   "$script_dir/install-homebrew.sh" --prefix="${homebrew_prefix}"
+
+  # Source Homebrew shellenv so brew is available in current session
+  if [[ -x "${homebrew_prefix}/bin/brew" ]]; then
+    eval "$("${homebrew_prefix}/bin/brew" shellenv)" 2>/dev/null || true
+  elif [[ -x "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null || true
+  fi
 }
 
 # Install uv Python package manager with verification
@@ -740,6 +757,13 @@ install_uv() {
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
   "$script_dir/install-uv.sh"
+
+  # Source uv env so it's available in current session
+  if [[ -x "$HOME/.cargo/bin/uv" ]]; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+  elif [[ -x "$HOME/.local/bin/uv" ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
 }
 
 # Install pyenv with enhanced setup and verification
@@ -756,7 +780,19 @@ install_pyenv() {
   else
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-  "$script_dir/install-pyenv.sh"
+  "$script_dir/install-pyenv.sh" || {
+    local rc=$?
+    if [[ $rc -eq 1 ]] && [[ -d "${PYENV_ROOT:-$HOME/.pyenv}" ]]; then
+      info "pyenv appears to already be installed"
+    else
+      return $rc
+    fi
+  }
+
+  # Source pyenv env so it's available in current session
+  export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init - --no-rehash 2>/dev/null)" || true
 }
 
 # Install jenv Java version manager with platform detection
@@ -899,6 +935,11 @@ install_cargo() {
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   "$script_dir/install-cargo.sh"
+
+  # Source cargo env so it's available in current session
+  if [[ -f "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
+  fi
 }
 
 install_bc() {

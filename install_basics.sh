@@ -52,11 +52,33 @@ install_essentials_prerequisite() {
   # Execute essentials installation
   if bash "$essentials_script" "$@" 2>&1; then
     success "Essential development tools installed successfully"
-    return 0
   else
-    local exit_code=$?
-    error "Essential development tools installation failed (exit code: $exit_code)"
-    return $exit_code
+    warn "Some essential tools failed to install, continuing..."
+  fi
+
+  # Re-source PATH for tools installed by the essentials subprocess.
+  # The subprocess runs in a separate shell, so PATH changes are lost.
+  # We re-detect installed tools here so component installers find them.
+
+  # Homebrew
+  if [[ -x "$HOME/.local/homebrew/bin/brew" ]]; then
+    eval "$("$HOME/.local/homebrew/bin/brew" shellenv)" 2>/dev/null || true
+  elif [[ -x "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null || true
+  fi
+
+  # pyenv
+  if [[ -d "${PYENV_ROOT:-$HOME/.pyenv}" ]]; then
+    export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init - --no-rehash 2>/dev/null)" || true
+  fi
+
+  # cargo
+  if [[ -f "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
   fi
 }
 

@@ -59,7 +59,7 @@ install_tmux() {
   # Create build environment
   create_dir "$HOME/.local/bin"
   local build_dir
-  build_dir=$(get_temp_dir)
+  build_dir=$(get_temp_dir_no_cleanup)
 
   # Download and extract source
   local download_url="https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/tmux-${TMUX_VERSION}.tar.gz"
@@ -74,6 +74,7 @@ install_tmux() {
     cd "$build_dir/tmux-${TMUX_VERSION}" || error "Failed to enter build directory"
 
     # Configure with local prefix
+    git config --global --add safe.directory "$build_dir/tmux-${TMUX_VERSION}" 2>/dev/null || true
     if ! ./configure --prefix="$HOME/.local" --enable-static; then
       error "Configuration failed. Check build dependencies."
     fi

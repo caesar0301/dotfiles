@@ -100,16 +100,17 @@ main() {
   # Verify utility scripts directory
   verify_bin_path
 
-  # Core dependencies - order matters! Homebrew must be installed before tools that depend on it
+  # Core dependencies - order matters! Homebrew must be installed first
+  # so tools that depend on it (ctags, yazi, lazygit, lsp, formatters) can use brew.
   local core_deps=(
+    "install_homebrew"        # Homebrew package manager (MUST be first)
     "install_pyenv"           # Python version manager
-    "install_homebrew"        # Homebrew package manager (always installed)
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
     "install_fzf"             # Fuzzy finder
+    "install_cargo"           # Rust and Cargo
     "install_lsp"             # Language Server Protocol (LSP) servers
     "install_hack_nerd_font"  # Hack Nerd Font (required by nvim-web-devicons)
     "install_lang_formatters" # Language formatters and linters
-    "install_cargo"           # Rust and Cargo (conditionally based on kernel version)
     "install_yazi"            # Terminal file manager
     "install_lazygit"         # Terminal Git UI
   )
