@@ -107,6 +107,8 @@ export LSCOLORS=ExFxBxDxCxegedabagacad
 # extra paths
 export PATH=$HOME/.dotfiles/bin:$HOME/.local/bin:$PATH
 
+[ -d $HOME/.local/homebrew/bin ] && export PATH=$HOME/.local/homebrew/bin:$PATH
+
 # respect local zshenv
 [ -f ~/.zshenv.local ] && source ~/.zshenv.local
 
