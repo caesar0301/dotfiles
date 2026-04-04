@@ -721,11 +721,8 @@ install_homebrew() {
   else
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
-  if [[ -n "${HOMEBREW_INSTALL_PREFIX:-}" ]]; then
-    "$script_dir/install-homebrew.sh" --prefix="${HOMEBREW_INSTALL_PREFIX}"
-  else
-    "$script_dir/install-homebrew.sh"
-  fi
+  local homebrew_prefix="${HOMEBREW_INSTALL_PREFIX:-"$HOME/.local/homebrew"}"
+  "$script_dir/install-homebrew.sh" --prefix="${homebrew_prefix}"
 }
 
 # Install uv Python package manager with verification
