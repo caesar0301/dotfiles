@@ -104,6 +104,7 @@ main() {
   # so tools that depend on it (ctags, yazi, lazygit, lsp, formatters) can use brew.
   local core_deps=(
     "install_homebrew"        # Homebrew package manager (MUST be first)
+    "install_tmux"            # Tmux terminal multiplexer (needs Homebrew or source build)
     "install_pyenv"           # Python version manager
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
     "install_fzf"             # Fuzzy finder
@@ -144,6 +145,7 @@ main() {
   printf "\n%bInstalled Tools:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  • Utility scripts: %b~/.dotfiles/bin%b (in PATH)\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • Homebrew: Package manager\n"
+  printf "  • tmux: Terminal multiplexer\n"
   printf "  • pyenv: Python version manager\n"
   printf "  • fzf: Fuzzy finder\n"
   printf "  • universal-ctags: Code navigation tool\n"

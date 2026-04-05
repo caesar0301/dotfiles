@@ -1111,6 +1111,23 @@ change_shell_to_zsh() {
   fi
 }
 
+# Install tmux terminal multiplexer
+install_tmux() {
+  if checkcmd tmux; then
+    info "tmux already installed" && return
+  fi
+  if checkcmd brew; then
+    brew install tmux && return
+  fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-tmux.sh"
+}
+
 # Install yazi terminal file manager
 install_yazi() {
   if checkcmd yazi; then

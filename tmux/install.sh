@@ -4,7 +4,7 @@
 # https://github.com/caesar0301/cool-dotfiles
 #
 # Features:
-# - Tmux binary installation from source
+# - Tmux binary installation (brew preferred, source fallback)
 # - TPM (Tmux Plugin Manager) setup
 # - Modern configuration with XDG compliance
 # - Enhanced error handling and user feedback
@@ -32,7 +32,7 @@ source "$THISDIR/../lib/shlib.sh" || {
   exit 1
 }
 
-# Install tmux from source with enhanced error handling
+# Install tmux via Homebrew, falling back to source build
 install_tmux() {
   if checkcmd tmux; then
     local current_version
@@ -41,62 +41,28 @@ install_tmux() {
     return 0
   fi
 
-  info "Installing tmux $TMUX_VERSION from source..."
+  info "Installing tmux $TMUX_VERSION..."
 
-  # Check build dependencies
-  local missing_deps=()
-  for dep in gcc make libevent-dev ncurses-dev; do
-    if ! checkcmd "${dep%%-dev}"; then
-      missing_deps+=("$dep")
+  if checkcmd brew; then
+    info "Installing tmux via Homebrew..."
+    if brew install tmux; then
+      export PATH="$(brew --prefix)/bin:$PATH"
+      success "Tmux installed via Homebrew"
+      info "Tmux version: $(tmux -V)"
+      return 0
+    else
+      warn "Homebrew tmux installation failed, falling back to source build"
     fi
-  done
-
-  [[ ${#missing_deps[@]} -gt 0 ]] && {
-    warn "Missing build dependencies: ${missing_deps[*]}"
-    warn "Please install them manually or via package manager"
-  }
-
-  # Create build environment
-  create_dir "$HOME/.local/bin"
-  local build_dir
-  build_dir=$(get_temp_dir_no_cleanup)
-
-  # Download and extract source
-  local download_url="https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/tmux-${TMUX_VERSION}.tar.gz"
-  local archive_path="$build_dir/tmux-${TMUX_VERSION}.tar.gz"
-
-  download_file "$download_url" "$archive_path"
-  extract_tar "$archive_path" "$build_dir"
-
-  # Build and install
-  info "Compiling tmux (this may take a few minutes)..."
-  (
-    cd "$build_dir/tmux-${TMUX_VERSION}" || error "Failed to enter build directory"
-
-    # Configure with local prefix
-    git config --global --add safe.directory "$build_dir/tmux-${TMUX_VERSION}" 2>/dev/null || true
-    if ! ./configure --prefix="$HOME/.local" --enable-static; then
-      error "Configuration failed. Check build dependencies."
-    fi
-
-    # Compile
-    if ! make -j"$(nproc 2>/dev/null || echo 2)"; then
-      error "Compilation failed"
-    fi
-
-    # Install
-    if ! make install; then
-      error "Installation failed"
-    fi
-  ) || return 1
-
-  # Verify installation
-  export PATH="$HOME/.local/bin:$PATH"
-  if checkcmd tmux; then
-    success "Tmux $TMUX_VERSION installed successfully"
-    info "Tmux version: $(tmux -V)"
   else
-    error "Tmux installation verification failed"
+    info "Homebrew not found, building tmux from source"
+  fi
+
+  # Fall back to source build
+  local script_dir="$THISDIR/../lib"
+  if [[ -f "$script_dir/install-tmux.sh" ]]; then
+    "$script_dir/install-tmux.sh"
+  else
+    error "Cannot install tmux: Homebrew not available and source installer not found"
   fi
 }
 
