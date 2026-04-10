@@ -1,22 +1,59 @@
 # Ghostty Terminal Configuration
 # https://ghostty.org
 
+# =============================================================================
+# Font
+# =============================================================================
+font-family = "Hack Nerd Font Mono"
+font-size = 14
+font-style = Regular
+font-style-bold = Bold
+font-style-italic = Italic
+font-style-bold-italic = Bold Italic
+
+# =============================================================================
+# Terminal
+# =============================================================================
 # Use xterm-256color for better SSH compatibility
 # This ensures terminfo is available on remote servers
 term = xterm-256color
 
-# Clipboard settings
+# =============================================================================
+# Clipboard
+# =============================================================================
 clipboard-read = allow
 copy-on-select = true
 
-# Color theme - Monokai Remastered
-theme = Monokai Remastered
+# =============================================================================
+# Window
+# =============================================================================
+window-padding-x = 4
+window-padding-y = 2
+window-padding-balance = true
+window-decoration = true
+window-theme = dark
 background = #0c0c0c
 foreground = #d9d9d9
 selection-background = #343434
 selection-foreground = #ffffff
+
+# =============================================================================
+# Cursor
+# =============================================================================
 cursor-color = #fc971f
 cursor-text = #000000
+cursor-style = block
+cursor-style-blink = false
+
+# =============================================================================
+# Scrollback
+# =============================================================================
+scrollback-limit = 100000
+
+# =============================================================================
+# Color theme - Monokai Remastered
+# =============================================================================
+theme = Monokai Remastered
 palette = 0=#1a1a1a
 palette = 1=#f4005f
 palette = 2=#98e024
@@ -33,3 +70,16 @@ palette = 12=#9d65ff
 palette = 13=#f4005f
 palette = 14=#58d1eb
 palette = 15=#f6f6ef
+
+# =============================================================================
+# Keybindings
+# =============================================================================
+# Ghostty uses standard terminal keybindings by default
+# Only override when necessary for compatibility
+
+# Disable ctrl+shift+left/right (conflicts with tmux window switching)
+# keybind = ctrl+shift+left=ignore
+# keybind = ctrl+shift+right=ignore
+
+# macOS: Option as Alt for terminal keybinds
+macos-option-as-alt = true

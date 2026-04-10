@@ -95,6 +95,11 @@ if utils.is_env_set("TMUX") then
 	vim.opt.termguicolors = true
 end
 
+-- Enable true color support for Ghostty
+if vim.env.TERM_PROGRAM == "ghostty" or vim.env.GHOSTTY_SHELL_INTEGRATION_ENABLED then
+	vim.opt.termguicolors = true
+end
+
 -- Set utf8 as standard encoding and en_US as the standard language
 --vim.cmd("language en_US.UTF-8")
 vim.opt.encoding = "utf8"
