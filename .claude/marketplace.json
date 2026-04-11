@@ -1,0 +1,35 @@
+{
+  "skills": [
+    {
+      "name": "use-my-computer",
+      "path": "skills/use-my-computer",
+      "description": "Manage dotfiles, troubleshoot environment issues, configure development tools, and handle system-level setups. Cross-platform support for macOS and Linux with XDG compliance.",
+      "author": "xiaming.chen",
+      "version": "1.0.0",
+      "repository": "https://github.com/caesar0301/dotfiles",
+      "keywords": [
+        "dotfiles",
+        "environment",
+        "shell",
+        "configuration",
+        "zsh",
+        "nvim",
+        "tmux",
+        "path",
+        "xdg",
+        "macos",
+        "linux",
+        "development",
+        "tools"
+      ],
+      "install_command": "npx skills add use-my-computer --from ~/.dotfiles/skills/use-my-computer"
+    }
+  ],
+  "marketplace_info": {
+    "name": "cool-dotfiles skills",
+    "description": "Custom skills for managing development environment using cool-dotfiles repository",
+    "repository_url": "https://github.com/caesar0301/dotfiles",
+    "skills_directory": "skills",
+    "maintainer": "xiaming.chen"
+  }
+}

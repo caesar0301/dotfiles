@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo:*)",
+      "Bash(npm config get:*)",
+      "Bash(npm root:*)",
+      "Bash(npm bin:*)",
+      "Bash(npm --version)",
+      "Bash(chmod +x:*)"
+    ]
+  }
+}
