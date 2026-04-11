@@ -80,6 +80,11 @@ install_essentials_prerequisite() {
   if [[ -f "$HOME/.cargo/env" ]]; then
     source "$HOME/.cargo/env"
   fi
+
+  # X11 tools (fontconfig for font installation)
+  if [[ -d "/opt/X11/bin" ]] && [[ ":$PATH:" != *":/opt/X11/bin:"* ]]; then
+    export PATH="/opt/X11/bin:$PATH"
+  fi
 }
 
 # Enhanced component installation with progress tracking

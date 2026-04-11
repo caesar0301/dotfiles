@@ -17,9 +17,15 @@ source "$SCRIPT_DIR/shlib.sh"
 main() {
   info "Installing Hack Nerd Font and updating font cache..."
 
+  # Add X11 bin to PATH on macOS (fontconfig tools location)
+  if is_macos && [[ -d "/opt/X11/bin" ]]; then
+    export PATH="/opt/X11/bin:$PATH"
+  fi
+
   # Check if fontconfig tools are available
   if ! checkcmd fc-list; then
     warn "Fontconfig tools (fc-list, fc-cache) not found."
+    info "Install with: brew install fontconfig"
     exit 0
   fi
 
