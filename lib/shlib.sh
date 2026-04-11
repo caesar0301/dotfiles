@@ -339,6 +339,30 @@ npm_install_lib() {
   create_dir "$HOME/.local"
   npm config set prefix "$HOME/.local" >/dev/null 2>&1
 
+  # Handle SSL certificate issues (common in corporate environments)
+  # Set NODE_EXTRA_CA_CERTS for macOS Homebrew users
+  if [[ -z "${NODE_EXTRA_CA_CERTS:-}" ]]; then
+    if is_macos; then
+      # Try Homebrew OpenSSL certificates
+      if [[ -f "/opt/homebrew/etc/openssl@3/cert.pem" ]]; then
+        export NODE_EXTRA_CA_CERTS="/opt/homebrew/etc/openssl@3/cert.pem"
+      elif [[ -f "/usr/local/etc/openssl@3/cert.pem" ]]; then
+        export NODE_EXTRA_CA_CERTS="/usr/local/etc/openssl@3/cert.pem"
+      fi
+    elif is_linux; then
+      # Try Linux standard CA certificates
+      if [[ -f "/etc/ssl/certs/ca-certificates.crt" ]]; then
+        export NODE_EXTRA_CA_CERTS="/etc/ssl/certs/ca-certificates.crt"
+      elif [[ -f "/etc/pki/tls/certs/ca-bundle.crt" ]]; then
+        export NODE_EXTRA_CA_CERTS="/etc/pki/tls/certs/ca-bundle.crt"
+      fi
+    fi
+  fi
+
+  # Disable strict SSL as fallback for certificate verification issues
+  # This helps in environments with corporate proxies or custom CA certificates
+  npm config set strict-ssl false >/dev/null 2>&1 || true
+
   local packages=("$@")
   local cache_dir="$HOME/.npm_cache"
   create_dir "$cache_dir"
