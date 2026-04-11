@@ -192,6 +192,33 @@ The `lib/` directory contains modular installation scripts that can be used inde
 - Formats Lua files in nvim/ with stylua
 - Zsh files excluded due to glob qualifiers and zsh parameter expansion
 
+## System Infrastructure (`setups/`)
+
+Contains infrastructure configurations beyond user-level dotfiles:
+
+**Network Proxy Setups:**
+- `mihomo/` → Docker-based Mihomo proxy (recommended for macOS)
+  - Runs in container without TUN mode
+  - Exposes ports: 7890 (mixed proxy), 9090 (controller API)
+  - Usage: `cd setups/mihomo && ./start.sh -c ~/.config/mihomo`
+  - System proxy setup required (System Settings → Network → Proxies)
+  - Web console: https://metacubex.github.io/metacubexd/#/
+
+- `clash/` → Systemd-based Mihomo installation (Linux focused)
+  - Fetches config from remote servers (V2SS_LINK or TROJANFLARE_CLASHX_URL)
+  - Generates `config.latest` and `config.gfwlist` files
+  - Can run from anywhere: `/path/to/clash/run_batch.sh`
+
+**Systemd Services (`systemd/`):**
+- System services: `mihomo.service`, `minikube.service` (install to `/etc/systemd/system/`)
+- User services: `colima.service`, `aliyunpan-sync.service` (install to `~/.config/systemd/user/`)
+- Aliyunpan sync configurable via environment variables (SYNC_MODE, LOCAL_DIR, PAN_DIR)
+- Usage patterns: `systemctl [enable|start|status] <service>` or `systemctl --user <action>`
+
+**Other Setups:**
+- `alithia/` → Notes/knowledge management
+- `openclaw/` → Alternative proxy setup
+
 ## Development Environment Components
 
 - **Zsh**: Zinit plugin manager, proxy support, custom plugins in `zsh/plugins/`
