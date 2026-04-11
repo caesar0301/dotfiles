@@ -1,6 +1,10 @@
 #!/bin/bash
+# Support custom port via SHELLPROXY_PORT environment variable
+# Default port: 7890
+PROXY_PORT="${SHELLPROXY_PORT:-7890}"
+
 if [[ "$(uname)" = Darwin ]]; then
-  echo "http://127.0.0.1:7890"
+  echo "http://127.0.0.1:${PROXY_PORT}"
 else
-  echo "http://127.0.0.1:7890"
+  echo "http://127.0.0.1:${PROXY_PORT}"
 fi
