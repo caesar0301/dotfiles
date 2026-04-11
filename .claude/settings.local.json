@@ -6,7 +6,10 @@
       "Bash(npm root:*)",
       "Bash(npm bin:*)",
       "Bash(npm --version)",
-      "Bash(chmod +x:*)"
+      "Bash(chmod +x:*)",
+      "Bash(wc:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(ls:*)"
     ]
   }
 }
