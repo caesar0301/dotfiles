@@ -26,7 +26,7 @@ main() {
   if ! checkcmd fc-list; then
     warn "Fontconfig tools (fc-list, fc-cache) not found."
     info "Install with: brew install fontconfig"
-    exit 0
+    return 1
   fi
 
   # Set font directory based on OS

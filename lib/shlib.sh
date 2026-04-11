@@ -240,10 +240,18 @@ SUPPORTS_MODERN_PLUGINS() {
 pip_install_lib() {
   [[ $# -eq 0 ]] && error "pip_install_lib: requires at least one package name"
 
-  checkcmd pip || error "pip is not installed or not in PATH"
+  # Check for pip or pip3
+  local pip_cmd=""
+  if checkcmd pip; then
+    pip_cmd="pip"
+  elif checkcmd pip3; then
+    pip_cmd="pip3"
+  else
+    error "pip is not installed or not in PATH"
+  fi
 
   info "Installing pip packages: $*"
-  if pip install --user "$@" --quiet; then
+  if $pip_cmd install --user "$@" --quiet; then
     success "Successfully installed pip packages: $*"
   else
     error "Failed to install pip packages: $*"

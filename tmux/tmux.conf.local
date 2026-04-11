@@ -69,7 +69,11 @@ tmux_conf_new_pane_reconnect_ssh=false
 # automatic detection relies on the COLORTERM environment variable being defined
 # to 'truecolor' or '24bit' or '$ tput colors' answering '16777216'
 # see https://github.com/termstandard/colors
-tmux_conf_24b_colour=auto
+# Enable true color support for Neovim termguicolors
+tmux_conf_24b_colour=true
+
+# Add terminal features for true color support
+set-option -a terminal-features 'xterm-256color:RGB'
 
 
 # -- theming -------------------------------------------------------------------
@@ -382,9 +386,9 @@ tmux_conf_urlscan_options="--compact --dedupe"
 
 # this is the place to override or undo settings
 
-# use xterm-256color instead of tmux-256color for better SSH compatibility
-# fixes display issues when using tmux over SSH connections
-set -g default-terminal "xterm-256color" #!important
+# Use screen-256color for proper Neovim color support in tmux
+# This ensures proper color rendering and termguicolors support
+set -g default-terminal "screen-256color" #!important
 
 # increase history size
 #set -g history-limit 10000

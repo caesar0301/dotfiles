@@ -250,5 +250,5 @@ local function setup_python3_provider()
 	end
 end
 
--- Defer Python provider setup to avoid blocking startup
-vim.defer_fn(setup_python3_provider, 100)
+-- Setup Python provider synchronously (no defer) for proper checkhealth detection
+setup_python3_provider()
