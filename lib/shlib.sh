@@ -344,8 +344,8 @@ npm_install_lib() {
   create_dir "$cache_dir"
 
   local registries=(
-    "https://registry.npmmirror.com"
     "https://registry.npmjs.org"
+    "https://registry.npmmirror.com"
     "https://registry.yarnpkg.com"
   )
 
