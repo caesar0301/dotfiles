@@ -3,9 +3,9 @@ return {
 	ft = "markdown",
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter",
-		"nvim-tree/nvim-web-devicons",
+		"echasnovski/mini.nvim",
 	},
-	config = function()
-		require("render-markdown").setup({})
-	end,
+	---@module 'render-markdown'
+	---@type render.md.UserConfig
+	opts = {},
 }
