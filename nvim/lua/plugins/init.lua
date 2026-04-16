@@ -21,6 +21,7 @@ return {
 	{ import = "plugins.nvim-tree" },
 	{ import = "plugins.nvim-treesitter" },
 	{ import = "plugins.nvim-web-devicons" },
+	{ import = "plugins.render-markdown" },
 	{ import = "plugins.tagbar" },
 	{ import = "plugins.telescope" },
 	{ import = "plugins.toggleterm" },
