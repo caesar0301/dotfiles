@@ -2,15 +2,15 @@
   "$schema": "https://opencode.ai/config.json",
 
   "model": "dashscope/glm-5",
-  "small_model": "dashscope/qwen3-coder-next",
+  "small_model": "dashscope/kimi-k2.5",
 
   "provider": {
     "dashscope": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "DashScope",
       "options": {
-        "baseURL": "{env:DASHSCOPE_BASE_URL}",
-        "apiKey": "{env:DASHSCOPE_API_KEY}"
+        "baseURL": "{env:DASHSCOPE_CP_BASE_URL}",
+        "apiKey": "{env:DASHSCOPE_CP_API_KEY}"
       },
       "models": {
         "qwen3.5-plus": {
