@@ -26,6 +26,11 @@ source "${ZSH_CONFIG_DIR}/_helper.zsh"
 export ZSH_CONFIG_DIR=${ZSH_CONFIG_DIR}
 export ZSH_PLUGIN_DIR=${ZSH_PLUGIN_DIR}
 
+# Load config files (locale, proxy, etc.)
+for config_file in "${ZSH_CONFIG_DIR}/config"/*.zsh(N); do
+  source "$config_file"
+done
+
 ###------------------------------------------------
 ### ZI MANAGER
 ###------------------------------------------------

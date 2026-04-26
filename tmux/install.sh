@@ -25,6 +25,7 @@ readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly TMUX_CONFIG_HOME="$XDG_CONFIG_HOME/tmux"
 readonly TPM_HOME="$TMUX_CONFIG_HOME/plugins/tpm"
+readonly TMUX_CONF_SYMLINK="$HOME/.tmux.conf"
 
 # Load common utilities with validation
 source "$THISDIR/../lib/shlib.sh" || {
@@ -95,6 +96,35 @@ install_tpm() {
   fi
 }
 
+# Set tmux global environment variables for Unicode support
+configure_tmux_locale() {
+  info "Configuring tmux locale settings..."
+
+  # Check if tmux server is running
+  if ! pgrep -x "tmux" >/dev/null 2>&1; then
+    info "No tmux server running, locale will be set on first start"
+    return 0
+  fi
+
+  # Set locale environment variables in tmux global environment
+  # This ensures Unicode displays correctly in tmux sessions over SSH
+  local locale_vars=(
+    "LANG=en_US.UTF-8"
+    "LC_ALL=en_US.UTF-8"
+    "LC_CTYPE=en_US.UTF-8"
+    "LC_COLLATE=en_US.UTF-8"
+    "LC_MESSAGES=en_US.UTF-8"
+  )
+
+  for locale_var in "${locale_vars[@]}"; do
+    tmux set-environment -g "$locale_var" 2>/dev/null || {
+      warn "Failed to set tmux environment: $locale_var"
+    }
+  done
+
+  success "Tmux locale configured for Unicode support"
+}
+
 # Install tmux configuration files with enhanced validation
 handle_tmux_config() {
   info "Installing tmux configuration..."
@@ -122,19 +152,66 @@ handle_tmux_config() {
     install_file_pair "$src_path" "$dest_path"
   done
 
+  # Create ~/.tmux.conf symlink for Oh my tmux! compatibility
+  # Oh my tmux! expects ~/.tmux.conf to exist as primary config location
+  if [[ ! -e "$TMUX_CONF_SYMLINK" ]]; then
+    info "Creating ~/.tmux.conf symlink..."
+    ln -sf "$TMUX_CONFIG_HOME/tmux.conf" "$TMUX_CONF_SYMLINK"
+    success "Created ~/.tmux.conf symlink"
+  elif [[ -L "$TMUX_CONF_SYMLINK" ]]; then
+    # Update existing symlink
+    ln -sf "$TMUX_CONFIG_HOME/tmux.conf" "$TMUX_CONF_SYMLINK"
+    info "Updated existing ~/.tmux.conf symlink"
+  elif [[ -f "$TMUX_CONF_SYMLINK" && ! -L "$TMUX_CONF_SYMLINK" ]]; then
+    warn "Existing ~/.tmux.conf file found (not a symlink)"
+    warn "Skipping symlink creation to preserve existing configuration"
+  fi
+
   success "Tmux configuration installed"
   info "Configuration directory: $TMUX_CONFIG_HOME"
+  info "Primary config file: $TMUX_CONF_SYMLINK"
 }
 
-# Remove tmux configuration and plugins
+# Remove tmux configuration and plugins with backup support
 cleanse_tmux() {
-  local items_to_remove=(
-    "$TMUX_CONFIG_HOME/tmux.conf"
-    "$TMUX_CONFIG_HOME/tmux.conf.local"
-    "$TPM_HOME"
-  )
+  local backup_dir="$HOME/.tmux.backup.$(date +%Y%m%d_%H%M%S)"
 
   info "Cleansing tmux configuration..."
+
+  # Create backup directory
+  create_dir "$backup_dir"
+
+  # Backup existing configuration files before removal
+  local files_to_backup=(
+    "$TMUX_CONF_SYMLINK"
+    "$TMUX_CONFIG_HOME/tmux.conf"
+    "$TMUX_CONFIG_HOME/tmux.conf.local"
+  )
+
+  for backup_file in "${files_to_backup[@]}"; do
+    if [[ -e "$backup_file" ]]; then
+      local filename=$(basename "$backup_file")
+      # Dereference symlinks when backing up
+      if [[ -L "$backup_file" ]]; then
+        cp -L "$backup_file" "$backup_dir/$filename" 2>/dev/null || {
+          warn "Failed to backup: $backup_file"
+        }
+      else
+        cp "$backup_file" "$backup_dir/$filename" 2>/dev/null || {
+          warn "Failed to backup: $backup_file"
+        }
+      fi
+      info "Backed up: $backup_file"
+    fi
+  done
+
+  # Items to remove (including entire plugins directory)
+  local items_to_remove=(
+    "$TMUX_CONF_SYMLINK"
+    "$TMUX_CONFIG_HOME/tmux.conf"
+    "$TMUX_CONFIG_HOME/tmux.conf.local"
+    "$TMUX_CONFIG_HOME/plugins"
+  )
 
   for item in "${items_to_remove[@]}"; do
     if [[ -e "$item" ]]; then
@@ -144,9 +221,25 @@ cleanse_tmux() {
   done
 
   # Remove empty directories
-  [[ -d "$TMUX_CONFIG_HOME" ]] && rmdir "$TMUX_CONFIG_HOME" 2>/dev/null || true
+  if [[ -d "$TMUX_CONFIG_HOME" ]]; then
+    rmdir "$TMUX_CONFIG_HOME" 2>/dev/null || {
+      info "Configuration directory not empty, preserving: $TMUX_CONFIG_HOME"
+    }
+  fi
+
+  # Unset tmux global locale environment variables if server is running
+  if pgrep -x "tmux" >/dev/null 2>&1; then
+    info "Unsetting tmux locale environment variables..."
+    tmux set-environment -gu LANG 2>/dev/null || true
+    tmux set-environment -gu LC_ALL 2>/dev/null || true
+    tmux set-environment -gu LC_CTYPE 2>/dev/null || true
+    tmux set-environment -gu LC_COLLATE 2>/dev/null || true
+    tmux set-environment -gu LC_MESSAGES 2>/dev/null || true
+  fi
 
   success "Tmux configuration cleansed successfully"
+  info "Backup location: $backup_dir"
+  info "To restore: cp $backup_dir/* to original locations"
 }
 
 # Process command line options
@@ -171,15 +264,19 @@ main() {
   install_tmux
   install_tpm
   handle_tmux_config
+  configure_tmux_locale
 
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Tmux configuration: $TMUX_CONFIG_HOME"
+  info "Primary config symlink: $TMUX_CONF_SYMLINK"
   info "Plugin manager: $TPM_HOME"
+  info "Locale configured: UTF-8 support enabled"
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Start tmux: %btmux%b\n" "$COLOR_CYAN" "$COLOR_RESET"
-  printf "  2. Install plugins: %bPrefix + I%b (default: Ctrl-b + I)\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  2. Install plugins: %bPrefix + I%b (default: Ctrl-a + I)\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  3. Reload config: %bPrefix + r%b\n" "$COLOR_CYAN" "$COLOR_RESET"
+  printf "  4. Verify Unicode: %btmux show-environment -g | grep LANG%b\n" "$COLOR_CYAN" "$COLOR_RESET"
 
   success "Tmux installation completed successfully!"
 }

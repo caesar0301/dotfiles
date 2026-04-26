@@ -102,8 +102,28 @@ When making changes to installation scripts:
 1. Test individual module installations first
 2. Verify prerequisite installation works correctly
 3. Check both symlink (`-s`) and copy (`-f`) installation modes
-4. Test clean mode (`-c`) for proper removal
+4. Test clean mode (`-c`) for proper removal and backup creation
 5. Ensure all scripts have proper error handling and exit codes
+
+### Tmux Unicode Testing
+
+After tmux installation changes, verify Unicode display:
+
+```bash
+# Check locale configuration
+source ~/.zshrc && locale | grep -E "LANG|LC_ALL"
+
+# Start tmux and check environment
+tmux new-session -d
+tmux show-environment -g | grep LANG
+
+# Test Unicode display
+tmux new-session -d 'echo "💛🩷💙🖤❤️🤍"'
+tmux capture-pane -p | grep "💛"
+tmux kill-server
+```
+
+For comprehensive troubleshooting guide, see `docs/tmux-unicode-fix.md`.
 
 ## Common Workflows
 

@@ -116,6 +116,27 @@ handle_zsh_config() {
     fi
   done
 
+  # Install config directory files (locale, proxy, etc.)
+  local config_dir="$THISDIR/config"
+  local target_config_dir="$ZSH_CONFIG_HOME/config"
+
+  if [[ -d "$config_dir" ]]; then
+    create_dir "$target_config_dir"
+
+    # Check if any .zsh files exist before iterating (bash-compatible)
+    if compgen -G "$config_dir/*.zsh" >/dev/null 2>&1; then
+      for config_item in "$config_dir"/*.zsh; do
+        if [[ -f "$config_item" ]]; then
+          local config_name=$(basename "$config_item")
+          install_file_pair "$config_item" "$target_config_dir/$config_name"
+        fi
+      done
+      info "Config directory files installed"
+    else
+      info "No .zsh config files found in $config_dir"
+    fi
+  fi
+
   # Change default shell to zsh if not already
   change_shell_to_zsh
 
@@ -134,6 +155,7 @@ cleanse_zsh() {
     "$ZINIT_HOME"
     "$PROXY_CONFIG"
     "$ZSH_CONFIG_HOME"
+    "$ZSH_CONFIG_HOME/config"
   )
 
   for item in "${items_to_remove[@]}"; do
