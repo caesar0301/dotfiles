@@ -25,7 +25,6 @@ readonly XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly TMUX_CONFIG_HOME="$XDG_CONFIG_HOME/tmux"
 readonly TPM_HOME="$TMUX_CONFIG_HOME/plugins/tpm"
-readonly TMUX_CONF_SYMLINK="$HOME/.tmux.conf"
 
 # Load common utilities with validation
 source "$THISDIR/../lib/shlib.sh" || {
@@ -152,24 +151,10 @@ handle_tmux_config() {
     install_file_pair "$src_path" "$dest_path"
   done
 
-  # Create ~/.tmux.conf symlink for Oh my tmux! compatibility
-  # Oh my tmux! expects ~/.tmux.conf to exist as primary config location
-  if [[ ! -e "$TMUX_CONF_SYMLINK" ]]; then
-    info "Creating ~/.tmux.conf symlink..."
-    ln -sf "$TMUX_CONFIG_HOME/tmux.conf" "$TMUX_CONF_SYMLINK"
-    success "Created ~/.tmux.conf symlink"
-  elif [[ -L "$TMUX_CONF_SYMLINK" ]]; then
-    # Update existing symlink
-    ln -sf "$TMUX_CONFIG_HOME/tmux.conf" "$TMUX_CONF_SYMLINK"
-    info "Updated existing ~/.tmux.conf symlink"
-  elif [[ -f "$TMUX_CONF_SYMLINK" && ! -L "$TMUX_CONF_SYMLINK" ]]; then
-    warn "Existing ~/.tmux.conf file found (not a symlink)"
-    warn "Skipping symlink creation to preserve existing configuration"
-  fi
-
   success "Tmux configuration installed"
   info "Configuration directory: $TMUX_CONFIG_HOME"
-  info "Primary config file: $TMUX_CONF_SYMLINK"
+  info "XDG config: $TMUX_CONFIG_HOME/tmux.conf"
+  info "Local config: $TMUX_CONFIG_HOME/tmux.conf.local"
 }
 
 # Remove tmux configuration and plugins with backup support
@@ -183,7 +168,6 @@ cleanse_tmux() {
 
   # Backup existing configuration files before removal
   local files_to_backup=(
-    "$TMUX_CONF_SYMLINK"
     "$TMUX_CONFIG_HOME/tmux.conf"
     "$TMUX_CONFIG_HOME/tmux.conf.local"
   )
@@ -207,7 +191,6 @@ cleanse_tmux() {
 
   # Items to remove (including entire plugins directory)
   local items_to_remove=(
-    "$TMUX_CONF_SYMLINK"
     "$TMUX_CONFIG_HOME/tmux.conf"
     "$TMUX_CONFIG_HOME/tmux.conf.local"
     "$TMUX_CONFIG_HOME/plugins"
@@ -269,9 +252,9 @@ main() {
   # Post-installation information
   printf "\n%b=== Installation Complete ===%b\n" "$COLOR_BOLD$COLOR_GREEN" "$COLOR_RESET"
   info "Tmux configuration: $TMUX_CONFIG_HOME"
-  info "Primary config symlink: $TMUX_CONF_SYMLINK"
   info "Plugin manager: $TPM_HOME"
   info "Locale configured: UTF-8 support enabled"
+  info "XDG Base Directory: Pure XDG compliance (no ~/.tmux.conf symlink)"
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Start tmux: %btmux%b\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  2. Install plugins: %bPrefix + I%b (default: Ctrl-a + I)\n" "$COLOR_CYAN" "$COLOR_RESET"

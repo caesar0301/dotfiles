@@ -243,7 +243,7 @@ Contains infrastructure configurations beyond user-level dotfiles:
 
 - **Zsh**: Zinit plugin manager, proxy support, custom plugins in `zsh/plugins/`
 - **Neovim**: Lazy.nvim plugin manager, LSP support, kernel version compatibility checks, language formatters
-- **Tmux**: Terminal multiplexer with optimized configurations
+- **Tmux**: Terminal multiplexer with optimized configurations, pure XDG Base Directory compliance (no ~/.tmux.conf symlink)
 - **Emacs**: Configuration with plugins and Lisp development environment
 - **Vifm**: Vi file manager
 - **Misc**: Kitty, Alacritty, and Ghostty terminals, SBCL completions (supports selective installation via `-m`)
