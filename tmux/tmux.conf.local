@@ -466,6 +466,11 @@ bind -r n next-window     # select next window
 bind -n PageUp copy-mode -e
 bind -n PageDown if-shell -F "#{pane_in_mode}" "send -X page-down" "copy-mode -e \; send -X page-down"
 
+# Fix copy-mode exit keys: override copycat plugin's complex bindings with simple cancel
+# The copycat wrapper script can fail silently, preventing 'q' and 'Escape' from working
+bind -T copy-mode-vi q send-keys -X cancel #!important
+bind -T copy-mode-vi Escape send-keys -X cancel #!important
+
 # -- tpm -----------------------------------------------------------------------
 
 # while I don't use tpm myself, many people requested official support so here
