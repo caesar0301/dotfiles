@@ -27,6 +27,15 @@ SHELLPROXY_NO_PROXY="localhost,127.0.0.1"
 proxy enable
 ```
 
+Or split host/port and compose `SHELLPROXY_URL` yourself:
+
+```sh
+SHELLPROXY_HOST="127.0.0.1"
+SHELLPROXY_PORT="7890"
+SHELLPROXY_URL="http://${SHELLPROXY_HOST}:${SHELLPROXY_PORT}"
+proxy enable
+```
+
 ### Method 2
 
 Write a program file in `$HOME/.config/proxy` so that the proxy URL is defined dynamically.
@@ -38,11 +47,9 @@ Example:
 #!/bin/bash
 
 # HTTP Proxy
-if [[ "$(uname)" = Darwin ]]; then
-  echo "http://127.0.0.1:6152" # Surge Mac
-else
-  echo "http://127.0.0.1:8123" # polipo
-fi
+PROXY_HOST="${SHELLPROXY_HOST:-127.0.0.1}"
+PROXY_PORT="${SHELLPROXY_PORT:-7890}"
+echo "http://${PROXY_HOST}:${PROXY_PORT}"
 
 # No Proxy
 echo "localhost,127.0.0.1"

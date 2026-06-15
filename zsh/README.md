@@ -64,6 +64,8 @@ If you already have a `~/.zshrc`, the installer will skip it. Add this line to y
 | Variable | Description |
 |----------|-------------|
 | `SHELLPROXY_URL` | Proxy address for `shell-proxy` plugin |
+| `SHELLPROXY_HOST` | Proxy host used by `~/.config/proxy` (default: `127.0.0.1`) |
+| `SHELLPROXY_PORT` | Proxy port used by `~/.config/proxy` (default: `7890`) |
 
 ## Options
 
