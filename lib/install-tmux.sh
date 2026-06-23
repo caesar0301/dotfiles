@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/shlib.sh"
 
-readonly TMUX_VERSION="3.6"
+readonly TMUX_VERSION="3.6b"
 
 main() {
   if checkcmd tmux; then
@@ -54,7 +54,22 @@ main() {
     cd "$build_dir/tmux-${TMUX_VERSION}" || error "Failed to enter build directory"
 
     git config --global --add safe.directory "$build_dir/tmux-${TMUX_VERSION}" 2>/dev/null || true
-    if ! ./configure --prefix="$HOME/.local" --enable-static; then
+
+    # Configure flags per platform
+    local configure_args="--prefix=$HOME/.local"
+    if is_linux; then
+      configure_args="$configure_args --enable-static"
+    fi
+    if is_macos; then
+      # macOS requires explicit utf8proc choice for Unicode/emoji support
+      if brew list utf8proc &>/dev/null || pkg-config --exists libutf8proc; then
+        configure_args="$configure_args --enable-utf8proc"
+      else
+        configure_args="$configure_args --disable-utf8proc"
+      fi
+    fi
+
+    if ! ./configure $configure_args; then
       error "Configuration failed. Check build dependencies."
     fi
 
