@@ -18,7 +18,7 @@ Options:
   --claude       Install Claude Code and claude-code-router
   --opencode     Install opencode
   --cursor       Install Cursor agent
-  --codex        Install OpenAI Codex and oh-my-codex
+  --codex        Install OpenAI Codex (supports custom OpenAI configs)
   --all          Install all agents (default if no options specified)
   --autostart    Enable pm2 autostart for ccr and opencode-web (independent of --all)
   -h, --help     Show this help message and exit

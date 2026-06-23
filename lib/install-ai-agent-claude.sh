@@ -2,9 +2,9 @@
 ###################################################
 # Claude AI Agent Installer
 #
-# Installs Claude Code CLI and claude-code-router (CCR)
+# Installs Claude Code CLI via npm and claude-code-router (CCR)
 #
-# Copyright (c) 2024, Xiaming Chen
+# Copyright (c) 2024, 2026 Xiaming Chen
 # License: MIT
 ###################################################
 
@@ -16,11 +16,13 @@ Usage: $(basename "$0") [OPTIONS]
 
 Options:
   --autostart    Enable pm2 autostart for ccr
+  --remove-native Remove native binary installed by curl method
   -h, --help     Show this help message and exit
 
 Examples:
   $(basename "$0")                   # Install Claude Code and CCR (no autostart)
   $(basename "$0") --autostart       # Install with pm2 autostart for ccr
+  $(basename "$0") --remove-native   # Remove native binary before npm install
 
 Note: Claude Code CLI requires Node.js >= 20 and npm >= 20
 EOF
@@ -29,6 +31,35 @@ EOF
 # Source the shell utility library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/shlib.sh"
+
+# Remove native binary installed by curl method
+remove_native_binary() {
+  local native_binary="$HOME/.local/bin/claude"
+  local native_dir="$HOME/.local/share/claude"
+
+  # Check if native binary exists
+  if [[ -e "$native_binary" ]]; then
+    info "Removing native Claude binary installed by curl method..."
+
+    # Remove symlink
+    if rm -f "$native_binary"; then
+      success "Removed: $native_binary"
+    else
+      warn "Failed to remove: $native_binary"
+    fi
+
+    # Remove versions directory if exists
+    if [[ -d "$native_dir" ]]; then
+      if rm -rf "$native_dir"; then
+        success "Removed: $native_dir"
+      else
+        warn "Failed to remove: $native_dir"
+      fi
+    fi
+  else
+    info "No native binary found at $native_binary"
+  fi
+}
 
 # Install claude-code-router config file
 # Supports soft link or copy based on global LINK_INSTEAD_OF_COPY
@@ -59,27 +90,22 @@ install_claude_code_router_config() {
   info "Or set claude code wrapper to $HOME/.local/bin/ccr_wrapper.sh"
 }
 
-# Install Claude code CLI (always installs latest version)
+# Install Claude code CLI via npm (always installs latest version)
 install_claude_code_cli() {
-  # Check if Claude code CLI is already installed
-  if command -v claude >/dev/null 2>&1; then
-    info "Claude code CLI already installed, updating to latest version..."
+  # Check if Claude code CLI is already installed via npm
+  if npm list -g @anthropic-ai/claude-code >/dev/null 2>&1; then
+    info "Claude code CLI already installed via npm, updating to latest version..."
+    npm update -g @anthropic-ai/claude-code
   else
-    info "Installing claude code CLI..."
+    info "Installing Claude code CLI via npm..."
+    npm install -g @anthropic-ai/claude-code
   fi
 
-  # Try primary installation method (curl)
-  if curl -fsSL https://claude.ai/install.sh | bash; then
-    success "Claude code CLI installed/updated successfully via curl"
-    return 0
-  fi
-
-  # Fallback to npm installation if curl fails
-  warn "Curl installation failed, trying npm installation as fallback..."
-  if npm install -g @anthropic-ai/claude-code; then
+  if [[ $? -eq 0 ]]; then
     success "Claude code CLI installed/updated successfully via npm"
+    return 0
   else
-    error "Failed to install/update Claude code CLI via both curl and npm"
+    error "Failed to install/update Claude code CLI via npm"
     return 1
   fi
 }
@@ -150,12 +176,17 @@ setup_ccr_autostart() {
 # Main installation function
 main() {
   local enable_autostart=false
+  local remove_native=false
 
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case $1 in
     --autostart)
       enable_autostart=true
+      shift
+      ;;
+    --remove-native)
+      remove_native=true
       shift
       ;;
     -h | --help)
@@ -172,14 +203,16 @@ main() {
 
   info "Installing Claude AI agent..."
 
-  # Install Claude code CLI
-  install_claude_code_cli
+  # Remove native binary if requested
+  if [[ "$remove_native" == "true" ]]; then
+    remove_native_binary
+  fi
+
+  # Install Claude code CLI via npm
+  install_claude_code_cli || exit 1
 
   # Install claude-code-router via npm
   npm_install_lib "@musistudio/claude-code-router"
-
-  # Install oh-my-claude-sisyphus plugin
-  npm_install_lib "oh-my-claude-sisyphus@latest"
 
   # Install claude-code-router config file
   install_claude_code_router_config
@@ -198,20 +231,17 @@ main() {
   info "1. Add the following to your bashrc or zshrc:"
   echo "   eval \"\$(ccr activate)\""
   echo ""
-  info "2. Run the following command in Claude CLI to setup oh-my-claude-sisyphus:"
-  echo "   /omc-setup"
-  echo ""
-  info "3. Set essential environment variables for claude-code-router:"
+  info "2. Set essential environment variables for claude-code-router:"
   echo "   export DASHSCOPE_BASE_URL=\"your-dashscope-base-url\""
   echo "   export DASHSCOPE_API_KEY=\"your-dashscope-api-key\""
   echo "   export DASHSCOPE_CP_BASE_URL=\"your-coding-plan-base-url\""
   echo "   export DASHSCOPE_CP_API_KEY=\"your-coding-plan-api-key\""
   echo "   export GEMINI_API_KEY=\"your-gemini-api-key\""
   echo ""
-  info "4. Restart ccr to apply the installed configuration:"
+  info "3. Restart ccr to apply the installed configuration:"
   echo "   ccr restart"
   echo ""
-  info "5. Verify ccr is running:"
+  info "4. Verify ccr is running:"
   echo "   ccr status"
   echo ""
 }

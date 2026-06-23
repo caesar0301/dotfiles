@@ -197,7 +197,7 @@ HOMEBREW_CORE_DEFAULT_GIT_REMOTE="https://github.com/Homebrew/homebrew-core"
 if [[ -n "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
   # Expand ~ to home directory
   case "${HOMEBREW_CUSTOM_PREFIX}" in
-    ~*) HOMEBREW_CUSTOM_PREFIX="${HOMEBREW_CUSTOM_PREFIX/#~/$HOME}" ;;
+  ~*) HOMEBREW_CUSTOM_PREFIX="${HOMEBREW_CUSTOM_PREFIX/#~/$HOME}" ;;
   esac
   HOMEBREW_PREFIX="${HOMEBREW_CUSTOM_PREFIX}"
   HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
@@ -511,7 +511,7 @@ fi
 # shellcheck disable=SC2016
 if [[ -n "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
   ohai "Custom prefix specified: ${HOMEBREW_PREFIX} — skipping sudo check"
-  HAVE_SUDO_ACCESS=0  # prevent execute_sudo from attempting sudo
+  HAVE_SUDO_ACCESS=0 # prevent execute_sudo from attempting sudo
 else
   ohai 'Checking for `sudo` access (which may request your password)...'
 fi
