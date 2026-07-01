@@ -93,11 +93,11 @@ configure_codex_toml() {
     # Check if config.toml exists
     if [[ -f "$config_file" ]]; then
       # Append to existing config
-      echo -e "\n# Custom configuration added by installer\n$toml_entries" >> "$config_file"
+      echo -e "\n# Custom configuration added by installer\n$toml_entries" >>"$config_file"
       success "Configuration appended to $config_file"
     else
       # Create new config
-      echo -e "# Codex Configuration\n$toml_entries" > "$config_file"
+      echo -e "# Codex Configuration\n$toml_entries" >"$config_file"
       success "Configuration created at $config_file"
     fi
   fi
