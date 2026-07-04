@@ -497,7 +497,9 @@ tmux_conf_update_plugins_on_launch=true
 # by default, reloading the configuration will update tpm and all plugins
 #   - true (default)
 #   - false
-tmux_conf_update_plugins_on_reload=true
+# Disabled: parallel reloads can race in __apply_plugins, wipe plugins via
+# clean_plugins, and make tpm sourcing fail with exit 1. Use prefix + u to update.
+tmux_conf_update_plugins_on_reload=false
 
 # by default, reloading the configuration will uninstall tpm and plugins when no
 # plugins are enabled
@@ -516,7 +518,7 @@ tmux_conf_uninstall_plugins_on_reload=true
 # to enable a plugin, use the 'set -g @plugin' syntax:
 # visit https://github.com/tmux-plugins for available plugins
 set -g @plugin 'tmux-plugins/tmux-logging'
-set -g @logging-path '~/.local/share/tmux/logs'
+set -g @logging-path "$HOME/.local/share/tmux/logs"
 set -g @plugin 'tmux-plugins/tmux-copycat'
 set -g @plugin 'tmux-plugins/tmux-cpu'
 set -g @plugin 'tmux-plugins/tmux-resurrect'

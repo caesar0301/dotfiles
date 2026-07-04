@@ -151,6 +151,9 @@ handle_tmux_config() {
     install_file_pair "$src_path" "$dest_path"
   done
 
+  # tmux-logging writes to @logging-path; create it up front
+  create_dir "$XDG_DATA_HOME/tmux/logs"
+
   success "Tmux configuration installed"
   info "Configuration directory: $TMUX_CONFIG_HOME"
   info "XDG config: $TMUX_CONFIG_HOME/tmux.conf"
