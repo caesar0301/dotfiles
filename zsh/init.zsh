@@ -112,7 +112,14 @@ export LSCOLORS=ExFxBxDxCxegedabagacad
 # extra paths
 export PATH=$HOME/.dotfiles/bin:$HOME/.local/bin:$PATH
 
-[ -d $HOME/.local/homebrew/bin ] && export PATH=$HOME/.local/homebrew/bin:$PATH
+# Homebrew (user-local prefix first, then standard macOS locations)
+if [[ -x "$HOME/.local/homebrew/bin/brew" ]]; then
+  eval "$("$HOME/.local/homebrew/bin/brew" shellenv)" 2>/dev/null || true
+elif [[ -x "/opt/homebrew/bin/brew" ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+elif [[ -x "/usr/local/bin/brew" ]]; then
+  eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null || true
+fi
 
 # respect local zshenv
 [ -f ~/.zshenv.local ] && source ~/.zshenv.local
