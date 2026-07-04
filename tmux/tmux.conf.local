@@ -389,6 +389,14 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # This ensures proper color rendering and termguicolors support
 set -g default-terminal "screen-256color" #!important
 
+# Strip color-blocking env vars injected by IDE agents (Cursor, CI, npm).
+# Claude Code and other CLIs disable colors when NO_COLOR, FORCE_COLOR=0, or TERM=dumb.
+set-environment -gu NO_COLOR
+set-environment -gu FORCE_COLOR
+set-environment -gu NODE_DISABLE_COLORS
+set-environment -gu TERM
+set-hook -g client-attached 'run "tmux set-environment -gu NO_COLOR; tmux set-environment -gu FORCE_COLOR; tmux set-environment -gu NODE_DISABLE_COLORS; tmux set-environment -gu TERM"'
+
 # Agent-friendly scrollback: enough depth for long runs without Apple Silicon SIGABRT crashes
 set -g history-limit 50000 #!important
 
