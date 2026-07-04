@@ -1,5 +1,9 @@
 // Local Zellij customizations
 // Edit this file, then re-run: ./zellij/install.sh
+//
+// Starts in Lock Mode: keys pass through to apps/agents. Ctrl+g toggles LOCK ↔ NORMAL.
+
+default_mode "locked"
 
 default_shell "zsh"
 mouse_mode false
@@ -10,7 +14,7 @@ advanced_mouse_actions false
 mouse_hover_effects false
 
 keybinds {
-    // Pass Ctrl-a/Ctrl-b through to nested tmux (tmux prefix keys)
+    // Pass Ctrl-a/Ctrl-b through to nested tmux
     unbind "Ctrl a"
     unbind "Ctrl b"
 
