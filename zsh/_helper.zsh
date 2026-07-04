@@ -59,7 +59,7 @@ bingot() {
   tmux attach -t "$SESSION_NAME"
 }
 
-bingo() {
+bingoz() {
   local SESSION_NAME="${1:-bingo}"
 
   if zellij list-sessions -s 2>/dev/null | grep -qx "$SESSION_NAME"; then
@@ -70,6 +70,8 @@ bingo() {
 
   zellij attach -c "$SESSION_NAME"
 }
+
+alias bingo=bingoz
 
 # Load custom extensions under $ZSH_PLUGIN_DIR
 _zinit_ice_plugin() {
