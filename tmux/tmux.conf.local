@@ -407,8 +407,8 @@ set -g status-keys vi
 set -g mode-keys vi
 bind -T copy-mode-vi WheelUpPane send -X scroll-up
 bind -T copy-mode-vi WheelDownPane send -X scroll-down
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "reattach-to-user-namespace pbcopy"
-bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "reattach-to-user-namespace pbcopy" \; display-message "highlighted selection copied to system clipboard"
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy" \; display-message "highlighted selection copied to system clipboard"
 bind v copy-mode
 
 # replace C-b by C-a instead of using both prefixes
@@ -492,7 +492,7 @@ bind -T copy-mode-vi Escape send-keys -X cancel #!important
 # by default, launching tmux will update tpm and all plugins
 #   - true (default)
 #   - false
-tmux_conf_update_plugins_on_launch=true
+tmux_conf_update_plugins_on_launch=false
 
 # by default, reloading the configuration will update tpm and all plugins
 #   - true (default)

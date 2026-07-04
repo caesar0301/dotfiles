@@ -41,22 +41,37 @@ function zshup {
   echo "==> Done. Restart shell if completions behave oddly."
 }
 
+_tmux_recover_server() {
+  if tmux list-sessions >/dev/null 2>&1; then
+    return 0
+  fi
+
+  tmux kill-server >/dev/null 2>&1
+}
+
 bingot() {
   local SESSION_NAME="${1:-bingo}"
 
-  # Check if tmux server is already running by listing sessions
+  _tmux_recover_server
+
   if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     echo "Attaching to existing tmux session: $SESSION_NAME"
   else
     echo "Creating new tmux session: $SESSION_NAME"
-    tmux new-session -d -s "$SESSION_NAME"
+    if ! tmux new-session -d -s "$SESSION_NAME"; then
+      _tmux_recover_server
+      tmux new-session -d -s "$SESSION_NAME" || return 1
+    fi
   fi
 
   # Unset TMUX to allow clean attach
   unset TMUX
 
-  # Attach to the session
-  tmux attach -t "$SESSION_NAME"
+  if ! tmux attach -t "$SESSION_NAME"; then
+    _tmux_recover_server
+    tmux new-session -d -s "$SESSION_NAME" || return 1
+    tmux attach -t "$SESSION_NAME"
+  fi
 }
 
 bingoz() {
