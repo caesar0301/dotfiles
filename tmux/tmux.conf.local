@@ -389,11 +389,17 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # This ensures proper color rendering and termguicolors support
 set -g default-terminal "screen-256color" #!important
 
-# increase history size
-#set -g history-limit 10000
+# Agent-friendly scrollback: enough depth for long runs without Apple Silicon SIGABRT crashes
+set -g history-limit 50000 #!important
+
+# Optimize terminal reflow and scrollback responsiveness
+set -g window-size latest
+setw -g aggressive-resize on
 
 # start with mouse mode enabled
 set -g mouse off #!important
+# When mouse is toggled on (prefix + m), avoid wheel scroll hammering the history grid
+unbind -n WheelUpPane
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
@@ -417,6 +423,9 @@ bind C-a send-prefix
 
 # display a message after toggling mouse support
 bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?#{mouse},on,off}'
+
+# prefix + K: clear screen and pane history (flush runaway agent output without killing the session)
+bind K clear-history \; display-message "History cleared!"
 
 # move status line to top
 #set -g status-position top
@@ -506,6 +515,8 @@ tmux_conf_uninstall_plugins_on_reload=true
 
 # to enable a plugin, use the 'set -g @plugin' syntax:
 # visit https://github.com/tmux-plugins for available plugins
+set -g @plugin 'tmux-plugins/tmux-logging'
+set -g @logging-path '~/.local/share/tmux/logs'
 set -g @plugin 'tmux-plugins/tmux-copycat'
 set -g @plugin 'tmux-plugins/tmux-cpu'
 set -g @plugin 'tmux-plugins/tmux-resurrect'

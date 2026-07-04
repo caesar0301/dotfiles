@@ -71,7 +71,7 @@ bingoz() {
   zellij attach -c "$SESSION_NAME"
 }
 
-alias bingo=bingoz
+alias bingo=bingot
 
 # Load custom extensions under $ZSH_PLUGIN_DIR
 _zinit_ice_plugin() {
