@@ -1160,6 +1160,23 @@ install_tmux() {
   "$script_dir/install-tmux.sh"
 }
 
+# Install zellij terminal workspace
+install_zellij() {
+  if checkcmd zellij; then
+    info "zellij already installed" && return
+  fi
+  if checkcmd brew; then
+    brew install zellij && return
+  fi
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-zellij.sh"
+}
+
 # Install yazi terminal file manager
 install_yazi() {
   if checkcmd yazi; then

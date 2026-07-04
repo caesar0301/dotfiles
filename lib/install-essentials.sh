@@ -105,6 +105,7 @@ main() {
   local core_deps=(
     "install_homebrew"        # Homebrew package manager (MUST be first)
     "install_tmux"            # Tmux terminal multiplexer (needs Homebrew or source build)
+    "install_zellij"          # Zellij terminal workspace (needs Homebrew or release binary)
     "install_pyenv"           # Python version manager
     "install_universal_ctags" # Universal ctags (required by Tagbar, may use Homebrew)
     "install_fzf"             # Fuzzy finder
@@ -146,6 +147,7 @@ main() {
   printf "  • Utility scripts: %b~/.dotfiles/bin%b (in PATH)\n" "$COLOR_CYAN" "$COLOR_RESET"
   printf "  • Homebrew: Package manager\n"
   printf "  • tmux: Terminal multiplexer\n"
+  printf "  • zellij: Terminal workspace\n"
   printf "  • pyenv: Python version manager\n"
   printf "  • fzf: Fuzzy finder\n"
   printf "  • universal-ctags: Code navigation tool\n"

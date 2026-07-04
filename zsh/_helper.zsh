@@ -41,7 +41,7 @@ function zshup {
   echo "==> Done. Restart shell if completions behave oddly."
 }
 
-bingo() {
+bingot() {
   local SESSION_NAME="${1:-bingo}"
 
   # Check if tmux server is already running by listing sessions
@@ -57,6 +57,18 @@ bingo() {
 
   # Attach to the session
   tmux attach -t "$SESSION_NAME"
+}
+
+bingo() {
+  local SESSION_NAME="${1:-bingo}"
+
+  if zellij list-sessions -s 2>/dev/null | grep -qx "$SESSION_NAME"; then
+    echo "Attaching to existing zellij session: $SESSION_NAME"
+  else
+    echo "Creating new zellij session: $SESSION_NAME"
+  fi
+
+  zellij attach -c "$SESSION_NAME"
 }
 
 # Load custom extensions under $ZSH_PLUGIN_DIR

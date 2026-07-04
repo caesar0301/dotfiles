@@ -46,7 +46,7 @@ Personal dotfiles collection (`cool-dotfiles`) for setting up a modern developme
 
 ### Module Structure
 
-Each module (zsh/, nvim/, tmux/, emacs/, vifm/, misc/, lisp/, alacritty/) follows this pattern:
+Each module (zsh/, nvim/, tmux/, zellij/, emacs/, vifm/, misc/, lisp/, alacritty/) follows this pattern:
 - Has `install.sh` script with `-s`, `-f`, `-c` flags
 - Sources `lib/shlib.sh` for utilities
 - Follows XDG Base Directory specification (XDG_DATA_HOME, XDG_CONFIG_HOME, XDG_CACHE_HOME)
@@ -132,8 +132,8 @@ For comprehensive troubleshooting guide, see `docs/tmux-unicode-fix.md`.
 2. Source `lib/shlib.sh` for utilities
 3. Follow existing patterns for XDG compliance
 4. Add module to `COMPONENTS` array in `install_all.sh` if needed
-5. Current modules in install_all.sh: zsh, tmux, nvim, emacs, vifm, misc, lisp, alacritty
-6. Current modules in install_basics.sh: zsh, tmux, nvim
+5. Current modules in install_all.sh: zsh, tmux, zellij, nvim, emacs, vifm, misc, lisp, alacritty
+6. Current modules in install_basics.sh: zsh, tmux, zellij, nvim
 
 ### Updating Utility Scripts
 1. Modify scripts in `bin/` directory
@@ -244,6 +244,7 @@ Contains infrastructure configurations beyond user-level dotfiles:
 - **Zsh**: Zinit plugin manager, proxy support, custom plugins in `zsh/plugins/`
 - **Neovim**: Lazy.nvim plugin manager, LSP support, kernel version compatibility checks, language formatters
 - **Tmux**: Terminal multiplexer with optimized configurations, pure XDG Base Directory compliance (no ~/.tmux.conf symlink)
+- **Zellij**: Terminal workspace with XDG config at `~/.config/zellij/config.kdl` (base + local merge)
 - **Emacs**: Configuration with plugins and Lisp development environment
 - **Vifm**: Vi file manager
 - **Misc**: Kitty, Alacritty, and Ghostty terminals, SBCL completions (supports selective installation via `-m`)

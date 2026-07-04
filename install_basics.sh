@@ -27,9 +27,10 @@ source "$THISDIR/lib/shlib.sh" || {
 
 # Basic component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"  # Z shell configuration
-  "tmux" # Terminal multiplexer
-  "nvim" # Neovim development environment
+  "zsh"    # Z shell configuration
+  "tmux"   # Terminal multiplexer
+  "zellij" # Terminal workspace
+  "nvim"   # Neovim development environment
 )
 
 # Track installation statistics

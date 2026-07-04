@@ -1,0 +1,20 @@
+// Local Zellij customizations
+// Edit this file, then re-run: ./zellij/install.sh
+
+default_shell "zsh"
+mouse_mode false
+scroll_buffer_size 10000
+copy_on_select false
+show_release_notes false
+advanced_mouse_actions false
+mouse_hover_effects false
+
+keybinds {
+    // Pass Ctrl-a/Ctrl-b through to nested tmux (tmux prefix keys)
+    unbind "Ctrl a"
+    unbind "Ctrl b"
+
+    scroll {
+        bind "Alt c" { Copy; }
+    }
+}

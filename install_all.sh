@@ -27,13 +27,14 @@ source "$THISDIR/lib/shlib.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"   # Z shell configuration
-  "tmux"  # Terminal multiplexer
-  "nvim"  # Neovim development environment
-  "emacs" # Emacs configuration
-  "vifm"  # Vi file manager
-  "misc"  # Utility scripts and terminal configurations
-  "lisp"  # Common Lisp development environment
+  "zsh"    # Z shell configuration
+  "tmux"   # Terminal multiplexer
+  "zellij" # Terminal workspace
+  "nvim"   # Neovim development environment
+  "emacs"  # Emacs configuration
+  "vifm"   # Vi file manager
+  "misc"   # Utility scripts and terminal configurations
+  "lisp"   # Common Lisp development environment
 )
 
 # Track installation statistics
