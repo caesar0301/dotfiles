@@ -478,9 +478,9 @@ function gplfs() {
 # Submodule Utilities
 # =====================
 
-# Pull all submodules to latest master
+# Pull all submodules to latest on their current branch
 function git-submodule-latest() {
-  git submodule foreach git pull origin master
+  git submodule foreach 'git pull origin $(git symbolic-ref --short HEAD)'
 }
 
 # Reset and clean repo and submodules
