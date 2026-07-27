@@ -19,6 +19,7 @@ Options:
   --opencode     Install opencode
   --cursor       Install Cursor agent
   --codex        Install OpenAI Codex (supports custom OpenAI configs)
+  --grok         Install Grok CLI (caesar0301/grok-build releases)
   --all          Install all agents (default if no options specified)
   --autostart    Enable pm2 autostart for ccr and opencode-web (independent of --all)
   -h, --help     Show this help message and exit
@@ -30,6 +31,7 @@ Examples:
   $(basename "$0") --all --autostart    # Install all agents with autostart
   $(basename "$0") --claude --opencode  # Install Claude and opencode only
   $(basename "$0") --codex              # Install OpenAI Codex only
+  $(basename "$0") --grok               # Install Grok CLI only
 
 Note: --autostart is not included in --all and must be specified separately
 EOF
@@ -45,6 +47,7 @@ main() {
   local install_opencode=false
   local install_cursor=false
   local install_codex=false
+  local install_grok=false
   local enable_autostart=false
   local any_agent_specified=false
 
@@ -71,11 +74,17 @@ main() {
       any_agent_specified=true
       shift
       ;;
+    --grok)
+      install_grok=true
+      any_agent_specified=true
+      shift
+      ;;
     --all)
       install_claude=true
       install_opencode=true
       install_cursor=true
       install_codex=true
+      install_grok=true
       any_agent_specified=true
       shift
       ;;
@@ -102,6 +111,7 @@ main() {
     install_opencode=true
     install_cursor=true
     install_codex=true
+    install_grok=true
   fi
 
   info "Installing AI code agents..."
@@ -156,6 +166,17 @@ main() {
       success "OpenAI Codex agent installation completed"
     else
       error "OpenAI Codex agent installation failed"
+      return 1
+    fi
+  fi
+
+  # Install grok CLI
+  if [[ "$install_grok" == "true" ]]; then
+    info "Calling install-ai-agent-grok.sh..."
+    if "$SCRIPT_DIR/install-ai-agent-grok.sh"; then
+      success "Grok agent installation completed"
+    else
+      error "Grok agent installation failed"
       return 1
     fi
   fi
