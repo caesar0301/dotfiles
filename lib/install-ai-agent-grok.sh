@@ -17,7 +17,6 @@ readonly GROK_GITHUB_REPO="grok-build"
 readonly GROK_INSTALL_DIR="${HOME}/.local/bin"
 readonly GROK_CONFIG_DIR="${HOME}/.grok"
 readonly DASHSCOPE_DEFAULT_MODEL="glm-5.2"
-readonly DASHSCOPE_DEFAULT_BASE_URL="https://llm-0wh4qxgauf8u61nx.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 
 usage() {
   cat <<EOF
@@ -26,25 +25,23 @@ Grok AI Agent Installer
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --base-url URL       OpenAI-compatible base URL
-                       (default: DASHSCOPE_BASE_URL env or MaaS URL)
-  --model MODEL        Default model id (default: ${DASHSCOPE_DEFAULT_MODEL})
-  --dashscope          Configure DashScope / custom OpenAI endpoint
+  --dashscope          Install DashScope config from bundled template
+                       (lib/grok-config.toml) into ~/.grok/config.toml
   -h, --help           Show this help message and exit
 
 Environment Variables (auto-detected for DashScope):
   DASHSCOPE_API_KEY    API key used via env_key in ~/.grok/config.toml
-  DASHSCOPE_BASE_URL   OpenAI-compatible base URL written into config
 
 Examples:
-  $(basename "$0")                              # Install latest + auto DashScope if env set
-  $(basename "$0") --dashscope                  # Install and write DashScope config
-  $(basename "$0") --dashscope --model glm-5.2  # Set default model explicitly
+  $(basename "$0")                              # Install binary + auto config if env set
+  $(basename "$0") --dashscope                  # Install binary and write DashScope config
 
 Note: Binary is downloaded from:
   https://github.com/${GROK_GITHUB_OWNER}/${GROK_GITHUB_REPO}/releases
   Assets: grok-{macos|linux}-{x86_64|aarch64}
-  Config: ~/.grok/config.toml (API key via DASHSCOPE_API_KEY, not stored in file)
+  Config: ~/.grok/config.toml installed from lib/grok-config.toml template
+          (API key via DASHSCOPE_API_KEY env var, not stored in file)
+          Existing config is preserved; re-running will not overwrite it.
 EOF
 }
 
@@ -161,41 +158,33 @@ install_grok_cli() {
   fi
 }
 
-# Write ~/.grok/config.toml for OpenAI-compatible / DashScope endpoint
+# Install ~/.grok/config.toml from the bundled template.
+#
+# The template (lib/grok-config.toml) is the source of truth: it carries the
+# full DashScope model catalog and baked-in base_url values. An existing config
+# is preserved (never overwritten) so user edits survive re-runs.
 configure_dashscope_grok() {
-  local model="$1"
-  local base_url="$2"
   local config_file="${GROK_CONFIG_DIR}/config.toml"
+  local template_file="${SCRIPT_DIR}/grok-config.toml"
 
-  mkdir -p "$GROK_CONFIG_DIR"
+  create_dir "$GROK_CONFIG_DIR"
 
-  info "Configuring Grok DashScope / OpenAI-compatible settings in ${config_file}..."
+  if [[ -e "$config_file" ]]; then
+    info "Existing Grok config found at ${config_file}; preserving (not overwritten)"
+    if [[ -z "${DASHSCOPE_API_KEY:-}" ]]; then
+      warn "DASHSCOPE_API_KEY is not set; export it before running grok"
+    fi
+    return 0
+  fi
 
-  cat >"$config_file" <<EOF
-# Grok Configuration (DashScope / OpenAI-compatible endpoint)
-# API key is read from DASHSCOPE_API_KEY (not stored in this file)
+  [[ -e "$template_file" ]] || error "Grok config template not found: ${template_file}"
 
-[cli]
-auto_update = false
+  info "Installing Grok config template to ${config_file}..."
+  install -m 644 "$template_file" "$config_file"
 
-[models]
-default = "${model}"
-
-[endpoints]
-models_base_url = "${base_url}"
-
-[model.${model}]
-model = "${model}"
-base_url = "${base_url}"
-name = "DashScope ${model}"
-description = "DashScope OpenAI-compatible model"
-env_key = "DASHSCOPE_API_KEY"
-api_backend = "chat_completions"
-EOF
-
-  success "Grok configuration written to ${config_file}"
-  info "Endpoint: ${base_url}"
-  info "Default model: ${model}"
+  success "Grok configuration installed to ${config_file}"
+  info "Default model: glm-5.2 (edit ${config_file} to change)"
+  info "API key is read from DASHSCOPE_API_KEY at runtime (not stored in file)"
 
   if [[ -z "${DASHSCOPE_API_KEY:-}" ]]; then
     warn "DASHSCOPE_API_KEY is not set; export it before running grok"
@@ -206,22 +195,9 @@ EOF
 
 main() {
   local use_dashscope=false
-  local base_url=""
-  local model=""
 
   while [[ $# -gt 0 ]]; do
     case $1 in
-    --base-url)
-      [[ $# -ge 2 ]] || error "--base-url requires a URL argument"
-      base_url="$2"
-      use_dashscope=true
-      shift 2
-      ;;
-    --model)
-      [[ $# -ge 2 ]] || error "--model requires a model id"
-      model="$2"
-      shift 2
-      ;;
     --dashscope)
       use_dashscope=true
       shift
@@ -241,8 +217,6 @@ main() {
   # Auto-detect DashScope when env vars are present
   if [[ "$use_dashscope" == true || -n "${DASHSCOPE_API_KEY:-}" || -n "${DASHSCOPE_BASE_URL:-}" ]]; then
     use_dashscope=true
-    base_url="${base_url:-${DASHSCOPE_BASE_URL:-${DASHSCOPE_DEFAULT_BASE_URL}}}"
-    model="${model:-${DASHSCOPE_DEFAULT_MODEL}}"
     info "Using DashScope / OpenAI-compatible endpoint configuration"
   fi
 
@@ -250,7 +224,7 @@ main() {
   install_grok_cli
 
   if [[ "$use_dashscope" == true ]]; then
-    configure_dashscope_grok "$model" "$base_url"
+    configure_dashscope_grok
   else
     info "Skipping endpoint configuration (pass --dashscope or set DASHSCOPE_* env vars)"
   fi
@@ -259,9 +233,8 @@ main() {
   echo ""
   echo "Next steps:"
   echo "  export DASHSCOPE_API_KEY=sk-xxx"
-  echo "  export DASHSCOPE_BASE_URL=${base_url:-${DASHSCOPE_DEFAULT_BASE_URL}}"
   echo "  grok"
-  echo "  grok -p \"hello\" -m ${model:-${DASHSCOPE_DEFAULT_MODEL}}"
+  echo "  grok -p \"hello\" -m ${DASHSCOPE_DEFAULT_MODEL}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
