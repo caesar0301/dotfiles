@@ -3,7 +3,7 @@
 # OpenAI Codex AI Agent Installer
 #
 # Installs OpenAI Codex CLI with custom configuration support
-# Supports DashScope (Alibaba Cloud) Coding Plan via local bridge
+# Supports DashScope (Alibaba Cloud) via local bridge
 #
 # Copyright (c) 2024, 2026 Xiaming Chen
 # License: MIT
@@ -11,8 +11,8 @@
 
 readonly CODEX_BRIDGE_HOST="127.0.0.1"
 readonly CODEX_BRIDGE_PORT="31415"
-readonly DASHSCOPE_DEFAULT_MODEL="glm-5"
-readonly DASHSCOPE_DEFAULT_BASE_URL="https://coding.dashscope.aliyuncs.com/v1"
+readonly DASHSCOPE_DEFAULT_MODEL="glm-5.2"
+readonly DASHSCOPE_DEFAULT_BASE_URL="https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 
 usage() {
   cat <<EOF
@@ -23,24 +23,24 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   --api-key KEY        Set OpenAI API key via login command
   --base-url URL       DashScope upstream URL for the local bridge
-                       (default: DASHSCOPE_BASE_URL env or Coding Plan URL)
+                       (default: DASHSCOPE_BASE_URL env or MaaS URL)
   --model MODEL        Set default model (DashScope default: ${DASHSCOPE_DEFAULT_MODEL})
-  --dashscope          Use DashScope (Alibaba Cloud) Coding Plan defaults
+  --dashscope          Use DashScope (Alibaba Cloud) defaults
   -h, --help           Show this help message and exit
 
 Environment Variables (auto-detected for DashScope):
-  DASHSCOPE_API_KEY    DashScope Coding Plan API key (sk-sp-...)
+  DASHSCOPE_API_KEY    DashScope API key (sk-sp-...)
   DASHSCOPE_BASE_URL   DashScope upstream base URL for the bridge
 
 Examples:
   $(basename "$0")                              # Install with env defaults
   $(basename "$0") --dashscope                 # Use DashScope defaults
-  $(basename "$0") --dashscope --model glm-5   # Set DashScope model explicitly
+  $(basename "$0") --dashscope --model glm-5.2 # Set DashScope model explicitly
   $(basename "$0") --api-key sk-xxx            # Install OpenAI with API key
 
 DashScope Configuration:
   export DASHSCOPE_API_KEY=sk-sp-xxx
-  export DASHSCOPE_BASE_URL=https://coding.dashscope.aliyuncs.com/v1
+  export DASHSCOPE_BASE_URL=https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
   $(basename "$0") --dashscope
 
 Note: OpenAI Codex requires Node.js >= 20 and npm >= 20
@@ -66,9 +66,9 @@ install_codex_cli() {
   fi
 }
 
-# Install Responses API bridge for DashScope Coding Plan
+# Install Responses API bridge for DashScope
 install_codex_bridge() {
-  info "Installing aliyun-codex-bridge for DashScope Coding Plan..."
+  info "Installing aliyun-codex-bridge for DashScope..."
   npm_install_lib aliyun-codex-bridge
 }
 
@@ -119,7 +119,7 @@ configure_dashscope_codex() {
   info "Configuring DashScope Codex settings in $config_file..."
 
   cat >"$config_file" <<EOF
-# Codex Configuration (DashScope Coding Plan via local bridge)
+# Codex Configuration (DashScope via local bridge)
 model = "${model}"
 model_provider = "dashscope"
 
@@ -193,7 +193,7 @@ start_codex_bridge() {
   return 1
 }
 
-# Verify Codex can reach glm-5 through the configured provider
+# Verify Codex can reach glm-5.2 through the configured provider
 verify_codex_status() {
   local model="$1"
 
@@ -265,7 +265,7 @@ main() {
     api_key="${api_key:-${DASHSCOPE_API_KEY:-}}"
     base_url="${base_url:-${DASHSCOPE_BASE_URL:-${DASHSCOPE_DEFAULT_BASE_URL}}}"
     model="${model:-${DASHSCOPE_DEFAULT_MODEL}}"
-    info "Using DashScope (Alibaba Cloud) Coding Plan configuration"
+    info "Using DashScope (Alibaba Cloud) configuration"
   fi
 
   info "Installing OpenAI Codex AI agent..."
@@ -287,7 +287,7 @@ main() {
   echo ""
 
   if [[ "$use_dashscope" == true ]]; then
-    info "1. Ensure your Coding Plan credentials are exported:"
+    info "1. Ensure your DashScope credentials are exported:"
     echo "   export DASHSCOPE_API_KEY=sk-sp-xxx"
     echo "   export DASHSCOPE_BASE_URL=${DASHSCOPE_DEFAULT_BASE_URL}"
     echo ""

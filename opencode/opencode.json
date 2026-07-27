@@ -1,25 +1,25 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
-  "model": "dashscope/glm-5",
-  "small_model": "dashscope/kimi-k2.5",
+  "model": "dashscope/glm-5.2",
+  "small_model": "dashscope/kimi-k2.6",
 
   "provider": {
     "dashscope": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "DashScope",
       "options": {
-        "baseURL": "{env:DASHSCOPE_CP_BASE_URL}",
-        "apiKey": "{env:DASHSCOPE_CP_API_KEY}"
+        "baseURL": "{env:DASHSCOPE_BASE_URL}",
+        "apiKey": "{env:DASHSCOPE_API_KEY}"
       },
       "models": {
-        "qwen3.5-plus": {
+        "glm-5.2": {
           "tools": true,
           "options": {
             "maxTokens": 65536
           }
         },
-        "kimi-k2.5": {
+        "MiniMax-M": {
           "tools": true,
           "options": {
             "maxTokens": 65536
@@ -31,19 +31,19 @@
             "maxTokens": 65536
           }
         },
-        "glm-5": {
+        "kimi-k2.7-code": {
           "tools": true,
           "options": {
             "maxTokens": 65536
           }
         },
-        "glm-4.7": {
+        "kimi-k3": {
           "tools": true,
           "options": {
             "maxTokens": 65536
           }
         },
-        "qwen3-coder-next": {
+        "kimi-k2.6": {
           "tools": true,
           "options": {
             "maxTokens": 65536

@@ -16,7 +16,7 @@ readonly GROK_GITHUB_OWNER="caesar0301"
 readonly GROK_GITHUB_REPO="grok-build"
 readonly GROK_INSTALL_DIR="${HOME}/.local/bin"
 readonly GROK_CONFIG_DIR="${HOME}/.grok"
-readonly DASHSCOPE_DEFAULT_MODEL="glm-5"
+readonly DASHSCOPE_DEFAULT_MODEL="glm-5.2"
 readonly DASHSCOPE_DEFAULT_BASE_URL="https://llm-0wh4qxgauf8u61nx.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 
 usage() {
@@ -39,7 +39,7 @@ Environment Variables (auto-detected for DashScope):
 Examples:
   $(basename "$0")                              # Install latest + auto DashScope if env set
   $(basename "$0") --dashscope                  # Install and write DashScope config
-  $(basename "$0") --dashscope --model glm-5    # Set default model explicitly
+  $(basename "$0") --dashscope --model glm-5.2  # Set default model explicitly
 
 Note: Binary is downloaded from:
   https://github.com/${GROK_GITHUB_OWNER}/${GROK_GITHUB_REPO}/releases

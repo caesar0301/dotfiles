@@ -10,8 +10,7 @@
 #                       baked in per model below — keep values in sync with
 #                       DASHSCOPE_BASE_URL, or re-run the installer to refresh.
 #
-# Two endpoints are used:
-#   coding endpoint  https://coding.dashscope.aliyuncs.com/v1
+# Endpoint used:
 #   maas endpoint    https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
 #
 # Note: DashScope GLM models emit empty-string `function.name` / `id` in
@@ -30,10 +29,10 @@ default_skills_installs_purged = true
 
 [models]
 # Default model for new sessions. Change with `grok -m <name>` or `/model`.
-default = "glm-5"
+default = "glm-5.2"
 # Avoid built-in grok-4.5 for title/summary (not available on DashScope).
-session_summary = "glm-5"
-web_search = "qwen3.7-plus"
+session_summary = "glm-5.2"
+web_search = "glm-5.2"
 
 # ---------------------------------------------------------------------------
 # Custom models (DashScope / Alibaba Cloud MaaS)
@@ -42,44 +41,6 @@ web_search = "qwen3.7-plus"
 # time, so the key is never written to disk. base_url is baked in because
 # Grok does not interpolate env vars in config values; re-run the installer
 # (or edit below) if a DashScope endpoint changes.
-
-# --- Coding endpoint (https://coding.dashscope.aliyuncs.com/v1) -----------
-
-[model."glm-5"]
-model = "glm-5"
-base_url = "https://coding.dashscope.aliyuncs.com/v1"
-name = "GLM-5 (DashScope)"
-description = "Zhipu GLM-5 via DashScope OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."qwen3.7-plus"]
-model = "qwen3.7-plus"
-base_url = "https://coding.dashscope.aliyuncs.com/v1"
-name = "Qwen3.7-Plus (DashScope)"
-description = "Alibaba Qwen3.7-Plus via DashScope OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."kimi-k2.5"]
-model = "kimi-k2.5"
-base_url = "https://coding.dashscope.aliyuncs.com/v1"
-name = "Kimi K2.5 (DashScope)"
-description = "Moonshot Kimi K2.5 via DashScope OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."MiniMax-M2.5"]
-model = "MiniMax-M2.5"
-base_url = "https://coding.dashscope.aliyuncs.com/v1"
-name = "MiniMax M2.5 (DashScope)"
-description = "MiniMax M2.5 via DashScope OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
 
 # --- MaaS endpoint (https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1) ---
 
@@ -92,11 +53,20 @@ api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model."qwen3.7-max"]
-model = "qwen3.7-max"
+[model."MiniMax-M"]
+model = "MiniMax-M"
 base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
-name = "Qwen3.7-Max (DashScope MaaS)"
-description = "Alibaba Qwen3.7-Max via DashScope MaaS OpenAI-compatible endpoint"
+name = "MiniMax-M (DashScope MaaS)"
+description = "MiniMax-M via DashScope MaaS OpenAI-compatible endpoint"
+api_backend = "chat_completions"
+env_key = "DASHSCOPE_API_KEY"
+context_window = 128000
+
+[model."MiniMax-M2.5"]
+model = "MiniMax-M2.5"
+base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+name = "MiniMax M2.5 (DashScope MaaS)"
+description = "MiniMax M2.5 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
@@ -106,6 +76,24 @@ model = "kimi-k2.7-code"
 base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 name = "Kimi K2.7 Code (DashScope MaaS)"
 description = "Moonshot Kimi K2.7 Code via DashScope MaaS OpenAI-compatible endpoint"
+api_backend = "chat_completions"
+env_key = "DASHSCOPE_API_KEY"
+context_window = 128000
+
+[model."kimi-k3"]
+model = "kimi-k3"
+base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+name = "Kimi K3 (DashScope MaaS)"
+description = "Moonshot Kimi K3 via DashScope MaaS OpenAI-compatible endpoint"
+api_backend = "chat_completions"
+env_key = "DASHSCOPE_API_KEY"
+context_window = 128000
+
+[model."kimi-k2.6"]
+model = "kimi-k2.6"
+base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+name = "Kimi K2.6 (DashScope MaaS)"
+description = "Moonshot Kimi K2.6 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000

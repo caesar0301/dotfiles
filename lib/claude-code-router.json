@@ -14,13 +14,12 @@
       "api_base_url": "${DASHSCOPE_BASE_URL}/chat/completions",
       "api_key": "${DASHSCOPE_API_KEY}",
       "models": [
-        "qwen3.6-flash",
-        "qwen3.6-plus",
-        "qwen3.7-plus",
-        "glm-5",
         "glm-5.2",
-        "kimi-k2.5",
+        "MiniMax-M",
         "MiniMax-M2.5",
+        "kimi-k2.7-code",
+        "kimi-k3",
+        "kimi-k2.6",
         "text-embedding-v4"
       ],
       "transformer": {
@@ -52,9 +51,9 @@
     }
   },
   "Router": {
-    "default": "dashscope,glm-5",
-    "think": "dashscope,glm-5",
-    "image": "dashscope,qwen3.7-plus"
+    "default": "dashscope,glm-5.2",
+    "think": "dashscope,glm-5.2",
+    "image": "dashscope,MiniMax-M2.5"
   },
   "CUSTOM_ROUTER_PATH": ""
 }
