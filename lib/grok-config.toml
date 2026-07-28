@@ -24,6 +24,18 @@ installer = "internal"
 default_skills_installs_purged = true
 
 # ---------------------------------------------------------------------------
+# UI / permissions
+# ---------------------------------------------------------------------------
+# permission_mode controls how tool executions are approved:
+#   "always-approve"  auto-approve every tool execution (no prompts)
+#   "auto"            LLM classifier approves safe tools; risky ones may prompt
+#   "ask"             prompt before every tool action
+# Equivalent to running grok with --always-approve (alias --yolo) every session.
+
+[ui]
+permission_mode = "always-approve"
+
+# ---------------------------------------------------------------------------
 # Model catalog
 # ---------------------------------------------------------------------------
 
