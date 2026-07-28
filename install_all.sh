@@ -53,7 +53,7 @@ install_essentials_prerequisite() {
   }
 
   info "Installing essential development tools (prerequisite)..."
-  info "Enabling optional version managers (AI code agents are enabled by default)"
+  info "Enabling optional version managers (AI code agents are opt-in)"
 
   # Enable optional version managers for full installation
   export INSTALL_EXTRA_VENV=1

@@ -39,9 +39,10 @@ Personal dotfiles collection (`cool-dotfiles`) for setting up a modern developme
 - Both automatically run `lib/install-essentials.sh` as prerequisite
 
 **Prerequisites (`lib/install-essentials.sh`):**
-- Always installs: utility scripts (bin/), pyenv, fzf, universal-ctags, cargo, Homebrew, AI code agents
+- Always installs: utility scripts (bin/), pyenv, fzf, universal-ctags, cargo, Homebrew
 - Optional: `INSTALL_EXTRA_VENV=1` enables jenv, gvm, nvm, rbenv version managers
-- `install_all.sh` enables all optional features by default
+- Optional: `INSTALL_AI_AGENTS=1` enables AI code agents (requires npm >= 20)
+- `install_all.sh` enables all optional version managers by default
 - `install_basics.sh` uses default settings (no optional version managers)
 
 ### Module Structure

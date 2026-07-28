@@ -12,7 +12,7 @@
 # - Language Server Protocol (LSP) support
 # - Language formatters and linters
 # - Hack Nerd Font for development icons
-# - AI code agents support
+# - AI code agents support (opt-in)
 # - Enhanced error handling and user feedback
 #
 # Usage:
@@ -21,12 +21,14 @@
 #
 #   With optional components:
 #     INSTALL_EXTRA_VENV=1 ./lib/install-essentials.sh
+#     INSTALL_AI_AGENTS=1 ./lib/install-essentials.sh
 #
-#   AI code agents are installed by default (requires Node.js >= 20
-#   and npm >= 20) when supported by the system.
+#   AI code agents are opt-in (set INSTALL_AI_AGENTS=1, requires
+#   Node.js >= 20 and npm >= 20) when supported by the system.
 #
 # Environment Variables:
 #   INSTALL_EXTRA_VENV=1    Install jenv, gvm, nvm version managers
+#   INSTALL_AI_AGENTS=1     Install AI code agents (requires npm >= 20)
 #
 # What Gets Installed:
 #   - pyenv: Python version manager (always installed)
@@ -40,7 +42,7 @@
 #   - yazi: Terminal file manager (always installed)
 #   - lazygit: Terminal Git UI (always installed)
 #   - jenv, gvm, nvm: Java/Go/Node version managers (if INSTALL_EXTRA_VENV=1)
-#   - AI code agents: AI-powered development tools (installed by default,
+#   - AI code agents: AI-powered development tools (if INSTALL_AI_AGENTS=1,
 #     requires npm >= 20)
 #
 # Post-Installation:
@@ -123,8 +125,12 @@ main() {
     info "Development environment installation enabled via INSTALL_EXTRA_VENV=1"
   fi
 
-  # Always attempt to install AI code agents (best-effort, depends on npm >= 20)
-  core_deps+=("install_ai_code_agents")
+  # Install AI code agents only when explicitly requested
+  # (requires npm >= 20). Set INSTALL_AI_AGENTS=1 to enable.
+  if [[ "${INSTALL_AI_AGENTS:-0}" == "1" ]]; then
+    core_deps+=("install_ai_code_agents")
+    info "AI code agents installation enabled via INSTALL_AI_AGENTS=1"
+  fi
 
   # Install core dependencies
   for dep_func in "${core_deps[@]}"; do
@@ -159,7 +165,7 @@ main() {
   printf "  • lazygit: Terminal Git UI\n"
 
   [[ "${INSTALL_EXTRA_VENV:-0}" == "1" ]] && printf "  • jenv, gvm, nvm: Java/Go/Node version managers\n"
-  printf "  • AI code agents\n"
+  [[ "${INSTALL_AI_AGENTS:-0}" == "1" ]] && printf "  • AI code agents\n"
 
   success "Essential development tools installation completed successfully!"
 }
