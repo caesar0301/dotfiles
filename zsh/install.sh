@@ -186,6 +186,9 @@ done
 main() {
   info "Starting Zsh environment setup..."
 
+  # Ensure Zinit data directory exists (mkdir -p via create_dir)
+  create_dir "$(dirname "$ZINIT_HOME")"
+
   # Core Zsh dependencies
   local core_deps=(
     "install_zsh"         # Zsh shell binary
