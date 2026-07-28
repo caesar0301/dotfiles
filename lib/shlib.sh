@@ -762,6 +762,10 @@ install_homebrew() {
     script_dir="$(cd "$(dirname "$0")" && pwd)"
   fi
   local homebrew_prefix="${HOMEBREW_INSTALL_PREFIX:-"$HOME/.local/homebrew"}"
+  # Pre-create the prefix directory as the current user so the Homebrew installer
+  # does not create parent directories (~/.local) via sudo mkdir, which would
+  # leave them owned by root. See lib/install-homebrew.sh execute_sudo logic.
+  create_dir "$homebrew_prefix"
   "$script_dir/install-homebrew.sh" --prefix="${homebrew_prefix}"
 
   # Source Homebrew shellenv so brew is available in current session
@@ -801,28 +805,31 @@ install_uv() {
 # Install pyenv with enhanced setup and verification
 install_pyenv() {
   if checkcmd pyenv; then
-    info "pyenv already installed" && return
-  fi
-  if checkcmd brew; then
-    brew install pyenv && return
-  fi
-  local script_dir
-  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    info "pyenv already installed"
+  elif checkcmd brew && brew install pyenv; then
+    : # installed via brew
   else
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-  fi
-  "$script_dir/install-pyenv.sh" || {
-    local rc=$?
-    if [[ $rc -eq 1 ]] && [[ -d "${PYENV_ROOT:-$HOME/.pyenv}" ]]; then
-      info "pyenv appears to already be installed"
+    local script_dir
+    if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+      script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     else
-      return $rc
+      script_dir="$(cd "$(dirname "$0")" && pwd)"
     fi
-  }
+    "$script_dir/install-pyenv.sh" || {
+      local rc=$?
+      if [[ $rc -eq 1 ]] && [[ -d "${PYENV_ROOT:-$HOME/.pyenv}" ]]; then
+        info "pyenv appears to already be installed"
+      else
+        return $rc
+      fi
+    }
+  fi
 
-  # Source pyenv env so it's available in current session
+  # Source pyenv env so it's available in current session (all install paths).
+  # brew install pyenv does not create ~/.pyenv, so downstream tools
+  # (e.g. install-nvim-python.sh get_pyenv_root) would fail without this.
   export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+  create_dir "$PYENV_ROOT"
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init - --no-rehash 2>/dev/null)" || true
 }
