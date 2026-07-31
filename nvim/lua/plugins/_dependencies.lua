@@ -42,7 +42,10 @@ return {
 
 	-- Simple plugins without config
 	{ "wellle/context.vim", event = "BufReadPost" },
-	{ "plasticboy/vim-markdown", ft = "markdown" },
+	-- NOTE: plasticboy/vim-markdown removed — it is abandonware, breaks on
+	-- Neovim 0.12+ (E884: function names cannot contain colons), and its
+	-- ftdetect/mkd.vim sets filetype=mkd which prevented markdown-preview.nvim
+	-- from loading. Use render-markdown.nvim + built-in markdown ft instead.
 	{ "editorconfig/editorconfig-vim", event = { "BufReadPre", "BufNewFile" } },
 	{ "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
 	{ "neovimhaskell/haskell-vim", ft = "haskell" },
@@ -106,10 +109,13 @@ return {
 		end,
 	},
 	{
+		-- NOTE: do NOT lazy-load via `cmd` — MarkdownPreview is a buffer-local
+		-- command created by a FileType autocmd. Lazy's cmd loader runs the
+		-- command before that autocmd fires, so it reports "not found after
+		-- loading". Loading on `ft` ensures the command exists before use.
 		"iamcco/markdown-preview.nvim",
 		ft = "markdown",
 		build = "cd app && bash install.sh",
-		cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle" },
 	},
 	{
 		"Civitasv/cmake-tools.nvim",
