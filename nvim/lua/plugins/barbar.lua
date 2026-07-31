@@ -1,7 +1,9 @@
 -- Tabline with auto-sizing, clickable tabs, icons, highlighting etc.
+local pins = require("plugin-pins")
+
 return {
 	"romgrk/barbar.nvim",
-	tag = "v1.9.1",
+	version = pins.barbar.version,
 	event = "VeryLazy",
 	keys = {
 		-- Buffer navigation (Alt key - may require terminal configuration)

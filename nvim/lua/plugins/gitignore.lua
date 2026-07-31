@@ -1,6 +1,9 @@
 -- Generating .gitignore files
+local pins = require("plugin-pins")
+
 return {
 	"wintermute-cell/gitignore.nvim",
+	version = pins.no_tags.version,
 	cmd = { "Gitignore" },
 	keys = {
 		{

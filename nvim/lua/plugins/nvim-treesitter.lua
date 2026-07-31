@@ -1,8 +1,12 @@
 -- Nvim interface to configure tree-sitter and syntax highlighting
 -- Uses modern nvim-treesitter API (main branch, incompatible rewrite)
 -- NOTE: nvim-treesitter-refactor is deprecated and incompatible with modern nvim-treesitter
+local pins = require("plugin-pins")
+
 return {
 	"nvim-treesitter/nvim-treesitter",
+	branch = pins.treesitter.branch, -- master is Neovim <=0.10 only; its query directives break on 0.11+
+	version = pins.treesitter.version, -- override lazy-config's `version = "*"`, which pins to the v0.10.0 tag
 	lazy = false, -- Load immediately - core functionality
 	build = ":TSUpdate",
 	config = function()
@@ -23,9 +27,9 @@ return {
 			}
 
 			-- Use pcall to safely install parsers
-			for _, parser in ipairs(parser_list) do
-				pcall(vim.treesitter.language.add, parser)
-			end
+			pcall(function()
+				require("nvim-treesitter").install(parser_list)
+			end)
 		end)
 
 		-- Enable treesitter highlighting for all filetypes (except shell scripts)

@@ -1,6 +1,9 @@
 -- Displays tags in a window, ordered by scope
+local pins = require("plugin-pins")
+
 return {
 	"preservim/tagbar",
+	version = pins.tagbar.version,
 	cmd = "TagbarToggle",
 	keys = {
 		{ "<leader>tt", "<cmd>TagbarToggle<CR>", desc = "[tagbar] Toggle tagbar" },

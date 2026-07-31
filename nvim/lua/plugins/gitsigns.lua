@@ -1,7 +1,9 @@
 -- Git signs for better git integration
+local pins = require("plugin-pins")
+
 return {
 	"lewis6991/gitsigns.nvim",
-	tag = "v2.0.0",
+	version = pins.gitsigns.version,
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		require("gitsigns").setup({

@@ -1,6 +1,9 @@
 -- R language support for vim
+local pins = require("plugin-pins")
+
 return {
 	"jalvesaq/Nvim-R",
+	version = pins.nvim_r.version,
 	ft = { "r", "rmd", "rnoweb", "rhelp", "rrst" },
 	dependencies = {
 		"jalvesaq/cmp-nvim-r",

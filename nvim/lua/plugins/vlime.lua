@@ -1,6 +1,9 @@
 -- Vlime: Common Lisp development environment
+local pins = require("plugin-pins")
+
 return {
 	"vlime/vlime",
+	version = pins.vlime.version,
 	ft = { "lisp", "commonlisp" },
 	dependencies = { "HiPhish/nvim-cmp-vlime", "kovisoft/paredit" },
 	init = function()

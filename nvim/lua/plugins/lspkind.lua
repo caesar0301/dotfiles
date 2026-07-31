@@ -1,6 +1,9 @@
 -- vscode-like pictograms for neovim LSP completion items
+local pins = require("plugin-pins")
+
 return {
 	"onsails/lspkind-nvim",
+	version = pins.no_tags.version,
 	lazy = true,
 	config = function()
 		require("lspkind").init({

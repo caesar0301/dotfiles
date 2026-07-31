@@ -1,6 +1,9 @@
 -- Web dev icons
+local pins = require("plugin-pins")
+
 return {
 	"nvim-tree/nvim-web-devicons",
+	version = pins.web_devicons.version, -- semver tags stuck at v0.100 (2024)
 	lazy = true,
 	config = function()
 		require("nvim-web-devicons").setup({

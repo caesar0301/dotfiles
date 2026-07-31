@@ -1,11 +1,13 @@
 -- Code completion for Nvim LSP
+local pins = require("plugin-pins")
+
 return {
 	"hrsh7th/nvim-cmp",
-	tag = "v0.0.2",
+	version = pins.nvim_cmp.version,
 	event = "InsertEnter",
 	dependencies = {
 		"neovim/nvim-lspconfig",
-		{ "hrsh7th/cmp-nvim-lsp", branch = "main" },
+		{ "hrsh7th/cmp-nvim-lsp", branch = "main", version = pins.no_tags.version },
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-cmdline",

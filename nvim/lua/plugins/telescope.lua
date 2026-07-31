@@ -1,7 +1,9 @@
 -- Highly extendable fuzzy finder over file and symbols
+local pins = require("plugin-pins")
+
 return {
 	"nvim-telescope/telescope.nvim",
-	tag = "0.1.8",
+	version = pins.telescope.version, -- stay on 0.1.x stable line
 	cmd = "Telescope",
 	keys = {
 		{ "<leader>tf", "<cmd>Telescope find_files<cr>", desc = "Find files" },

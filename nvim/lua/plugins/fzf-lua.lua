@@ -1,6 +1,9 @@
 -- Improved fzf.vim written in lua
+local pins = require("plugin-pins")
+
 return {
 	"ibhagwan/fzf-lua",
+	version = pins.fzf_lua.version, -- only release tag is stale; track main
 	cmd = {
 		"FzfLua",
 		"FzfLuaFiles",

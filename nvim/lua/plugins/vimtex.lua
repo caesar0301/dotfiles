@@ -1,7 +1,9 @@
 -- LaTeX syntax highlighting
+local pins = require("plugin-pins")
+
 return {
 	"lervag/vimtex",
-	tag = "v2.17",
+	version = pins.vimtex.version,
 	ft = { "tex", "latex" },
 	config = function()
 		-- Vimtex settings

@@ -1,7 +1,9 @@
 -- Easily manage multiple terminal windows
+local pins = require("plugin-pins")
+
 return {
 	"akinsho/toggleterm.nvim",
-	version = "v2.13.1",
+	version = pins.toggleterm.version,
 	cmd = { "ToggleTerm", "TermExec" },
 	keys = {
 		{ "<C-\\>", desc = "Toggle terminal" },

@@ -1,7 +1,9 @@
 -- Folder and file tree view
+local pins = require("plugin-pins")
+
 return {
 	"nvim-tree/nvim-tree.lua",
-	tag = "nvim-tree-v1.16.0",
+	version = pins.nvim_tree.version,
 	cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile" },
 	keys = {
 		{ "<F8>", "<cmd>NvimTreeFindFileToggle!<cr>", desc = "[nvim-tree] Toggle find file" },

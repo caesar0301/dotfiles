@@ -1,7 +1,10 @@
 -- AI coding assistant
+local pins = require("plugin-pins")
+
 return {
 	"coder/claudecode.nvim",
-	dependencies = { "folke/snacks.nvim" },
+	version = pins.claudecode.version,
+	dependencies = { { "folke/snacks.nvim", version = pins.snacks.version } },
 	opts = {
 		command = "claude",
 		args = {

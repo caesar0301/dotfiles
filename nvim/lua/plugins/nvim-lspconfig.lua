@@ -1,7 +1,9 @@
 -- Quickstart configs for Nvim LSP
+local pins = require("plugin-pins")
+
 return {
 	"neovim/nvim-lspconfig",
-	tag = "v2.7.0",
+	version = pins.lspconfig.version,
 	event = { "BufReadPre", "BufNewFile" },
 	dependencies = {
 		"nvim-lua/lsp-status.nvim",

@@ -1,7 +1,9 @@
 -- Code style formatter
+local pins = require("plugin-pins")
+
 return {
 	"stevearc/conform.nvim",
-	tag = "v9.1.0",
+	version = pins.conform.version,
 	event = "VimEnter",
 	keys = {
 		{ "<leader>af", "<cmd>Format<cr>", desc = "Format code" },

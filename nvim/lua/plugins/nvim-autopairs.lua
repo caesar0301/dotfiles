@@ -1,7 +1,9 @@
 -- Autopairs supporting multiple characters
+local pins = require("plugin-pins")
+
 return {
 	"windwp/nvim-autopairs",
-	tag = "0.10.0",
+	version = pins.nvim_autopairs.version,
 	event = "InsertEnter",
 	config = function()
 		require("nvim-autopairs").setup({})

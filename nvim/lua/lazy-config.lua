@@ -17,6 +17,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim with optimized configuration
+-- Compatible pin matrix: see lua/plugin-pins.lua (Neovim 0.12.4 + treesitter@main).
+-- defaults.version="*" is a fallback only; every plugin spec sets an explicit
+-- version or version=false so stale/misnamed tags cannot pin us.
 require("lazy").setup("plugins", {
 	-- No plugins in this config require luarocks; disable to avoid hererocks ERROR.
 	rocks = {
@@ -26,7 +29,7 @@ require("lazy").setup("plugins", {
 	-- Lazy.nvim configuration options
 	defaults = {
 		lazy = true, -- Enable lazy loading by default for better performance
-		version = "*", -- Try installing the latest stable version for plugins that support semver
+		version = "*", -- Fallback for any unpinned plugin that publishes semver tags
 	},
 
 	install = {
