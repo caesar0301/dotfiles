@@ -161,7 +161,16 @@ local status, result = pcall(function()
 end)
 
 -- =====================
--- 6. Miscellaneous Settings
+-- 6. Provider Settings
+-- =====================
+
+-- Disable unused optional providers to silence checkhealth warnings.
+-- Python/Node providers are kept enabled; they are configured elsewhere.
+vim.g.loaded_perl_provider = 0 -- no perl / Neovim::Ext on this machine
+vim.g.loaded_ruby_provider = 0 -- no neovim-ruby-host on this machine
+
+-- =====================
+-- 7. Miscellaneous Settings
 -- =====================
 
 -- Paste mode (conflicts with autopairs)

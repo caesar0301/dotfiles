@@ -25,6 +25,7 @@ This directory contains standalone installer scripts for various development too
 
 ### Text Editors & Tools
 - **`install-neovim.sh`** - Installs Neovim text editor
+- **`install-tree-sitter.sh`** - Installs tree-sitter CLI (parser generator for `:TSInstallFromGrammar`)
 - **`install-fzf.sh`** - Installs fzf fuzzy finder
 - **`install-shfmt.sh`** - Installs shfmt shell formatter
 

@@ -18,6 +18,11 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim with optimized configuration
 require("lazy").setup("plugins", {
+	-- No plugins in this config require luarocks; disable to avoid hererocks ERROR.
+	rocks = {
+		enabled = false,
+	},
+
 	-- Lazy.nvim configuration options
 	defaults = {
 		lazy = true, -- Enable lazy loading by default for better performance

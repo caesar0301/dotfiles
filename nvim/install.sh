@@ -48,6 +48,14 @@ function check_dependencies {
 
   # Check bc for version comparison (install if missing on Linux)
   install_bc
+
+  # tree-sitter CLI: required by :TSInstallFromGrammar (parser generator).
+  # :TSInstall uses prebuilt parsers, so this is optional but recommended.
+  install_tree_sitter
+
+  # Disable optional providers that are not configured on this machine to keep
+  # :checkhealth clean. Perl and Ruby providers are intentionally unused.
+  # Applied in lua/preference.lua (vim.g.loaded_{perl,ruby}_provider = 0).
 }
 
 # Function to handle Neovim installation and configuration

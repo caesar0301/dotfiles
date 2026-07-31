@@ -108,7 +108,7 @@ return {
 	{
 		"iamcco/markdown-preview.nvim",
 		ft = "markdown",
-		build = "cd app && npx --yes yarn install",
+		build = "cd app && bash install.sh",
 		cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle" },
 	},
 	{

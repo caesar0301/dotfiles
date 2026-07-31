@@ -969,6 +969,17 @@ install_neovim() {
   "$script_dir/install-neovim.sh" "$@"
 }
 
+# Install tree-sitter CLI (parser generator used by :TSInstallFromGrammar)
+install_tree_sitter() {
+  local script_dir
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+  fi
+  "$script_dir/install-tree-sitter.sh"
+}
+
 # Install Rust and Cargo with kernel version check
 install_cargo() {
   local script_dir
