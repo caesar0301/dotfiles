@@ -92,11 +92,20 @@ install_claude_code_router_config() {
 
 # Install Claude code CLI via npm (always installs latest version)
 install_claude_code_cli() {
+  local native_binary="$HOME/.local/bin/claude"
+
   # Check if Claude code CLI is already installed via npm
   if npm list -g @anthropic-ai/claude-code >/dev/null 2>&1; then
     info "Claude code CLI already installed via npm, updating to latest version..."
     npm update -g @anthropic-ai/claude-code
   else
+    # A native binary (installed by curl method) at the npm bin path will
+    # cause EEXIST errors during npm install. Remove it before installing.
+    if [[ -e "$native_binary" ]]; then
+      info "Found existing 'claude' binary at $native_binary, removing to avoid npm EEXIST conflict..."
+      remove_native_binary
+    fi
+
     info "Installing Claude code CLI via npm..."
     npm install -g @anthropic-ai/claude-code
   fi
