@@ -17,6 +17,9 @@ nvim/plugin/packer_compiled.lua
 setups/openclaw/config/
 setups/alithia/alithia_config.json
 
+# Secret credential pools
+lib/dashscope-keys.conf
+
 .claude
 .qoder
 .agents
