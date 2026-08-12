@@ -1,73 +1,33 @@
-# Grok Build Configuration (DashScope / Alibaba Cloud MaaS) — Default Template
-#
-# Source of truth for ~/.grok/config.toml. Installed by lib/install-ai-agent-grok.sh.
-#
-# Routes grok through OpenAI-compatible DashScope endpoints. Credentials are
-# resolved from the environment at runtime:
-#   DASHSCOPE_API_KEY   API key (read per request via env_key, never written to disk)
-#   DASHSCOPE_BASE_URL  Preferred OpenAI-compatible base URL. Grok does not
-#                       interpolate env vars in config values, so base_url is
-#                       baked in per model below — keep values in sync with
-#                       DASHSCOPE_BASE_URL, or re-run the installer to refresh.
-#
-# Endpoint used:
-#   maas endpoint    https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
-#
-# Note: DashScope GLM models emit empty-string `function.name` / `id` in
-# streamed tool_call continuation deltas. Grok Build ignores those empties
-# when accumulating (see xai-grok-sampler chat_completions stream).
-
 [cli]
 installer = "internal"
 
 [marketplace]
 default_skills_installs_purged = true
 
-# ---------------------------------------------------------------------------
-# UI / permissions
-# ---------------------------------------------------------------------------
-# permission_mode controls how tool executions are approved:
-#   "always-approve"  auto-approve every tool execution (no prompts)
-#   "auto"            LLM classifier approves safe tools; risky ones may prompt
-#   "ask"             prompt before every tool action
-# Equivalent to running grok with --always-approve (alias --yolo) every session.
-
 [ui]
 permission_mode = "always-approve"
-
-# ---------------------------------------------------------------------------
-# Model catalog
-# ---------------------------------------------------------------------------
+max_thoughts_width = 120
+fork_secondary_model = "grok-4.5"
+yolo = false
+compact_mode = false
 
 [models]
-# Default model for new sessions. Change with `grok -m <name>` or `/model`.
 default = "glm-5.2"
-# Avoid built-in grok-4.5 for title/summary (not available on DashScope).
 session_summary = "glm-5.2"
 web_search = "glm-5.2"
 
-# ---------------------------------------------------------------------------
-# Custom models (DashScope / Alibaba Cloud MaaS)
-# ---------------------------------------------------------------------------
-# Each model reads its API key from env_key (DASHSCOPE_API_KEY) at request
-# time, so the key is never written to disk. base_url is baked in because
-# Grok does not interpolate env vars in config values; re-run the installer
-# (or edit below) if a DashScope endpoint changes.
-
-# --- MaaS endpoint (https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1) ---
-
 [model."glm-5.2"]
 model = "glm-5.2"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "GLM-5.2 (DashScope MaaS)"
 description = "Zhipu GLM-5.2 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model."MiniMax-M"]
+[model.MiniMax-M]
 model = "MiniMax-M"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "MiniMax-M (DashScope MaaS)"
 description = "MiniMax-M via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
@@ -76,7 +36,7 @@ context_window = 128000
 
 [model."MiniMax-M2.5"]
 model = "MiniMax-M2.5"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "MiniMax M2.5 (DashScope MaaS)"
 description = "MiniMax M2.5 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
@@ -85,16 +45,16 @@ context_window = 128000
 
 [model."kimi-k2.7-code"]
 model = "kimi-k2.7-code"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "Kimi K2.7 Code (DashScope MaaS)"
 description = "Moonshot Kimi K2.7 Code via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model."kimi-k3"]
+[model.kimi-k3]
 model = "kimi-k3"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "Kimi K3 (DashScope MaaS)"
 description = "Moonshot Kimi K3 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
@@ -103,7 +63,7 @@ context_window = 128000
 
 [model."kimi-k2.6"]
 model = "kimi-k2.6"
-base_url = "https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+base_url = "${DASHSCOPE_BASE_URL}"
 name = "Kimi K2.6 (DashScope MaaS)"
 description = "Moonshot Kimi K2.6 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
