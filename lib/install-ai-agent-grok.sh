@@ -111,10 +111,12 @@ verify_grok_checksum() {
   sums_url="https://github.com/${GROK_GITHUB_OWNER}/${GROK_GITHUB_REPO}/releases/download/${tag}/SHA256SUMS"
   sums_file="$(dirname "${binary_path}")/SHA256SUMS"
 
+  info "Fetching checksums from ${sums_url}..."
   if ! curl -fsSL "${sums_url}" -o "${sums_file}" 2>/dev/null; then
     warn "SHA256SUMS not available for ${tag}; skipping checksum verification"
     return 0
   fi
+  success "Checksums retrieved"
 
   expected=$(awk -v name="${asset_name}" '$2 == name { print $1; exit }' "${sums_file}")
   if [[ -z "${expected}" ]]; then
@@ -136,6 +138,39 @@ verify_grok_checksum() {
   fi
 
   success "Checksum verified for ${asset_name}"
+}
+
+# Download a URL to a local path with a live progress bar (curl's `--progress-bar`
+# animated `###` meter, or wget's `--show-progress` as fallback). A trailing
+# newline is emitted after the bar so subsequent log lines stay tidy.
+#
+# Arguments: <url> <output_path>
+download_grok_with_progress() {
+  local url=$1 output=$2 output_dir
+  output_dir=$(dirname "$output")
+  create_dir "$output_dir"
+
+  info "Downloading Grok binary: $(basename "$output")"
+
+  # Preferred: curl's animated progress bar (streams to stderr).
+  if checkcmd curl; then
+    if curl -fL --progress-bar "$url" -o "$output"; then
+      printf '\n' # newline after the progress bar so logs stay tidy
+      success "Downloaded: $(basename "$output")"
+      return 0
+    fi
+  fi
+
+  # Fallback: wget with show-progress.
+  if checkcmd wget; then
+    if wget -q --show-progress "$url" -O "$output"; then
+      printf '\n'
+      success "Downloaded: $(basename "$output")"
+      return 0
+    fi
+  fi
+
+  error "Failed to download $url (tried curl and wget)"
 }
 
 # Download latest grok binary for this platform into ~/.grok/bin
@@ -161,7 +196,7 @@ install_grok_cli() {
   # shellcheck disable=SC2064
   trap "rm -rf '${tmp_dir}' 2>/dev/null || true" EXIT INT TERM
 
-  download_file "${download_url}" "${binary_path}"
+  download_grok_with_progress "${download_url}" "${binary_path}"
   verify_grok_checksum "${asset_name}" "${binary_path}" "${tag}"
 
   # Remove any existing destination (including symlinks created by grok's
