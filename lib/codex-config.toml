@@ -12,56 +12,55 @@
 # directly, so no local bridge (aliyun-codex-bridge) is needed anymore.
 # wire_api = "responses" is the only supported value in Codex >= 0.147.
 #
-# All models from lib/grok-config.toml are listed below as providers.
+# All models listed below were verified against the DashScope MaaS model
+# catalog. glm-5.2 is the default; Qwen variants are also available.
 # To use a different one as default, change `model` at the top and point
 # `model_provider` to the matching provider key.
 
 model = "glm-5.2"
-model_provider = "dashscope-glm-5.2"
+model_provider = "dashscope-glm"
 
-# --- GLM-5.2 (default) ---
-[model_providers.dashscope-glm-5.2]
+# NOTE: Provider keys containing a dot (e.g. "dashscope-glm-5.2") MUST be
+# quoted — otherwise TOML parses them as dotted keys and splits the table
+# (e.g. dashscope-glm-5 -> 2), which leaves the real provider without a
+# `name` and Codex rejects it with "provider name must not be empty".
+# See: https://github.com/caesar0301/cool-dotfiles/lib/codex-config.toml
+
+# --- GLM-5.2 (default; verified available on DashScope MaaS) ---
+[model_providers.dashscope-glm]
 name = "GLM-5.2 (DashScope MaaS)"
 base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"
 stream_idle_timeout_ms = 3000000
 
-# --- MiniMax-M ---
-[model_providers.dashscope-minimax-m]
-name = "MiniMax-M (DashScope MaaS)"
+# --- GLM-5.2-Fast-Preview ---
+[model_providers."dashscope-glm-fast"]
+name = "GLM-5.2-Fast-Preview (DashScope MaaS)"
 base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"
 stream_idle_timeout_ms = 3000000
 
-# --- MiniMax-M2.5 ---
-[model_providers.dashscope-minimax-m2.5]
-name = "MiniMax M2.5 (DashScope MaaS)"
+# --- Qwen3.7-Max ---
+[model_providers.dashscope-qwen]
+name = "Qwen3.7-Max (DashScope MaaS)"
 base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"
 stream_idle_timeout_ms = 3000000
 
-# --- Kimi K2.7 Code ---
-[model_providers.dashscope-kimi-k2.7-code]
-name = "Kimi K2.7 Code (DashScope MaaS)"
+# --- Qwen3.7-Plus ---
+[model_providers.dashscope-qwen-plus]
+name = "Qwen3.7-Plus (DashScope MaaS)"
 base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"
 stream_idle_timeout_ms = 3000000
 
-# --- Kimi K3 ---
-[model_providers.dashscope-kimi-k3]
-name = "Kimi K3 (DashScope MaaS)"
-base_url = "${DASHSCOPE_BASE_URL}"
-env_key = "DASHSCOPE_API_KEY"
-wire_api = "responses"
-stream_idle_timeout_ms = 3000000
-
-# --- Kimi K2.6 ---
-[model_providers.dashscope-kimi-k2.6]
-name = "Kimi K2.6 (DashScope MaaS)"
+# --- Qwen3.7-Flash ---
+[model_providers.dashscope-qwen-flash]
+name = "Qwen3.7-Flash (DashScope MaaS)"
 base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"

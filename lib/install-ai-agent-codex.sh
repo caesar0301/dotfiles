@@ -127,7 +127,7 @@ configure_dashscope_codex() {
 
   success "Codex configuration installed to ${config_file}"
   info "Default model: ${CODEX_DEFAULT_MODEL} (edit ${config_file} to change)"
-  info "Available models: glm-5.2, MiniMax-M, MiniMax-M2.5, kimi-k2.7-code, kimi-k3, kimi-k2.6"
+  info "Available models: glm-5.2, glm-5.2-fast-preview, qwen3.7-max, qwen3.7-plus, qwen3.7-flash"
   info "API key is read from DASHSCOPE_API_KEY at runtime (not stored in file)"
 
   if [[ -z "${DASHSCOPE_API_KEY:-}" ]]; then
