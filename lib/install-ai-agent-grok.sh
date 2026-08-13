@@ -14,7 +14,7 @@ set -euo pipefail
 
 readonly GROK_GITHUB_OWNER="caesar0301"
 readonly GROK_GITHUB_REPO="grok-build"
-readonly GROK_INSTALL_DIR="${HOME}/.local/bin"
+readonly GROK_INSTALL_DIR="${HOME}/.grok/bin"
 readonly GROK_CONFIG_DIR="${HOME}/.grok"
 readonly DASHSCOPE_DEFAULT_MODEL="glm-5.2"
 
@@ -138,7 +138,7 @@ verify_grok_checksum() {
   success "Checksum verified for ${asset_name}"
 }
 
-# Download latest grok binary for this platform into ~/.local/bin
+# Download latest grok binary for this platform into ~/.grok/bin
 install_grok_cli() {
   local asset_name tag download_url tmp_dir binary_path dest_path
 
@@ -164,6 +164,9 @@ install_grok_cli() {
   download_file "${download_url}" "${binary_path}"
   verify_grok_checksum "${asset_name}" "${binary_path}" "${tag}"
 
+  # Remove any existing destination (including symlinks created by grok's
+  # own self-update) so `install` writes a real binary file, not a symlink.
+  rm -f "${dest_path}"
   install -m 755 "${binary_path}" "${dest_path}"
   export PATH="${GROK_INSTALL_DIR}:${PATH}"
 
