@@ -69,3 +69,21 @@ description = "Moonshot Kimi K2.6 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
+
+[model."deepseek-v4-pro"]
+model = "deepseek-v4-pro"
+base_url = "${DASHSCOPE_BASE_URL}"
+name = "DeepSeek V4 Pro (DashScope MaaS)"
+description = "DeepSeek V4 Pro via DashScope MaaS OpenAI-compatible endpoint"
+api_backend = "chat_completions"
+env_key = "DASHSCOPE_API_KEY"
+context_window = 128000
+
+[model."deepseek-v4-flash"]
+model = "deepseek-v4-flash"
+base_url = "${DASHSCOPE_BASE_URL}"
+name = "DeepSeek V4 Flash (DashScope MaaS)"
+description = "DeepSeek V4 Flash via DashScope MaaS OpenAI-compatible endpoint"
+api_backend = "chat_completions"
+env_key = "DASHSCOPE_API_KEY"
+context_window = 128000

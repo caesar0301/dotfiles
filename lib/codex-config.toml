@@ -65,3 +65,19 @@ base_url = "${DASHSCOPE_BASE_URL}"
 env_key = "DASHSCOPE_API_KEY"
 wire_api = "responses"
 stream_idle_timeout_ms = 3000000
+
+# --- DeepSeek-V4-Pro ---
+[model_providers.dashscope-deepseek]
+name = "DeepSeek-V4-Pro (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- DeepSeek-V4-Flash ---
+[model_providers."dashscope-deepseek-flash"]
+name = "DeepSeek-V4-Flash (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
