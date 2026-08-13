@@ -2,17 +2,20 @@
 ###################################################
 # OpenAI Codex AI Agent Installer
 #
-# Installs OpenAI Codex CLI with custom configuration support
-# Supports DashScope (Alibaba Cloud) via local bridge
+# Installs OpenAI Codex CLI and configures a custom OpenAI-compatible
+# endpoint (DashScope / Alibaba Cloud MaaS by default).
+#
+# DashScope MaaS now supports the Responses API (/responses) directly,
+# so no local bridge (aliyun-codex-bridge) is required anymore.
+# Configuration is written from the bundled template (lib/codex-config.toml)
+# into ~/.codex/config.toml.
 #
 # Copyright (c) 2024, 2026 Xiaming Chen
 # License: MIT
 ###################################################
 
-readonly CODEX_BRIDGE_HOST="127.0.0.1"
-readonly CODEX_BRIDGE_PORT="31415"
-readonly DASHSCOPE_DEFAULT_MODEL="glm-5.2"
-readonly DASHSCOPE_DEFAULT_BASE_URL="https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+readonly CODEX_CONFIG_DIR="${HOME}/.codex"
+readonly CODEX_DEFAULT_MODEL="glm-5.2"
 
 usage() {
   cat <<EOF
@@ -21,41 +24,39 @@ OpenAI Codex AI Agent Installer
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --api-key KEY        Set OpenAI API key via login command
-  --base-url URL       DashScope upstream URL for the local bridge
-                       (default: DASHSCOPE_BASE_URL env or MaaS URL)
-  --model MODEL        Set default model (DashScope default: ${DASHSCOPE_DEFAULT_MODEL})
-  --dashscope          Use DashScope (Alibaba Cloud) defaults
+  --dashscope          Install DashScope config from bundled template
+                       (lib/codex-config.toml) into ~/.codex/config.toml
+  --api-key KEY        Set OpenAI API key via codex login (non-DashScope)
   -h, --help           Show this help message and exit
 
 Environment Variables (auto-detected for DashScope):
-  DASHSCOPE_API_KEY    DashScope API key (sk-sp-...)
-  DASHSCOPE_BASE_URL   DashScope upstream base URL for the bridge
+  DASHSCOPE_API_KEY    API key used via env_key in ~/.codex/config.toml
+  DASHSCOPE_BASE_URL   DashScope MaaS base URL; substituted into the template
+                       at install time (Codex does not interpolate \${VAR} in base_url)
 
 Examples:
-  $(basename "$0")                              # Install with env defaults
-  $(basename "$0") --dashscope                 # Use DashScope defaults
-  $(basename "$0") --dashscope --model glm-5.2 # Set DashScope model explicitly
-  $(basename "$0") --api-key sk-xxx            # Install OpenAI with API key
+  $(basename "$0")                              # Install binary + auto config if env set
+  $(basename "$0") --dashscope                  # Install binary and write DashScope config
+  $(basename "$0") --api-key sk-xxx             # Install with OpenAI API key (no DashScope)
 
-DashScope Configuration:
-  export DASHSCOPE_API_KEY=sk-sp-xxx
-  export DASHSCOPE_BASE_URL=https://llm-h1hl3i1mrsz01yiz.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
-  $(basename "$0") --dashscope
-
-Note: OpenAI Codex requires Node.js >= 20 and npm >= 20
-      DashScope uses aliyun-codex-bridge because Codex requires the Responses API
-      Configuration stored in ~/.codex/config.toml (TOML format)
+Note: Codex CLI is installed via npm: npm install -g @openai/codex
+      Requires Node.js >= 20 and npm >= 20.
+      Config: ~/.codex/config.toml installed from lib/codex-config.toml template
+              (API key via DASHSCOPE_API_KEY env var, not stored in file)
+              Existing config is preserved; re-running will not overwrite it.
 EOF
 }
 
 # Source the shell utility library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=shlib.sh
 source "$SCRIPT_DIR/shlib.sh"
 
-# Install OpenAI Codex CLI
+# Install OpenAI Codex CLI via npm
 install_codex_cli() {
   info "Installing OpenAI Codex CLI..."
+
+  checkcmd npm || error "npm is not installed or not in PATH (requires Node.js >= 20)"
 
   if npm install -g @openai/codex; then
     success "OpenAI Codex CLI installed successfully"
@@ -66,19 +67,81 @@ install_codex_cli() {
   fi
 }
 
-# Install Responses API bridge for DashScope
-install_codex_bridge() {
-  info "Installing aliyun-codex-bridge for DashScope..."
-  npm_install_lib aliyun-codex-bridge
+# Preserve user-specific sections from an existing config.toml.
+# Captures [projects.*] and [tui.*] tables so they survive rewrites.
+preserve_codex_config_sections() {
+  local config_file="$1"
+
+  [[ -f "$config_file" ]] || return 0
+
+  awk '
+    /^\[projects\./ { capture = 1 }
+    /^\[tui\./ { capture = 1 }
+    capture { print }
+  ' "$config_file"
 }
 
-# Configure OpenAI API key via login command
+# Install ~/.codex/config.toml from the bundled template.
+#
+# The template (lib/codex-config.toml) is the source of truth: it carries
+# the full DashScope model catalog with ${DASHSCOPE_BASE_URL} placeholders.
+# Codex does NOT interpolate ${VAR} in base_url at runtime, so we substitute
+# it with the actual URL here. An existing config is preserved (never
+# overwritten) so user edits survive re-runs; only [projects.*] and [tui.*]
+# sections are merged into the fresh template on re-install.
+configure_dashscope_codex() {
+  local config_file="${CODEX_CONFIG_DIR}/config.toml"
+  local template_file="${SCRIPT_DIR}/codex-config.toml"
+  local base_url="${DASHSCOPE_BASE_URL:-}"
+  local preserved=""
+
+  create_dir "${CODEX_CONFIG_DIR}"
+
+  [[ -e "${template_file}" ]] || error "Codex config template not found: ${template_file}"
+
+  # Preserve user sections from existing config before rewriting
+  if [[ -e "${config_file}" ]]; then
+    info "Existing Codex config found at ${config_file}; preserving user sections"
+    preserved="$(preserve_codex_config_sections "${config_file}")"
+  fi
+
+  info "Installing Codex config template to ${config_file}..."
+
+  if [[ -n "${base_url}" ]]; then
+    # Substitute ${DASHSCOPE_BASE_URL} placeholder with the actual URL.
+    # Codex does not interpolate env vars in base_url at runtime.
+    sed "s|\${DASHSCOPE_BASE_URL}|${base_url}|g" "${template_file}" >"${config_file}"
+  else
+    # No DASHSCOPE_BASE_URL env var — copy template as-is so the user can
+    # fill in the URL manually (the placeholder makes it obvious).
+    install -m 644 "${template_file}" "${config_file}"
+    warn "DASHSCOPE_BASE_URL is not set; edit \${DASHSCOPE_BASE_URL} in ${config_file} manually"
+  fi
+  chmod 644 "${config_file}"
+
+  # Append preserved [projects.*] and [tui.*] sections
+  if [[ -n "${preserved}" ]]; then
+    printf '\n' >>"${config_file}"
+    printf '%s\n' "${preserved}" >>"${config_file}"
+  fi
+
+  success "Codex configuration installed to ${config_file}"
+  info "Default model: ${CODEX_DEFAULT_MODEL} (edit ${config_file} to change)"
+  info "Available models: glm-5.2, MiniMax-M, MiniMax-M2.5, kimi-k2.7-code, kimi-k3, kimi-k2.6"
+  info "API key is read from DASHSCOPE_API_KEY at runtime (not stored in file)"
+
+  if [[ -z "${DASHSCOPE_API_KEY:-}" ]]; then
+    warn "DASHSCOPE_API_KEY is not set; export it before running codex"
+  else
+    success "DASHSCOPE_API_KEY is set in the current environment"
+  fi
+}
+
+# Configure OpenAI API key via login command (non-DashScope path)
 configure_openai_api_key() {
   local api_key="$1"
 
-  if [[ -z "$api_key" ]]; then
-    return 0
-  fi
+  [[ -z "$api_key" ]] && return 0
 
   info "Setting OpenAI API key via codex login..."
   if echo "$api_key" | codex login --with-api-key; then
@@ -90,110 +153,7 @@ configure_openai_api_key() {
   fi
 }
 
-# Preserve user-specific sections from an existing config.toml
-preserve_codex_config_sections() {
-  local config_file="$1"
-
-  if [[ ! -f "$config_file" ]]; then
-    return 0
-  fi
-
-  awk '
-    /^\[projects\./ { capture = 1 }
-    /^\[tui\./ { capture = 1 }
-    capture { print }
-  ' "$config_file"
-}
-
-# Configure Codex for DashScope via local Responses API bridge
-configure_dashscope_codex() {
-  local model="$1"
-  local upstream_base_url="$2"
-  local config_file="$HOME/.codex/config.toml"
-  local bridge_base_url="http://${CODEX_BRIDGE_HOST}:${CODEX_BRIDGE_PORT}"
-  local preserved=""
-
-  mkdir -p "$HOME/.codex"
-  preserved="$(preserve_codex_config_sections "$config_file")"
-
-  info "Configuring DashScope Codex settings in $config_file..."
-
-  cat >"$config_file" <<EOF
-# Codex Configuration (DashScope via local bridge)
-model = "${model}"
-model_provider = "dashscope"
-
-[model_providers.dashscope]
-name = "DashScope (Alibaba Cloud)"
-base_url = "${bridge_base_url}"
-env_key = "DASHSCOPE_API_KEY"
-wire_api = "responses"
-stream_idle_timeout_ms = 3000000
-
-EOF
-
-  if [[ -n "$preserved" ]]; then
-    printf '%s\n' "$preserved" >>"$config_file"
-  fi
-
-  success "DashScope configuration written to $config_file"
-  info "Bridge upstream: ${upstream_base_url}"
-  return 0
-}
-
-# Resolve the bridge server entrypoint (npm bin wrapper has a broken __dirname path)
-codex_bridge_server_path() {
-  local npm_root="${HOME}/.local/lib/node_modules"
-  if command -v npm >/dev/null 2>&1; then
-    npm_root="$(npm root -g 2>/dev/null || echo "$npm_root")"
-  fi
-  echo "${npm_root}/aliyun-codex-bridge/src/server.js"
-}
-
-# Start the local DashScope bridge if it is not already running
-start_codex_bridge() {
-  local upstream_base_url="$1"
-  local health_url="http://${CODEX_BRIDGE_HOST}:${CODEX_BRIDGE_PORT}/health"
-  local bridge_server=""
-
-  if curl -fsS "$health_url" >/dev/null 2>&1; then
-    info "aliyun-codex-bridge is already running at ${health_url}"
-    return 0
-  fi
-
-  if [[ -z "${DASHSCOPE_API_KEY:-}" ]]; then
-    warn "DASHSCOPE_API_KEY is not set; bridge not started"
-    return 1
-  fi
-
-  bridge_server="$(codex_bridge_server_path)"
-  if [[ ! -f "$bridge_server" ]]; then
-    warn "Bridge server not found at $bridge_server"
-    return 1
-  fi
-
-  info "Starting aliyun-codex-bridge on ${CODEX_BRIDGE_HOST}:${CODEX_BRIDGE_PORT}..."
-
-  HOST="${CODEX_BRIDGE_HOST}" \
-    PORT="${CODEX_BRIDGE_PORT}" \
-    AI_API_KEY="${DASHSCOPE_API_KEY}" \
-    AI_API_BASE="${upstream_base_url}" \
-    ALLOW_TOOLS=1 \
-    nohup node "$bridge_server" >/dev/null 2>&1 &
-  disown
-
-  sleep 2
-
-  if curl -fsS "$health_url" >/dev/null 2>&1; then
-    success "aliyun-codex-bridge started successfully"
-    return 0
-  fi
-
-  warn "Failed to start aliyun-codex-bridge; start it manually before using Codex"
-  return 1
-}
-
-# Verify Codex can reach glm-5.2 through the configured provider
+# Verify Codex can reach the configured model
 verify_codex_status() {
   local model="$1"
 
@@ -217,35 +177,24 @@ verify_codex_status() {
     return 0
   fi
 
-  warn "Codex model ${model} test did not return CODEX_OK; check bridge and API key"
+  warn "Codex model ${model} test did not return CODEX_OK; check config and API key"
   return 1
 }
 
 # Main installation function
 main() {
   local api_key=""
-  local base_url=""
-  local model=""
   local use_dashscope=false
 
-  # Parse arguments
   while [[ $# -gt 0 ]]; do
     case $1 in
-    --api-key)
-      api_key="$2"
-      shift 2
-      ;;
-    --base-url)
-      base_url="$2"
-      shift 2
-      ;;
-    --model)
-      model="$2"
-      shift 2
-      ;;
     --dashscope)
       use_dashscope=true
       shift
+      ;;
+    --api-key)
+      api_key="$2"
+      shift 2
       ;;
     -h | --help)
       usage
@@ -262,10 +211,7 @@ main() {
   # Auto-detect DashScope when env vars are present
   if [[ "$use_dashscope" == true || -n "${DASHSCOPE_API_KEY:-}" || -n "${DASHSCOPE_BASE_URL:-}" ]]; then
     use_dashscope=true
-    api_key="${api_key:-${DASHSCOPE_API_KEY:-}}"
-    base_url="${base_url:-${DASHSCOPE_BASE_URL:-${DASHSCOPE_DEFAULT_BASE_URL}}}"
-    model="${model:-${DASHSCOPE_DEFAULT_MODEL}}"
-    info "Using DashScope (Alibaba Cloud) configuration"
+    info "Using DashScope (Alibaba Cloud MaaS) configuration"
   fi
 
   info "Installing OpenAI Codex AI agent..."
@@ -273,10 +219,8 @@ main() {
   install_codex_cli || exit 1
 
   if [[ "$use_dashscope" == true ]]; then
-    install_codex_bridge || exit 1
-    configure_dashscope_codex "$model" "$base_url"
-    start_codex_bridge "$base_url" || true
-    verify_codex_status "$model" || true
+    configure_dashscope_codex
+    verify_codex_status "${CODEX_DEFAULT_MODEL}" || true
   elif [[ -n "$api_key" ]]; then
     configure_openai_api_key "$api_key" || warn "API key configuration failed, you may need to set it manually"
   fi
@@ -288,21 +232,19 @@ main() {
 
   if [[ "$use_dashscope" == true ]]; then
     info "1. Ensure your DashScope credentials are exported:"
-    echo "   export DASHSCOPE_API_KEY=sk-sp-xxx"
-    echo "   export DASHSCOPE_BASE_URL=${DASHSCOPE_DEFAULT_BASE_URL}"
+    echo "   export DASHSCOPE_API_KEY=sk-xxx"
+    echo "   export DASHSCOPE_BASE_URL=https://your-dashscope-maas-endpoint/compatible-mode/v1"
     echo ""
-    info "2. Start the local bridge before using Codex:"
-    echo "   HOST=127.0.0.1 PORT=31415 AI_API_KEY=\"\$DASHSCOPE_API_KEY\" \\"
-    echo "     AI_API_BASE=\"\${DASHSCOPE_BASE_URL:-${DASHSCOPE_DEFAULT_BASE_URL}}\" \\"
-    echo "     node \"\$(npm root -g)/aliyun-codex-bridge/src/server.js\""
+    info "2. Start using Codex:"
+    echo "   codex \"your prompt here\""
+    echo "   codex exec \"non-interactive prompt\""
     echo ""
-    info "3. Verify Codex health and model access:"
+    info "3. Check configuration and health:"
     echo "   codex doctor"
-    echo "   codex exec -m ${model:-${DASHSCOPE_DEFAULT_MODEL}} \"your prompt here\""
     echo ""
     info "4. Default model/provider:"
-    echo "   model = \"${model:-${DASHSCOPE_DEFAULT_MODEL}}\""
-    echo "   provider = dashscope (via http://${CODEX_BRIDGE_HOST}:${CODEX_BRIDGE_PORT})"
+    echo "   model = \"${CODEX_DEFAULT_MODEL}\""
+    echo "   provider = dashscope (direct Responses API, no bridge needed)"
     echo ""
   else
     if [[ -z "$api_key" ]]; then
@@ -315,7 +257,7 @@ main() {
     fi
     info "2. Start using Codex:"
     echo "   codex \"your prompt here\""
-    echo "   codex exec \"your non-interactive prompt\""
+    echo "   codex exec \"non-interactive prompt\""
     echo ""
     info "3. Check configuration and health:"
     echo "   codex doctor"

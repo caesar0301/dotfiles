@@ -1,0 +1,68 @@
+# OpenAI Codex CLI configuration template
+# Source: https://github.com/caesar0301/cool-dotfiles/lib/codex-config.toml
+#
+# This template is installed by lib/install-ai-agent-codex.sh into
+# ~/.codex/config.toml when --dashscope is used.
+#
+# Codex does NOT interpolate ${VAR} in base_url at runtime — the installer
+# substitutes ${DASHSCOPE_BASE_URL} with the actual URL at install time.
+# Only env_key (the API key) is resolved from the environment at runtime.
+#
+# The DashScope MaaS endpoint supports the Responses API (/responses)
+# directly, so no local bridge (aliyun-codex-bridge) is needed anymore.
+# wire_api = "responses" is the only supported value in Codex >= 0.147.
+#
+# All models from lib/grok-config.toml are listed below as providers.
+# To use a different one as default, change `model` at the top and point
+# `model_provider` to the matching provider key.
+
+model = "glm-5.2"
+model_provider = "dashscope-glm-5.2"
+
+# --- GLM-5.2 (default) ---
+[model_providers.dashscope-glm-5.2]
+name = "GLM-5.2 (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- MiniMax-M ---
+[model_providers.dashscope-minimax-m]
+name = "MiniMax-M (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- MiniMax-M2.5 ---
+[model_providers.dashscope-minimax-m2.5]
+name = "MiniMax M2.5 (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- Kimi K2.7 Code ---
+[model_providers.dashscope-kimi-k2.7-code]
+name = "Kimi K2.7 Code (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- Kimi K3 ---
+[model_providers.dashscope-kimi-k3]
+name = "Kimi K3 (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
+
+# --- Kimi K2.6 ---
+[model_providers.dashscope-kimi-k2.6]
+name = "Kimi K2.6 (DashScope MaaS)"
+base_url = "${DASHSCOPE_BASE_URL}"
+env_key = "DASHSCOPE_API_KEY"
+wire_api = "responses"
+stream_idle_timeout_ms = 3000000
