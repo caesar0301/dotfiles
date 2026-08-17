@@ -236,6 +236,23 @@ SUPPORTS_MODERN_PLUGINS() {
 # PACKAGE MANAGEMENT HELPERS
 ###################################################
 
+# Non-interactive Homebrew install.
+# Auto-confirms the "Do you want to proceed with the installation? [y/n]"
+# prompt (by detaching stdin) and skips the slow auto-update and install-time
+# cleanup. Preserves `brew install` exit status so callers can still use
+# `if brew_install ...; then`.
+brew_install() {
+  [[ $# -eq 0 ]] && error "brew_install: requires at least one formula"
+
+  checkcmd brew || error "Homebrew is not installed"
+
+  info "Installing via Homebrew: $*"
+  HOMEBREW_NO_AUTO_UPDATE=1 \
+    HOMEBREW_NO_INSTALL_CLEANUP=1 \
+    HOMEBREW_NO_ENV_HINTS=1 \
+    brew install "$@" </dev/null
+}
+
 # Install Python packages with enhanced error handling and feedback
 pip_install_lib() {
   [[ $# -eq 0 ]] && error "pip_install_lib: requires at least one package name"
@@ -784,7 +801,7 @@ install_uv() {
     info "uv already installed" && return
   fi
   if checkcmd brew; then
-    brew install uv && return
+    brew_install uv && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -806,7 +823,7 @@ install_uv() {
 install_pyenv() {
   if checkcmd pyenv; then
     info "pyenv already installed"
-  elif checkcmd brew && brew install pyenv; then
+  elif checkcmd brew && brew_install pyenv; then
     : # installed via brew
   else
     local script_dir
@@ -840,7 +857,7 @@ install_jenv() {
     info "jenv already installed" && return
   fi
   if checkcmd brew; then
-    brew install jenv && return
+    brew_install jenv && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -868,7 +885,7 @@ install_nvm() {
     info "nvm already installed" && return
   fi
   if checkcmd brew; then
-    brew install nvm && return
+    brew_install nvm && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -885,7 +902,7 @@ install_rbenv() {
     info "rbenv already installed" && return
   fi
   if checkcmd brew; then
-    brew install rbenv ruby-build && return
+    brew_install rbenv ruby-build && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -902,7 +919,7 @@ install_golang() {
     info "golang already installed" && return
   fi
   if checkcmd brew; then
-    brew install golang && return
+    brew_install golang && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -919,7 +936,7 @@ install_fzf() {
     info "fzf already installed" && return
   fi
   if checkcmd brew; then
-    brew install fzf && return
+    brew_install fzf && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -958,7 +975,7 @@ install_neovim() {
     info "neovim already installed" && return
   fi
   if checkcmd brew; then
-    brew install neovim && return
+    brew_install neovim && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -1179,7 +1196,7 @@ install_tmux() {
     info "tmux already installed" && return
   fi
   if checkcmd brew; then
-    brew install tmux && return
+    brew_install tmux && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -1196,7 +1213,7 @@ install_zellij() {
     info "zellij already installed" && return
   fi
   if checkcmd brew; then
-    brew install zellij && return
+    brew_install zellij && return
   fi
   local script_dir
   if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
@@ -1213,7 +1230,7 @@ install_yazi() {
     info "yazi already installed" && return
   fi
   if checkcmd brew; then
-    brew install yazi && return
+    brew_install yazi && return
   fi
   warn "yazi requires Homebrew for installation"
   return 1
@@ -1225,7 +1242,7 @@ install_lazygit() {
     info "lazygit already installed" && return
   fi
   if checkcmd brew; then
-    brew install lazygit && return
+    brew_install lazygit && return
   fi
   warn "lazygit requires Homebrew for installation"
   return 1

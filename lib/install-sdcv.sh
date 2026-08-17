@@ -27,7 +27,7 @@ install_sdcv() {
   fi
 
   info "Installing sdcv via Homebrew..."
-  brew install sdcv
+  brew_install sdcv
   success "sdcv installed successfully."
 }
 

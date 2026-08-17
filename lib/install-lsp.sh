@@ -54,7 +54,7 @@ main() {
     fi
 
     if checkcmd brew; then
-      if brew install "$pkg" 2>/dev/null; then
+      if brew_install "$pkg" 2>/dev/null; then
         success "Installed $pkg via brew"
         continue
       fi

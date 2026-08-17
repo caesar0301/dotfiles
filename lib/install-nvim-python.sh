@@ -27,7 +27,7 @@ source "$THISDIR/shlib.sh" || {
 
 # Configuration
 readonly NVIM_VENV_NAME="neovim"
-readonly DEFAULT_PYTHON_VERSION="3.11"
+readonly DEFAULT_PYTHON_VERSION="3.12"
 readonly PYNVIM_PACKAGE="pynvim"
 
 # Detect Python version from pyenv or fallback to default
@@ -48,9 +48,9 @@ detect_python_version() {
       return 0
     fi
 
-    # Try to find the latest installed 3.11.x version
+    # Try to find the latest installed 3.12.x version
     if [[ -d "$pyenv_root/versions" ]]; then
-      detected_version=$(ls -1 "$pyenv_root/versions" 2>/dev/null | grep "^3\.11\." | sort -V | tail -1 || echo "")
+      detected_version=$(ls -1 "$pyenv_root/versions" 2>/dev/null | grep "^3\.12\." | sort -V | tail -1 || echo "")
       if [[ -n "$detected_version" ]]; then
         printf "%s" "$detected_version"
         return 0

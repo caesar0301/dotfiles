@@ -32,7 +32,7 @@ main() {
 
   if checkcmd brew; then
     info "Installing universal-ctags via Homebrew..."
-    if brew install universal-ctags; then
+    if brew_install universal-ctags; then
       # Link universal-ctags, overwriting any existing ctags
       if ! brew link --overwrite universal-ctags 2>/dev/null; then
         warn "Failed to link universal-ctags automatically"

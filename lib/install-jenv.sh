@@ -24,7 +24,7 @@ main() {
 
   if is_macos; then
     if checkcmd brew; then
-      brew install jenv || error "Failed to install jenv via Homebrew"
+      brew_install jenv || error "Failed to install jenv via Homebrew"
     else
       error "Homebrew not found, required for jenv installation on macOS"
     fi

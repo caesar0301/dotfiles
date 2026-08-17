@@ -35,7 +35,7 @@ install_zellij() {
 
   if checkcmd brew; then
     info "Installing zellij via Homebrew..."
-    if brew install zellij; then
+    if brew_install zellij; then
       export PATH="$(brew --prefix)/bin:$PATH"
       success "Zellij installed via Homebrew"
       info "Zellij version: $(zellij --version)"

@@ -35,7 +35,7 @@ install_tree_sitter() {
   # library-only and does not ship the CLI, so we fall through).
   if checkcmd brew; then
     if is_linux; then
-      if brew install tree-sitter 2>/dev/null && checkcmd tree-sitter; then
+      if brew_install tree-sitter 2>/dev/null && checkcmd tree-sitter; then
         success "tree-sitter installed via Homebrew"
         return 0
       fi

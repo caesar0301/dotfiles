@@ -45,7 +45,7 @@ install_tmux() {
 
   if checkcmd brew; then
     info "Installing tmux via Homebrew..."
-    if brew install tmux; then
+    if brew_install tmux; then
       export PATH="$(brew --prefix)/bin:$PATH"
       success "Tmux installed via Homebrew"
       info "Tmux version: $(tmux -V)"

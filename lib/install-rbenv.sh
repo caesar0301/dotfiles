@@ -24,7 +24,7 @@ main() {
 
   if is_macos; then
     if checkcmd brew; then
-      brew install rbenv ruby-build || error "Failed to install rbenv via Homebrew"
+      brew_install rbenv ruby-build || error "Failed to install rbenv via Homebrew"
     else
       error "Homebrew not found, required for rbenv installation on macOS"
     fi
