@@ -1143,9 +1143,21 @@ change_shell_to_zsh() {
     fi
   fi
 
+  # Locate chsh, falling back to known locations when not in PATH
+  local chsh_cmd
+  chsh_cmd=$(command -v chsh 2>/dev/null)
+  if [[ -z "$chsh_cmd" ]]; then
+    for candidate in /usr/bin/chsh /bin/chsh /usr/sbin/chsh; do
+      if [[ -x "$candidate" ]]; then
+        chsh_cmd="$candidate"
+        break
+      fi
+    done
+  fi
+
   # Change shell using chsh
-  if command -v chsh >/dev/null 2>&1; then
-    if chsh -s "$zsh_path" 2>/dev/null; then
+  if [[ -n "$chsh_cmd" ]]; then
+    if "$chsh_cmd" -s "$zsh_path" 2>/dev/null; then
       success "Default shell changed to zsh"
       info "The change will take effect in new terminal sessions"
       info "To use zsh immediately, run: exec zsh"
