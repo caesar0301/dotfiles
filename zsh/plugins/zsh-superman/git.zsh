@@ -478,9 +478,26 @@ function gplfs() {
 # Submodule Utilities
 # =====================
 
-# Pull all submodules to latest on their current branch
+# Pull all submodules to latest on their tracked branch.
+# Handles detached HEAD submodules by falling back to the branch
+# configured in .gitmodules, then to the remote's default branch.
 function git-submodule-latest() {
-  git submodule foreach 'git pull origin $(git symbolic-ref --short HEAD)'
+  git submodule foreach '
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    if [ -z "$branch" ]; then
+      branch=$(git config -f "$toplevel/.gitmodules" --get "submodule.$name.branch" 2>/dev/null)
+    fi
+    if [ -z "$branch" ]; then
+      branch=$(git ls-remote --symref origin HEAD 2>/dev/null | sed -n "s/^ref: refs\/heads\/\([^[:space:]]*\).*/\1/p" | head -1)
+    fi
+    if [ -z "$branch" ]; then
+      echo "Could not determine branch for $name, skipping"
+    elif [ "$(git symbolic-ref --short HEAD 2>/dev/null)" != "$branch" ] && ! git checkout -q "$branch"; then
+      echo "warning: could not check out $branch in $name, skipping"
+    else
+      git pull origin "$branch"
+    fi
+  '
 }
 
 # Reset and clean repo and submodules
