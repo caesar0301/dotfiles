@@ -25,65 +25,38 @@ api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model.MiniMax-M]
-model = "MiniMax-M"
+[model."qwen3.7-plus"]
+model = "qwen3.7-plus"
 base_url = "${DASHSCOPE_BASE_URL}"
-name = "MiniMax-M (DashScope MaaS)"
-description = "MiniMax-M via DashScope MaaS OpenAI-compatible endpoint"
+name = "Qwen3.7-Plus (DashScope MaaS)"
+description = "Alibaba Qwen3.7-Plus via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model."MiniMax-M2.5"]
-model = "MiniMax-M2.5"
+[model."qwen3.6-flash"]
+model = "qwen3.6-flash"
 base_url = "${DASHSCOPE_BASE_URL}"
-name = "MiniMax M2.5 (DashScope MaaS)"
-description = "MiniMax M2.5 via DashScope MaaS OpenAI-compatible endpoint"
+name = "Qwen3.6-Flash (DashScope MaaS)"
+description = "Alibaba Qwen3.6-Flash via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model."kimi-k2.7-code"]
-model = "kimi-k2.7-code"
+[model."kimi-k2.5"]
+model = "kimi-k2.5"
 base_url = "${DASHSCOPE_BASE_URL}"
-name = "Kimi K2.7 Code (DashScope MaaS)"
-description = "Moonshot Kimi K2.7 Code via DashScope MaaS OpenAI-compatible endpoint"
+name = "Kimi K2.5 (DashScope MaaS)"
+description = "Moonshot Kimi K2.5 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000
 
-[model.kimi-k3]
-model = "kimi-k3"
+[model."MiniMax-M3"]
+model = "MiniMax-M3"
 base_url = "${DASHSCOPE_BASE_URL}"
-name = "Kimi K3 (DashScope MaaS)"
-description = "Moonshot Kimi K3 via DashScope MaaS OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."kimi-k2.6"]
-model = "kimi-k2.6"
-base_url = "${DASHSCOPE_BASE_URL}"
-name = "Kimi K2.6 (DashScope MaaS)"
-description = "Moonshot Kimi K2.6 via DashScope MaaS OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."deepseek-v4-pro"]
-model = "deepseek-v4-pro"
-base_url = "${DASHSCOPE_BASE_URL}"
-name = "DeepSeek V4 Pro (DashScope MaaS)"
-description = "DeepSeek V4 Pro via DashScope MaaS OpenAI-compatible endpoint"
-api_backend = "chat_completions"
-env_key = "DASHSCOPE_API_KEY"
-context_window = 128000
-
-[model."deepseek-v4-flash"]
-model = "deepseek-v4-flash"
-base_url = "${DASHSCOPE_BASE_URL}"
-name = "DeepSeek V4 Flash (DashScope MaaS)"
-description = "DeepSeek V4 Flash via DashScope MaaS OpenAI-compatible endpoint"
+name = "MiniMax-M3 (DashScope MaaS)"
+description = "MiniMax M3 via DashScope MaaS OpenAI-compatible endpoint"
 api_backend = "chat_completions"
 env_key = "DASHSCOPE_API_KEY"
 context_window = 128000

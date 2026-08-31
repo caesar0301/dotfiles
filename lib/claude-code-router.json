@@ -15,11 +15,10 @@
       "api_key": "${DASHSCOPE_API_KEY}",
       "models": [
         "glm-5.2",
-        "MiniMax-M",
-        "MiniMax-M2.5",
-        "kimi-k2.7-code",
-        "kimi-k3",
-        "kimi-k2.6",
+        "qwen3.7-plus",
+        "qwen3.6-flash",
+        "kimi-k2.5",
+        "MiniMax-M3",
         "text-embedding-v4"
       ],
       "transformer": {
@@ -53,7 +52,7 @@
   "Router": {
     "default": "dashscope,glm-5.2",
     "think": "dashscope,glm-5.2",
-    "image": "dashscope,MiniMax-M2.5"
+    "image": "dashscope,qwen3.7-plus"
   },
   "CUSTOM_ROUTER_PATH": ""
 }

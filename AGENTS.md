@@ -96,6 +96,35 @@ install_file_pair "$source_file" "$dest_file"
 
 Tmux Unicode display: see `docs/tmux-unicode-fix.md`.
 
+## AI Agent Config Syncing
+
+The AI agent configs (`grok`, `codex`, `opencode`) are kept in sync against a single source of truth: the `dashscope` provider block in `lib/claude-code-router.json`. When the router's model list changes, all three agent configs must be updated to match.
+
+### Source of truth
+
+- **File:** `lib/claude-code-router.json` → `Providers[name="dashscope"].models`
+- **Chat-usable models:** `glm-5.2`, `qwen3.7-plus`, `qwen3.6-flash`, `kimi-k2.5`, `MiniMax-M3`
+- **Excluded:** `text-embedding-v4` (embedding model — never synced into chat agents)
+- **Default model:** `glm-5.2` (matches `Router.default = "dashscope,glm-5.2"`)
+
+### Synced files
+
+| File | Format | Provider key style | Default |
+| --- | --- | --- | --- |
+| `lib/grok-config.toml` | TOML | `[model."<id>"]` tables, `api_backend = "chat_completions"` | `glm-5.2` |
+| `lib/codex-config.toml` | TOML | `[model_providers.dashscope-*]` tables, `wire_api = "responses"` | `glm-5.2` (`model_provider = "dashscope-glm"`) |
+| `opencode/opencode.json` | JSON | `provider.dashscope.models.<id>` entries | `dashscope/glm-5.2` |
+
+### Syncing rules
+
+1. **Single source:** `lib/claude-code-router.json` is the only source of truth. Never edit agent configs independently of it — if a model is added/removed there, propagate to all three.
+2. **Chat models only:** Sync only the chat-usable models from the `dashscope` provider. Skip any non-chat entries (e.g. `text-embedding-v4`).
+3. **Preserve defaults:** `glm-5.2` is the default in all three configs (matching the router's `Router.default`). Each agent's `small_model`/secondary selection may differ (e.g. opencode uses `kimi-k2.5`) — keep it stable unless the underlying model is removed.
+4. **Keep metadata consistent:** `name`, `description`, `base_url`/`baseURL`, and `env_key` must use `${DASHSCOPE_BASE_URL}` / `{env:DASHSCOPE_BASE_URL}` and `DASHSCOPE_API_KEY` across all three, matching the router's `api_base_url`/`api_key` placeholders.
+5. **Validate after editing:** Re-parse every changed file (TOML + JSON) to confirm it's well-formed before committing. A broken config silently breaks the agent at launch.
+6. **Installer note:** `lib/install-ai-agent-codex.sh` substitutes `${DASHSCOPE_BASE_URL}` into the codex template at install time (Codex doesn't interpolate it at runtime). Keep the placeholder in the template; don't hardcode the URL.
+7. **Comment cross-references:** Each agent config carries a header comment pointing back to `lib/claude-code-router.json` as the source — keep these comments accurate when models change.
+
 ## `setups/` (infrastructure, not dotfiles)
 
 - `mihomo/` — Docker proxy for macOS: `cd setups/mihomo && ./start.sh -c ~/.config/mihomo`; ports 7890 (proxy) / 9090 (API); console at metacubexd. Still needs macOS system proxy config.
