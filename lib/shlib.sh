@@ -783,7 +783,11 @@ install_homebrew() {
   # does not create parent directories (~/.local) via sudo mkdir, which would
   # leave them owned by root. See lib/install-homebrew.sh execute_sudo logic.
   create_dir "$homebrew_prefix"
-  "$script_dir/install-homebrew.sh" --prefix="${homebrew_prefix}"
+  # The installer only implies NONINTERACTIVE when stdin is not a TTY, so an
+  # interactive run otherwise blocks on its "Press RETURN to continue" prompt
+  # (install-homebrew.sh:729). Timeout guards against a network stall hanging
+  # the whole install_basics.sh run.
+  NONINTERACTIVE=1 timeout 600 "$script_dir/install-homebrew.sh" --prefix="${homebrew_prefix}"
 
   # Source Homebrew shellenv so brew is available in current session
   if [[ -x "${homebrew_prefix}/bin/brew" ]]; then

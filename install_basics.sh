@@ -38,6 +38,16 @@ INSTALL_SUCCESS=0
 INSTALL_FAILED=0
 INSTALL_SKIPPED=0
 
+# Resolve a portable timeout command: gtimeout on macOS, timeout on Linux.
+# Prints nothing when neither is available.
+get_timeout_cmd() {
+  if [[ "$OSTYPE" == "darwin"* ]] && command -v gtimeout >/dev/null 2>&1; then
+    printf "gtimeout"
+  elif command -v timeout >/dev/null 2>&1; then
+    printf "timeout"
+  fi
+}
+
 # Install essential development tools as a prerequisite
 # For basic installation, use default settings (no optional features)
 install_essentials_prerequisite() {
@@ -50,11 +60,21 @@ install_essentials_prerequisite() {
 
   info "Installing essential development tools (prerequisite)..."
 
-  # Execute essentials installation
-  if bash "$essentials_script" "$@" 2>&1; then
+  # Execute essentials installation under a timeout so a hanging tool
+  # (e.g. an interactive installer prompt) cannot stall the whole run.
+  local timeout_cmd
+  timeout_cmd=$(get_timeout_cmd)
+  local essentials_rc=0
+  if [[ -n "$timeout_cmd" ]]; then
+    $timeout_cmd 900 bash "$essentials_script" "$@" 2>&1 || essentials_rc=$?
+  else
+    bash "$essentials_script" "$@" 2>&1 || essentials_rc=$?
+  fi
+
+  if [[ $essentials_rc -eq 0 ]]; then
     success "Essential development tools installed successfully"
   else
-    warn "Some essential tools failed to install, continuing..."
+    warn "Some essential tools failed to install (exit code: $essentials_rc), continuing..."
   fi
 
   # Re-source PATH for tools installed by the essentials subprocess.
@@ -105,40 +125,32 @@ install_component() {
   # Execute component installation with timeout and error handling
   local start_time=$(date +%s)
 
-  # Use gtimeout on macOS, timeout on Linux, or skip timeout if not available
-  local timeout_cmd=""
-  if [[ "$OSTYPE" == "darwin"* ]] && command -v gtimeout >/dev/null 2>&1; then
-    timeout_cmd="gtimeout"
-  elif command -v timeout >/dev/null 2>&1; then
-    timeout_cmd="timeout"
-  fi
+  local timeout_cmd
+  timeout_cmd=$(get_timeout_cmd)
 
-  local install_success=false
+  # Capture the real exit code: reading $? after an `if` would yield the
+  # status of the condition, not of the installer.
+  local install_rc=0
   if [[ -n "$timeout_cmd" ]]; then
-    if $timeout_cmd 300 bash "$component_script" "$@" 2>&1; then
-      install_success=true
-    fi
+    $timeout_cmd 300 bash "$component_script" "$@" 2>&1 || install_rc=$?
   else
     # Fallback without timeout if command not available
-    if bash "$component_script" "$@" 2>&1; then
-      install_success=true
-    fi
+    bash "$component_script" "$@" 2>&1 || install_rc=$?
   fi
 
-  if $install_success; then
+  if [[ $install_rc -eq 0 ]]; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     success "Component '$component' installed successfully (${duration}s)"
     ((INSTALL_SUCCESS++))
   else
-    local exit_code=$?
-    if [[ $exit_code -eq 124 ]]; then
+    if [[ $install_rc -eq 124 ]]; then
       error "Component '$component' installation timed out (5 minutes)"
     else
-      error "Component '$component' installation failed (exit code: $exit_code)"
+      error "Component '$component' installation failed (exit code: $install_rc)"
     fi
     ((INSTALL_FAILED++))
-    return $exit_code
+    return $install_rc
   fi
 }
 

@@ -294,7 +294,10 @@ retry() {
 
 execute_sudo() {
   local -a args=("$@")
-  if [[ "${EUID:-${UID}}" != "0" ]] && have_sudo_access; then
+  # Never use sudo for a --prefix install: the prefix is user-owned, and
+  # HAVE_SUDO_ACCESS=0 (set above for custom prefixes) is read by
+  # have_sudo_access as "sudo check succeeded", so it must not be consulted here.
+  if [[ -z "${HOMEBREW_CUSTOM_PREFIX}" ]] && [[ "${EUID:-${UID}}" != "0" ]] && have_sudo_access; then
     if [[ -n "${SUDO_ASKPASS-}" ]]; then
       args=("-A" "${args[@]}")
     fi
