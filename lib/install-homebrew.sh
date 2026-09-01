@@ -175,10 +175,14 @@ if [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
 else
   UNAME_MACHINE="$(uname -m)"
 
-  # On Linux, this script installs to /home/linuxbrew/.linuxbrew only
-  HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+  # On Linux, default to a user-writable prefix under $HOME so the install
+  # is privilege-free (no need to write to /home/linuxbrew).
+  HOMEBREW_PREFIX="${HOME}/.linuxbrew"
   HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}/Homebrew"
   HOMEBREW_CACHE="${HOME}/.cache/Homebrew"
+  # The default Linux prefix lives under $HOME; treat it as a privilege-free
+  # (custom-prefix) install unless --prefix explicitly overrode it.
+  [[ -z "${HOMEBREW_CUSTOM_PREFIX}" ]] && HOMEBREW_CUSTOM_PREFIX="${HOMEBREW_PREFIX}"
 
   STAT_PRINTF=("/usr/bin/stat" "-c")
   PERMISSION_FORMAT="%a"
