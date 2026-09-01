@@ -247,6 +247,12 @@ have_sudo_access() {
     return 1
   fi
 
+  # Custom-prefix installs are intentionally sudo-free; never probe or abort here.
+  if [[ -n "${HOMEBREW_CUSTOM_PREFIX-}" ]]; then
+    HAVE_SUDO_ACCESS=0
+    return 0
+  fi
+
   local -a SUDO=("/usr/bin/sudo")
   if [[ -n "${SUDO_ASKPASS-}" ]]; then
     SUDO+=("-A")
@@ -497,7 +503,9 @@ EOABORT
 fi
 
 # Invalidate sudo timestamp before exiting (if it wasn't active before).
-if [[ -x /usr/bin/sudo ]] && ! /usr/bin/sudo -n -v 2>/dev/null; then
+# Skip for custom-prefix installs: they never invoke sudo, so there is no
+# timestamp to invalidate and probing sudo here is unnecessary noise.
+if [[ -z "${HOMEBREW_CUSTOM_PREFIX-}" ]] && [[ -x /usr/bin/sudo ]] && ! /usr/bin/sudo -n -v 2>/dev/null; then
   trap '/usr/bin/sudo -k' EXIT
 fi
 
@@ -519,7 +527,21 @@ else
   ohai 'Checking for `sudo` access (which may request your password)...'
 fi
 
-if [[ -n "${HOMEBREW_ON_MACOS-}" && -z "${HOMEBREW_CUSTOM_PREFIX}" ]]; then
+if [[ -n "${HOMEBREW_CUSTOM_PREFIX-}" ]]; then
+  # No-sudo install: the prefix lives under the user's home, so verify
+  # writability directly instead of probing sudo (which would abort on
+  # macOS without Administrator access — defeating the point of --prefix).
+  if ! [[ -w "${HOMEBREW_PREFIX}" ]] && ! [[ -w "$(dirname "${HOMEBREW_PREFIX}")" ]]; then
+    abort "$(
+      cat <<EOABORT
+Cannot write to the custom prefix "${HOMEBREW_PREFIX}".
+Ensure the parent directory exists and is owned by you, then re-run, e.g.:
+    mkdir -p "$(dirname "${HOMEBREW_PREFIX}")"
+    ${0} --prefix="${HOMEBREW_PREFIX}"
+EOABORT
+    )"
+  fi
+elif [[ -n "${HOMEBREW_ON_MACOS-}" ]]; then
   [[ "${EUID:-${UID}}" == "0" ]] || have_sudo_access
 elif ! [[ -w "${HOMEBREW_PREFIX}" ]] &&
   ! [[ -w "/home/linuxbrew" ]] &&
