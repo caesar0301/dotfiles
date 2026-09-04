@@ -27,6 +27,7 @@ readonly XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly ZSH_CONFIG_HOME="$XDG_CONFIG_HOME/zsh"
 readonly ZINIT_HOME="$XDG_DATA_HOME/zinit/zinit.git"
 readonly PROXY_CONFIG="$HOME/.config/proxy"
+readonly ZPROFILE_D="$HOME/.zprofile.d"
 
 # Load common utilities with validation
 source "$THISDIR/../lib/shlib.sh" || {
@@ -137,6 +138,14 @@ handle_zsh_config() {
     fi
   fi
 
+  # Create drop-in profile directory ~/.zprofile.d
+  if [ -d "$ZPROFILE_D" ]; then
+    warn "Already exists, skipping: $ZPROFILE_D"
+  else
+    create_dir "$ZPROFILE_D"
+  fi
+  info "Drop-in profile directory: $ZPROFILE_D"
+
   # Change default shell to zsh if not already
   change_shell_to_zsh
 
@@ -152,6 +161,8 @@ cleanse_zsh() {
 
   local items_to_remove=(
     "$HOME/.zshrc"
+    "$HOME/.zprofile"
+    "$ZPROFILE_D"
     "$ZINIT_HOME"
     "$PROXY_CONFIG"
     "$ZSH_CONFIG_HOME"
@@ -217,6 +228,7 @@ main() {
   info "Zsh configuration: $ZSH_CONFIG_HOME"
   info "Plugin manager: $ZINIT_HOME"
   info "Proxy configuration: $PROXY_CONFIG"
+  info "Drop-in profile dir: $ZPROFILE_D"
 
   printf "\n%bNext Steps:%b\n" "$COLOR_BOLD" "$COLOR_RESET"
   printf "  1. Restart your shell or run: %bexec zsh%b\n" "$COLOR_CYAN" "$COLOR_RESET"

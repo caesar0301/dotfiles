@@ -38,6 +38,7 @@ If you already have a `~/.zshrc`, the installer will skip it. Add this line to y
 
 | Path | Description |
 |------|-------------|
+| `~/.zprofile.d/` | Drop-in directory for shell extension scripts (`*.zsh`) |
 | `~/.config/zsh/` | Main configuration directory |
 | `~/.config/zsh/init.zsh` | Entry point initialization |
 | `~/.config/zsh/plugins/` | Custom plugins (oh-my-zsh compatible) |
@@ -47,6 +48,7 @@ If you already have a `~/.zshrc`, the installer will skip it. Add this line to y
 
 - **Zsh shell** (if not present)
 - **Zinit plugin manager** for efficient plugin loading
+- **Drop-in profile directory** (`~/.zprofile.d/`) for shell extensions
 - **Custom plugins** from `plugins/` directory
 - **Shell proxy configuration**
 
