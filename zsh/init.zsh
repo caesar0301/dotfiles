@@ -31,6 +31,11 @@ for config_file in "${ZSH_CONFIG_DIR}/config"/*.zsh(N); do
   source "$config_file"
 done
 
+# Load ~/.zprofile.d snippets (login-shell style env setup)
+for zprofile_file in "${HOME}/.zprofile.d"/*.zsh(N); do
+  source "$zprofile_file"
+done
+
 ###------------------------------------------------
 ### ZI MANAGER
 ###------------------------------------------------
