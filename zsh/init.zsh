@@ -26,16 +26,6 @@ source "${ZSH_CONFIG_DIR}/_helper.zsh"
 export ZSH_CONFIG_DIR=${ZSH_CONFIG_DIR}
 export ZSH_PLUGIN_DIR=${ZSH_PLUGIN_DIR}
 
-# Load config files (locale, proxy, etc.)
-for config_file in "${ZSH_CONFIG_DIR}/config"/*.zsh(N); do
-  source "$config_file"
-done
-
-# Load ~/.zprofile.d snippets (login-shell style env setup)
-for zprofile_file in "${HOME}/.zprofile.d"/*.zsh(N); do
-  source "$zprofile_file"
-done
-
 ###------------------------------------------------
 ### ZI MANAGER
 ###------------------------------------------------
@@ -114,23 +104,18 @@ export SAVEHIST=9999
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 
-# extra paths
-export PATH=$HOME/.dotfiles/bin:$HOME/.local/bin:$PATH
-
-# Homebrew (official Linux prefix first, then user-local, then standard macOS locations)
-for _brew_prefix in /home/linuxbrew/.linuxbrew "$HOME/.local/homebrew" /opt/homebrew /usr/local; do
-  if [[ -x "$_brew_prefix/bin/brew" ]]; then
-    eval "$("$_brew_prefix/bin/brew" shellenv)" 2>/dev/null || true
-    break
-  fi
+# Load config files (locale, proxy, etc.)
+for config_file in "${ZSH_CONFIG_DIR}/config"/*.zsh(N); do
+  source "$config_file"
 done
-unset _brew_prefix
+
+# Load ~/.zprofile.d snippets
+for zprofile_file in "${HOME}/.zprofile.d"/*.zsh(N); do
+  source "$zprofile_file"
+done
 
 # respect local zshenv
 [ -f ~/.zshenv.local ] && source ~/.zshenv.local
-
-# respect fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Show profiling results on startup
 if [[ x$ZINIT_PROFILING == "x1" ]]; then 

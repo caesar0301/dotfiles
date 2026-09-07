@@ -14,3 +14,8 @@ export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 export LC_CTYPE="${LC_CTYPE:-en_US.UTF-8}"
 export LC_COLLATE="${LC_COLLATE:-en_US.UTF-8}"
 export LC_MESSAGES="${LC_MESSAGES:-en_US.UTF-8}"
+
+# clicolor
+export CLICOLOR=1
+export LSCOLORS=ExFxBxDxCxegedabagacad
+
