@@ -17,6 +17,6 @@
 # Any extra args you pass to the alias are appended after the flag, so
 #   cc --resume   →  claude --dangerously-skip-permissions --resume
 
-alias oc='opencode --auto'
+alias oc='opencode'
 alias cc='claude --dangerously-skip-permissions'
 alias cb='codebuddy --dangerously-skip-permissions'
