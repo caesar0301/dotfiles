@@ -427,7 +427,8 @@ set -g prefix C-a
 bind C-a send-prefix
 
 # if you don't want Oh my tmux! to alter a binding or a setting, use #!important
-# bind c new-window -c '#{pane_current_path}' #!important
+# create new window to the right of current window
+bind c new-window -a -c '#{pane_current_path}' #!important
 
 # display a message after toggling mouse support
 bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?#{mouse},on,off}'
