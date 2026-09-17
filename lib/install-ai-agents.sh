@@ -20,6 +20,7 @@ Options:
   --cursor       Install Cursor agent
   --codex        Install OpenAI Codex (supports custom OpenAI configs)
   --grok         Install Grok CLI (caesar0301/grok-build releases)
+  --hermes       Install Hermes Agent (Nous Research, official installer)
   --all          Install all agents (default if no options specified)
   --autostart    Enable pm2 autostart for ccr and opencode-web (independent of --all)
   -h, --help     Show this help message and exit
@@ -32,6 +33,7 @@ Examples:
   $(basename "$0") --claude --opencode  # Install Claude and opencode only
   $(basename "$0") --codex              # Install OpenAI Codex only
   $(basename "$0") --grok               # Install Grok CLI only
+  $(basename "$0") --hermes             # Install Hermes Agent only
 
 Note: --autostart is not included in --all and must be specified separately
 EOF
@@ -48,6 +50,7 @@ main() {
   local install_cursor=false
   local install_codex=false
   local install_grok=false
+  local install_hermes=false
   local enable_autostart=false
   local any_agent_specified=false
 
@@ -79,12 +82,18 @@ main() {
       any_agent_specified=true
       shift
       ;;
+    --hermes)
+      install_hermes=true
+      any_agent_specified=true
+      shift
+      ;;
     --all)
       install_claude=true
       install_opencode=true
       install_cursor=true
       install_codex=true
       install_grok=true
+      install_hermes=true
       any_agent_specified=true
       shift
       ;;
@@ -112,6 +121,7 @@ main() {
     install_cursor=true
     install_codex=true
     install_grok=true
+    install_hermes=true
   fi
 
   info "Installing AI code agents..."
@@ -177,6 +187,17 @@ main() {
       success "Grok agent installation completed"
     else
       error "Grok agent installation failed"
+      return 1
+    fi
+  fi
+
+  # Install hermes agent
+  if [[ "$install_hermes" == "true" ]]; then
+    info "Calling install-ai-agent-hermes.sh..."
+    if "$SCRIPT_DIR/install-ai-agent-hermes.sh"; then
+      success "Hermes agent installation completed"
+    else
+      error "Hermes agent installation failed"
       return 1
     fi
   fi

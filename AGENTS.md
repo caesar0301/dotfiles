@@ -125,6 +125,18 @@ The AI agent configs (`grok`, `codex`, `opencode`) are kept in sync against a si
 6. **Installer note:** `lib/install-ai-agent-codex.sh` substitutes `${DASHSCOPE_BASE_URL}` into the codex template at install time (Codex doesn't interpolate it at runtime). Keep the placeholder in the template; don't hardcode the URL.
 7. **Comment cross-references:** Each agent config carries a header comment pointing back to `lib/claude-code-router.json` as the source — keep these comments accurate when models change.
 
+## Hermes Agent (standalone, not synced)
+
+Hermes Agent (Nous Research) is a self-contained open-source AI agent with its **own config system** — it does NOT read from `lib/claude-code-router.json` and is not part of the DashScope sync above.
+
+- **Installer:** `lib/install-ai-agent-hermes.sh` wraps the official upstream installer (`curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`).
+- **Orchestrator:** `lib/install-ai-agents.sh --hermes` (or `--all`, which includes it).
+- **Config directory:** `~/.hermes/` — `config.yaml`, `.env` (API keys), `SOUL.md` (persona), `skills/`, `sessions/`, `logs/`.
+- **Command:** `hermes` (linked into `~/.local/bin` by the upstream installer).
+- **API keys:** Configured via `hermes setup` (interactive wizard) or directly in `~/.hermes/.env`. The upstream installer runs the setup wizard automatically unless `--skip-setup` is passed.
+- **Requirements:** Python >= 3.11 (managed by the upstream installer via `uv`); Node.js >= 20 optional (browser tools, desktop app).
+- **Pass-through flags:** All flags after `--` are forwarded raw to the upstream installer (e.g. `-- --no-venv --skip-setup`).
+
 ## `setups/` (infrastructure, not dotfiles)
 
 - `mihomo/` — Docker proxy for macOS: `cd setups/mihomo && ./start.sh -c ~/.config/mihomo`; ports 7890 (proxy) / 9090 (API); console at metacubexd. Still needs macOS system proxy config.

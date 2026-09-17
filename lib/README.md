@@ -33,7 +33,8 @@ This directory contains standalone installer scripts for various development too
 - **`install-hack-nerd-font.sh`** - Installs Hack Nerd Font
 
 ### AI Development
-- **`install-ai-agents.sh`** - Installs various AI code agents
+- **`install-ai-agents.sh`** - Installs various AI code agents (claude, opencode, cursor, codex, grok, hermes)
+- **`install-ai-agent-hermes.sh`** - Installs Hermes Agent (Nous Research, official installer)
 
 ## Usage
 
