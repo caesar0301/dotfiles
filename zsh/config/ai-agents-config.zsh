@@ -4,19 +4,29 @@
 #     Maintained by xiaming.cxm
 #############################################################
 
-# All three aliases default to bypassing permission prompts so agents can run
-# without interactive confirmation:
-#   oc → opencode --auto
-#        auto-approves any permission request not explicitly denied
-#        (see https://opencode.ai/docs/permissions/)
+#   oc → opencode, with --thinking auto-injected for the `run` subcommand.
+#        --thinking (show reasoning/thinking blocks) is a `run`-subcommand
+#        flag only; it is NOT a valid top-level/TUI flag, so we cannot simply
+#        alias `oc='opencode --thinking'` (that would break both the TUI and
+#        `oc run ...`). The function below places --thinking right after
+#        `run` so it is parsed by the subcommand:
+#          oc            → opencode                       (launch TUI)
+#          oc run "hi"   → opencode run --thinking "hi"   (show thinking)
+#          oc run -c     → opencode run --thinking -c
+#        To start the TUI without thinking, just run `opencode` directly.
 #   cc → claude --dangerously-skip-permissions
 #   cb → codebuddy --dangerously-skip-permissions   (a.k.a. -y)
 #
 # To run a one-shot without the bypass, invoke the binary directly:
 #   opencode, claude, codebuddy
-# Any extra args you pass to the alias are appended after the flag, so
-#   cc --resume   →  claude --dangerously-skip-permissions --resume
 
-alias oc='opencode'
+oc() {
+  if [[ "$1" == "run" ]]; then
+    shift
+    command opencode run --thinking "$@"
+  else
+    command opencode "$@"
+  fi
+}
 alias cc='claude --dangerously-skip-permissions'
 alias cb='codebuddy --dangerously-skip-permissions'
