@@ -20,6 +20,8 @@
 # To run a one-shot without the bypass, invoke the binary directly:
 #   opencode, claude, codebuddy
 
+unalias oc 2>/dev/null
+
 oc() {
   if [[ "$1" == "run" ]]; then
     shift
