@@ -600,17 +600,23 @@ alias gbg='LANG=C git branch -vv | grep ": gone\]"'
 
 # Commit and push all modified files with a generated message
 function git-quick-update() {
-  local modified_files commit_message
+  local modified_files commit_message file_count
   modified_files=$(git diff --name-only && git diff --cached --name-only | sort -u)
   if [ -z "$modified_files" ]; then
     echo "No modified files to commit."
     return 1
   fi
-  commit_message="Update:"
-  for file in $modified_files; do
-    commit_message="$commit_message \"$file\""
-  done
-  commit_message="$commit_message [skip ci]"
+
+  file_count=$(echo "$modified_files" | wc -l | tr -d ' ')
+  local preview_count=5
+  if [ "$file_count" -le "$preview_count" ]; then
+    commit_message="Update: $(echo "$modified_files" | tr '\n' ' ' | sed 's/  */ /g; s/^ *//; s/ *$//')"
+  else
+    local preview_files remaining
+    preview_files=$(echo "$modified_files" | head -n "$preview_count" | tr '\n' ' ' | sed 's/  */ /g; s/^ *//; s/ *$//')
+    remaining=$((file_count - preview_count))
+    commit_message="Update: ${preview_files} (+${remaining} more files)"
+  fi
 
   # Stage the modified files
   git add -u
