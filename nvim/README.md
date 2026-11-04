@@ -70,7 +70,7 @@ sh nvim/install.sh
 - **File Explorer/Tabline:** `nvim-tree`, `barbar.nvim`
 - **Code Structure:** `tagbar` (requires `universal-ctags`/`gotags`)
 - **Fuzzy Finder:** `nvim-telescope`
-- **Git Integration:** `vim-gitgutter`
+- **Git Integration:** `gitsigns.nvim`, `diffview.nvim`, `vim-gitgutter`
 - **AI Coding Assistant:** `claudecode.nvim` - Claude Code integration with diff management
 
 ---

@@ -162,7 +162,7 @@ This document lists all custom keymaps and frequently used plugin shortcuts conf
 
 ---
 
-## Git Integration (Gitsigns)
+## Git Integration
 
 ### Navigation
 
@@ -192,6 +192,19 @@ This document lists all custom keymaps and frequently used plugin shortcuts conf
 | Key | Mode | Description |
 |-----|------|-------------|
 | `ih` | o/x | Inner hunk text object |
+
+### Diffview (Branch / Commit Diff)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>gd` | n | Open diff view (working tree vs index) |
+| `<leader>gb` | n | Diff against a branch / commit (prompts for a rev) |
+| `<leader>gh` | n | Current file history |
+| `<leader>gH` | n | Branch / repository history |
+| `<leader>gD` | n | Close diff view |
+
+Common commands: `:DiffviewOpen`, `:DiffviewOpen origin/main...HEAD` (branch diff),
+`:DiffviewOpen HEAD~2`, `:DiffviewFileHistory %`.
 
 ---
 

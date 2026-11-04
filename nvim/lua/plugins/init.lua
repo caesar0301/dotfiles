@@ -9,6 +9,7 @@ return {
 	{ import = "plugins.barbar" },
 	{ import = "plugins.ai-coding" },
 	{ import = "plugins.conform" },
+	{ import = "plugins.diffview" },
 	{ import = "plugins.fzf-lua" },
 	{ import = "plugins.gitignore" },
 	{ import = "plugins.gitsigns" },
