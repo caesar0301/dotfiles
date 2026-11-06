@@ -1,0 +1,3 @@
+[submodule "warp-vault"]
+	path = warp-vault
+	url = git@github.com:caesar0301/warp-vault

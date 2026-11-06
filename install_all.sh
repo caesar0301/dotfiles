@@ -27,15 +27,29 @@ source "$THISDIR/lib/shlib.sh" || {
 
 # Component installation order (dependencies first)
 readonly COMPONENTS=(
-  "zsh"    # Z shell configuration
-  "tmux"   # Terminal multiplexer
-  "zellij" # Terminal workspace
-  "nvim"   # Neovim development environment
-  "emacs"  # Emacs configuration
-  "vifm"   # Vi file manager
-  "misc"   # Utility scripts and terminal configurations
-  "lisp"   # Common Lisp development environment
+  "zsh"        # Z shell configuration
+  "tmux"       # Terminal multiplexer
+  "zellij"     # Terminal workspace
+  "nvim"       # Neovim development environment
+  "emacs"      # Emacs configuration
+  "vifm"       # Vi file manager
+  "misc"       # Utility scripts and terminal configurations
+  "lisp"       # Common Lisp development environment
+  "warp-vault" # Private credential vault (optional submodule)
 )
+
+# Components installed only when their installer is present.
+# warp-vault is a private git submodule that may be absent on some machines;
+# skip it quietly instead of reporting a missing-component warning.
+readonly OPTIONAL_COMPONENTS=("warp-vault")
+
+is_optional_component() {
+  local component=$1 opt
+  for opt in "${OPTIONAL_COMPONENTS[@]}"; do
+    [[ "$opt" == "$component" ]] && return 0
+  done
+  return 1
+}
 
 # Track installation statistics
 INSTALL_SUCCESS=0
@@ -233,6 +247,13 @@ main() {
   # Install each component
   for component in "${COMPONENTS[@]}"; do
     should_install_component "$component" || continue
+    # Optional components (e.g. the warp-vault submodule) are skipped
+    # silently when their installer is not present on this machine.
+    if is_optional_component "$component" && [[ ! -f "$THISDIR/$component/install.sh" ]]; then
+      info "Optional component '$component' not present, skipping"
+      ((INSTALL_SKIPPED++))
+      continue
+    fi
     install_component "$component" "${FORWARD_ARGS[@]}" || {
       warn "Continuing with remaining components..."
     }
